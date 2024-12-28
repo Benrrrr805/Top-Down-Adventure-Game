@@ -25,7 +25,6 @@ class Game:
 
     def closeWindow(self):
         self.running = False
-        pygame.quit()
 
     def is_terminated(self, event):
         return event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE)
