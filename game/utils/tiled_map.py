@@ -1,5 +1,5 @@
 import pygame
-from pytmx import load_pygame
+from pytmx import load_pygame, TiledTileLayer
 
 class TiledMap:
     def __init__(self, filename):
@@ -10,7 +10,7 @@ class TiledMap:
     def render(self, surface):
         """Renders the Tiled map to the given surface."""
         for layer in self.tmx_data.visible_layers:
-            if isinstance(layer, pytmx.TiledTileLayer):
+            if isinstance(layer, TiledTileLayer):
                 for x, y, gid in layer:
                     tile = self.tmx_data.get_tile_image_by_gid(gid)
                     if tile:
