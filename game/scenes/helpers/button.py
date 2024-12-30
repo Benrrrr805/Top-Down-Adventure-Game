@@ -25,7 +25,6 @@ class Button:
         return self.rect.collidepoint(coordinates)
 
     def hovering(self):
-        # print("hovering: " + self.name)
         return self.in_rect(pygame.mouse.get_pos())
     
     def clicked(self):
@@ -42,10 +41,13 @@ class Button:
 
 
     def update(self):
-        if self.debug and self.hovering():
-            self.debug_color = RED
+        if self.debug:
+            if self.hovering():
+                self.debug_color = RED
+            else:
+                self.debug_color = BLACK
 
-    def  draw(self):
+    def draw(self):
         if self.debug:
             pygame.draw.rect(self.screen, self.debug_color, self.rect, 5)
 

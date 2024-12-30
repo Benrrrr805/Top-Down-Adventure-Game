@@ -1,9 +1,7 @@
 # Core game logic
-import os
 import pygame
-from game.settings import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, BLACK
-from game.utils.tiled_map import TiledMap
-from game.scenes.menu import MenuScene
+from game.settings import SCREEN_WIDTH, SCREEN_HEIGHT
+from game.scenes.startingScene import StartingScene
 from game.core.game_resources import GameResources
 
 
@@ -16,8 +14,9 @@ class Game:
         pygame.display.set_caption("Top-Down Adventure Game")
         self.clock = pygame.time.Clock()
         self.running = True
-        self.state = "main_menu"
+        self.state = "startingScene"
         self.scene = None
+        self.frame_rate = None
         
 
     def handle_events(self):
@@ -36,8 +35,8 @@ class Game:
         return event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE)
 
     def update(self):
-        if self.state == "main_menu":
-            self.scene = MenuScene()
+        if self.state == "startingScene" and self.scene == None:
+            self.scene = StartingScene()
         self.scene.update()
 
 
@@ -49,4 +48,7 @@ class Game:
             self.handle_events()
             self.update()
             self.draw()
-            self.clock.tick(FPS)
+            ticks = self.clock.tick()
+            self.frame_rate = int(self.clock.get_fps())
+            if self.frame_rate:
+                print(f'frame_rate: {self.frame_rate}  -  milliseconds since last call: {ticks}')
