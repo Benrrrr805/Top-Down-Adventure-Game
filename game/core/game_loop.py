@@ -1,27 +1,33 @@
 # Core game logic
+import os
 import pygame
-from game.settings import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
+from game.settings import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, BLACK
 from game.utils.tiled_map import TiledMap
+from game.scenes.menu import MenuScene
+from game.core.game_resources import GameResources
 
 
 class Game:
     def __init__(self):
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        GameResources.display = pygame.display
+        GameResources.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        GameResources.debug = True
+
         pygame.display.set_caption("Top-Down Adventure Game")
         self.clock = pygame.time.Clock()
         self.running = True
-
-        # Load Tiled map
-        self.map = TiledMap('assets/maps/level1.tmx')
-        self.map_surface = self.map.make_map_surface()
-        self.map_rect = self.map_surface.get_rect()
+        self.state = "main_menu"
+        self.scene = None
+        
 
     def handle_events(self):
         for event in pygame.event.get():
             if self.is_terminated(event):
                 self.closeWindow()
-        
-            
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pygame.event.post(event)
+        if self.scene:
+            self.scene.handle_events()
 
     def closeWindow(self):
         self.running = False
@@ -30,12 +36,13 @@ class Game:
         return event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE)
 
     def update(self):
-        # Update game objects here
-        pass
+        if self.state == "main_menu":
+            self.scene = MenuScene()
+        self.scene.update()
+
 
     def draw(self):
-        self.screen.blit(self.map_surface, (0, 0))  # Draw the map
-        pygame.display.flip()  # Update the display
+        self.scene.draw()
 
     def run(self):
         while self.running:

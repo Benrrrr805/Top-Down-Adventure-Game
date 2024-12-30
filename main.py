@@ -2,7 +2,7 @@
 # Initialize Pygame and start the main game loop here
 
 import pygame
-from game.core import Game
+from game.core.game_loop import Game
 
 def main():
     pygame.init()
