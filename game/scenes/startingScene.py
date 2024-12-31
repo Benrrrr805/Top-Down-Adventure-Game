@@ -11,22 +11,22 @@ class StartingScene:
         self.display = GameResources.display
         self.debug = GameResources.debug
         
-        menu_x = 100
-        menu_y = 100
-        menu_width = 800
-        menu_height = 600
+        menu_x = 0
+        menu_y = 0
+        menu_width = 1792
+        menu_height = 1024
 
-        button_width = 300
+        button_width = 700
         button_height = 100
-
+        button_x = menu_width / 2 - button_width / 2
         self.menu_background_image_url = "./assets/images/startingScene/starting_scene_background_1792x1024.png"
         self.menu = Menu("startingScene", menu_width, menu_height, menu_x, menu_y, self.menu_background_image_url)
 
         # Buttons relative to the menu
-        self.new_game_button = Button("new_game", button_width, button_height,  5, 120)
-        self.load_game_button = Button("load_game", button_width, button_height, 120, 240)
-        self.setting_button = Button("settings", button_width, button_height, 120, 360)
-        self.exit_button = Button(exit, button_width, button_height, 120, 480)
+        self.new_game_button = Button("new_game", button_width, button_height,  button_x, 120, self.menu_background_image_url)
+        self.load_game_button = Button("load_game", button_width, button_height, button_x, 240, self.menu_background_image_url)
+        self.setting_button = Button("settings", button_width, button_height, button_x, 360, self.menu_background_image_url)
+        self.exit_button = Button(exit, button_width, button_height, button_x, 480, self.menu_background_image_url)
 
         self.menu.add_child(self.new_game_button)
         self.menu.add_child(self.load_game_button)

@@ -57,15 +57,19 @@ class UIComponent:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 return True
     
-    def handle_events(self):
+    def handle_events_(self):
         if self.clicked():
             print("clicked: " + self.name)
         for child in self.children:
             if child.active:
                 child.handle_events()
-                 
 
-    def update(self):
+    def handle_events(self):
+        if self.active:
+            return self.handle_events_()
+        return None
+
+    def update_(self):
         if self.debug and self.debug_color is not None:
             if self.hovering() and self.debug_color == BLACK:
                 self.need_to_update = True
@@ -76,9 +80,15 @@ class UIComponent:
         for child in self.children:
             if child.active:
                 child.update()
-            
 
-    def draw(self):
+    def update(self):
+        if self.active:
+            return self.update_()
+        return None
+
+
+
+    def draw_(self):
         if self.need_to_update and self.background_image is not None:
             self.surface.blit(self.background_image, (0, 0))
 
@@ -103,3 +113,9 @@ class UIComponent:
             self.need_to_update = False
         
         return self.surface
+
+
+    def draw(self):
+        if self.active:
+            return self.draw_()
+        return None
