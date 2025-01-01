@@ -51,4 +51,5 @@ class Game:
             ticks = self.clock.tick()
             self.frame_rate = int(self.clock.get_fps())
             if self.frame_rate:
-                print(f'frame_rate: {self.frame_rate}  -  milliseconds since last call: {ticks}')
+                if self.debug:
+                    print(f'frame_rate: {self.frame_rate}  -  milliseconds since last call: {ticks}')
