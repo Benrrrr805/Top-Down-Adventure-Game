@@ -1,9 +1,6 @@
 from game.core.game_resources import GameResources
-from game.scenes.uiComponents.buttons.newGame import new_game_button
-from game.scenes.uiComponents.buttons.loadGame import load_game_button
-from game.scenes.uiComponents.buttons.settings import settings_button
-from game.scenes.uiComponents.buttons.exit import exit_button
-from game.scenes.uiComponents.menus.mainMenu import main_menu
+from game.scenes.uiComponents.buttons.main_menu_buttons import new_game_button, load_game_button, settings_button, exit_button
+from game.scenes.uiComponents.menus.main_menu import main_menu
 from game.scenes.uiComponents.containers.mainContainer import main_container
 
 # Main menu scene
