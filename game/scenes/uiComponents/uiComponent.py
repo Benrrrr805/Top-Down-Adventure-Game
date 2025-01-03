@@ -57,6 +57,13 @@ class UIComponent:
         child.parent = self
         self.children.append(child)
         print(f"Added {child.name} to {self.name}")
+
+    def get_child(self, name):
+        # Returns the first child with the given name
+        for child in self.children:
+            if child.name == name:
+                return child
+        return None
     
     def remove_child(self, child):
         self.children.remove(child)
