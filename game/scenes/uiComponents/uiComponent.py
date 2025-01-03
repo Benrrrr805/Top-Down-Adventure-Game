@@ -40,23 +40,38 @@ class UIComponent:
         else:
             self.background_image = None
 
+    def enable(self):
+        if self.parent is not None:
+            self.parent.add_child(self)
+        self.enable_children()
+        self.active = True
+        self.need_to_update = True
 
-    def render_text(self):
-        if self.text:
-            text_surface = self.text_font.render(self.text, True, self.text_color)
-            text_rect = text_surface.get_rect()
-            if self.text_position == "center":
-                text_rect.center = (self.width // 2, self.height // 2)
-            else:
-                text_rect.topleft = self.text_position
-            self.surface.blit(text_surface, text_rect)
+    def disable(self):
+        self.disable_children()
+        self.parent.remove_child(self)
+        self.parent.need_to_update = True
+        self.active = False
 
+    def enable_children(self):
+        for child in self.children:
+            child.enable()
+
+    def disable_children(self):
+        for child in self.children:
+            child.disable()
+
+    
     def add_child(self, child):
         child.rect.x += self.rect.x
         child.rect.y += self.rect.y
-        child.parent = self
+        child.add_parent(self)
         self.children.append(child)
         print(f"Added {child.name} to {self.name}")
+
+    def remove_child(self, child):
+        self.children.remove(child)
+        child.remove_parent()
 
     def get_child(self, name):
         # Returns the first child with the given name
@@ -65,8 +80,8 @@ class UIComponent:
                 return child
         return None
     
-    def remove_child(self, child):
-        self.children.remove(child)
+    def add_parent(self, parent):
+        self.parent = parent
 
     def remove_parent(self):
         self.parent = None
@@ -90,6 +105,17 @@ class UIComponent:
         for event in self.pygame.event.get():
             if event.type == self.pygame.MOUSEBUTTONDOWN:
                 return True
+
+    def render_text(self):
+        if self.text:
+            text_surface = self.text_font.render(self.text, True, self.text_color)
+            text_rect = text_surface.get_rect()
+            if self.text_position == "center":
+                text_rect.center = (self.width // 2, self.height // 2)
+            else:
+                text_rect.topleft = self.text_position
+            self.surface.blit(text_surface, text_rect)
+
     
     def handle_events_(self):
         if self.clicked():
@@ -118,45 +144,12 @@ class UIComponent:
                 if child.need_to_update:
                     self.need_to_update = True
 
-    def delete(self):
-        # Use a copy here
-        children_copy = list(self.children)
-        for child in children_copy:
-            child.delete()
-
-        # Clear children at the end
-        self.children = []
-        self.active = False
-
-        if self.parent:
-            if self.debug:
-                print(f"Removing {self.name} from parent {self.parent.name}")
-            self.parent.need_to_update = True
-            self.parent.remove_child(self)
-        else:
-            if self.debug:
-                print("Parent is None")
-
-        self.need_to_update = True
-        self.parent = None
-        if self.debug:
-            print(f"Deleted {self.name}")
-
-    def disable(self):
-        self.active = False
-        self.need_to_update = True
-
-    def enable(self):
-        self.active = True
-        self.need_to_update = True
-
     def update(self):
         if self.active:
             return self.update_()
         return None
 
     def draw_(self):
-
         if not self.active or self.width == 0 or self.height == 0:
             return None
 
