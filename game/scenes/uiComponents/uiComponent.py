@@ -135,6 +135,14 @@ class UIComponent:
         if self.debug:
             print(f"Deleted {self.name}")
 
+    def disable(self):
+        self.active = False
+        self.need_to_update = True
+
+    def enable(self):
+        self.active = True
+        self.need_to_update = True
+
     def update(self):
         if self.active:
             return self.update_()
@@ -142,17 +150,18 @@ class UIComponent:
 
     def draw_(self):
 
-        if self.need_to_update and self.background_image is not None and self.background_color is None:
-            self.surface.blit(self.background_image, (0, 0))
+        if not self.active or self.width == 0 or self.height == 0:
+            return None
 
-        # Fill with background color if available
-        elif self.need_to_update and self.background_color is not None and self.background_image is None:
-            self.surface.fill(self.background_color)
-            
-        # Otherwise, make it transparent
-        elif self.need_to_update and self.background_color is None and self.background_image is None:
-            self.surface.fill((0, 0, 0, 0))  # Fully transparent (RGBA)
-           
+        if self.active:
+            if self.need_to_update:
+                if self.background_image is not None:
+                    self.surface.blit(self.background_image, (0, 0))
+                elif self.background_color is not None:
+                    self.surface.fill(self.background_color)
+                else:
+                    self.surface.fill((0, 0, 0, 0))
+
         # Render text
         self.render_text()
 
