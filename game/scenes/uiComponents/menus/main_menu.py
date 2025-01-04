@@ -38,6 +38,17 @@ main_menu = Menu("main_menu", main_menu_width, main_menu_height, main_menu_x, ma
                  text=main_menu_text, text_size=main_menu_text_size, text_position=main_menu_text_position, 
                  active=active, background_image=main_menu_background_image)
 
+def clicked_item(self):
+    if self.active:
+        if self.clicked() and self.name is not None:
+            print(f"Clicked {self.name}")
+
+new_game_button.add_helper_function(clicked_item)
+load_game_button.add_helper_function(clicked_item)
+settings_button.add_helper_function(clicked_item)
+exit_button.add_helper_function(clicked_item)
+main_menu.add_helper_function(clicked_item)
+
 main_menu.add_child(new_game_button)
 main_menu.add_child(load_game_button)
 main_menu.add_child(settings_button)

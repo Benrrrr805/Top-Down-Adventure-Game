@@ -9,7 +9,7 @@ class UIComponent:
                  background_image=None, background_color=None,  
                  text=None, text_font=None, text_size=24, text_color=BLACK, text_position=None, 
                  active=True, need_to_update=True, debug_color=BLACK, 
-                 parent=None, children=None):
+                 parent=None, children=None, helper_function=None, helper_function_enabled=True):
         self.pygame = GameResources.pygame
         self.screen = GameResources.screen
         self.display = GameResources.display
@@ -47,8 +47,24 @@ class UIComponent:
         else:
             self.background_image = None
             self.background_image_url = None
+        
+        self.helper_function = helper_function
+        self.helper_function_enabled = helper_function_enabled
 
         self.validate()
+
+    def add_helper_function(self, helper_function):
+        self.helper_function = helper_function
+
+    def run_helper_function(self):
+        if self.helper_function is not None and self.active and self.helper_function_enabled:
+            self.helper_function(self)
+
+    def enable_helper_function(self):
+        self.helper_function_enabled = True
+
+    def disable_helper_function(self):
+        self.helper_function_enabled = False
 
     def data(self, recursive=False, as_json=False, visited=None):
         """
@@ -426,9 +442,6 @@ class UIComponent:
             self.surface.blit(text_surface, text_rect)
 
     def handle_events_(self):
-        if self.clicked():
-            if self.debug:
-                print("clicked: " + self.name)
         for child in self.children:
             if child.active:
                 child.handle_events()
@@ -451,6 +464,7 @@ class UIComponent:
                 child.update()
                 if child.need_to_update:
                     self.need_to_update = True
+        self.run_helper_function()
 
     def update(self):
         if self.active:
