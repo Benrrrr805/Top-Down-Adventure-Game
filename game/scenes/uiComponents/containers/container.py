@@ -1,9 +1,6 @@
 from game.scenes.uiComponents.uiComponent import UIComponent
 from game.settings import BLACK
 
-from game.scenes.uiComponents.menus.settings_menu import settings_menu
-from game.scenes.uiComponents.menus.main_menu import main_menu
-
 class Container(UIComponent):
     def __init__(self, name, width, height, x_coordinate, y_coordinate, 
                  background_image=None, background_color = None, 
@@ -16,8 +13,4 @@ class Container(UIComponent):
                          text, text_font, text_size, text_color, text_position,
                          active, need_to_update, debug_color, 
                          parent, children)
-        self.menus = {
-            "main_menu": main_menu,
-            "settings_menu": settings_menu
-        }
         
