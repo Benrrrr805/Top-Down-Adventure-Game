@@ -1,5 +1,5 @@
 from game.core.game_resources import GameResources
-from game.scenes.uiComponents.containers.mainContainer import main_container
+from game.scenes.uiComponents.containers.main_container import main_container
 
 # Main menu scene
 class StartingScene:
