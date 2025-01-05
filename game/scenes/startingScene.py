@@ -1,5 +1,6 @@
 from game.core.game_resources import GameResources
 from game.scenes.uiComponents.containers.main_container import main_container
+from game.scenes.uiComponents.menus.main_menu import main_menu
 
 # Main menu scene
 class StartingScene:
@@ -10,6 +11,7 @@ class StartingScene:
         self.debug = GameResources.debug
 
         self.main_container = main_container
+        self.main_container.add_child(main_menu)
 
     def handle_events(self):
         self.main_container.handle_events()

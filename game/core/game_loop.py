@@ -1,6 +1,7 @@
 # Core game logic
 from game.scenes.startingScene import StartingScene
 from game.core.game_resources import GameResources
+from game.core.event_queue import EventQueue
 
 
 class Game:
@@ -11,6 +12,8 @@ class Game:
         self.display = GameResources.display
         self.clock = self.pygame.time.Clock()
         self.running = GameResources.running
+        GameResources.event_queue = EventQueue(self.pygame, self.debug)
+        self.event_queue = GameResources.event_queue
         self.state = "startingScene"
         self.scene = None
         self.frame_rate = None

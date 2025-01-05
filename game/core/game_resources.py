@@ -9,3 +9,4 @@ class GameResources:
     debug = True
     running = True
     pygame.display.set_caption("Top-Down Adventure Game")
+    event_queue = None
