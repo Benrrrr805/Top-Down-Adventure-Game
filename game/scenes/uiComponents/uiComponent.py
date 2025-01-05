@@ -3,455 +3,307 @@ from game.core.game_resources import GameResources
 from game.settings import BLACK, RED
 import os
 import json
+import os
+import json
+from game.core.node import Node
 
-class UIComponent:
-    def __init__(self, name, width, height, x_coordinate, y_coordinate, 
-                 background_image=None, background_color=None,  
-                 text=None, text_font=None, text_size=24, text_color=BLACK, text_position=None, 
-                 active=True, need_to_update=True, debug_color=BLACK, 
-                 parent=None, children=None, helper_function=None, helper_function_enabled=True):
+import os
+import json
+
+# Suppose these come from your game environment
+
+class UIComponent(Node):
+    """
+    UIComponent is a specialized Node that supports graphical rendering,
+    event handling, and text rendering via pygame. It also supports
+    multiple, named helper functions that can be automatically or manually called.
+    """
+
+    def __init__(
+        self,
+        name: str,
+        width: int,
+        height: int,
+        x_coordinate: int,
+        y_coordinate: int,
+        image_url: str = None,
+        background_color=None,
+        text: str = None,
+        text_font=None,
+        text_size: int = 24,
+        text_color=BLACK,
+        text_position=None
+    ):
+        """
+        Inherits from Node, which manages parent, children, enable/disable, etc.
+        """
+        super().__init__(name=name, top_level=False)
+        self.width = width
+        self.height = height
+        self.x_coordinate = x_coordinate
+        self.y_coordinate = y_coordinate
+
+        self.image_url = image_url
+        self.background_color = background_color
+
+        # Text settings
+        self.text = text
+        self.text_font = text_font
+        self.text_size = text_size
+        self.text_color = text_color
+        # Default text position to center if not specified
+        self.text_position = text_position if text_position else (width // 2, height // 2)
+
+        # Debug flags
+        self.debug_color = None
+        self.debug = False
+
+        # pygame references
+        self.pygame = None
+        self.screen = None
+        self.display = None
+        self.event_queue = None
+        self.rect = None
+        self.surface = None
+
+        # This dictionary holds each helper function by name.
+        # Each entry is: { "func": <callable>, "enabled": bool, "contexts": set_of_strings }
+        self.helper_functions = {}
+
+    # ----------------------------------------------------------------------
+    # Initialization
+    # ----------------------------------------------------------------------
+    def initialize(self):
+        if self.initialized:
+            return
+        super().initialize()  # Node-level init + validate()
+
+        from game.core.game_resources import GameResources
         self.pygame = GameResources.pygame
         self.screen = GameResources.screen
         self.display = GameResources.display
         self.debug = GameResources.debug
+        self.event_queue = GameResources.event_queue
 
-        self.x_coordinate = x_coordinate
-        self.y_coordinate = y_coordinate
-        self.height = height
-        self.width = width
-        self.name = name
-        self.background_color = background_color
+        # Create pygame rect & surface
         self.rect = self.pygame.Rect(self.x_coordinate, self.y_coordinate, self.width, self.height)
         self.surface = self.pygame.Surface((self.width, self.height), self.pygame.SRCALPHA)
-        self.debug_color = debug_color
-        self.need_to_update = need_to_update
-        if children is None:
-            children = []
-        self.children = children
-        self.parent = parent
-        self.active = active
-        self.image_url = background_image
 
-        self.text = text
-        self.text_size = text_size
-        self.text_font = self.pygame.font.Font(text_font, self.text_size) if text_font else self.pygame.font.SysFont(None, self.text_size)
-        self.text_color = text_color
-        self.text_position = text_position if text_position else (self.width // 2, self.height // 2)
+        # Load or create the font
+        if self.text_font:
+            self.text_font = self.pygame.font.Font(self.text_font, self.text_size)
+        else:
+            self.text_font = self.pygame.font.SysFont(None, self.text_size)
 
-        if background_image is not None and not os.path.exists(background_image):
-            raise ValueError("Background image does not exist")
-        if background_image is not None:
-            self.background_image_url = background_image
-            self.background_image = self.pygame.image.load(background_image).convert()
+        # Attempt to load background image if provided
+        if self.image_url is not None:
+            if not os.path.exists(self.image_url):
+                raise ValueError(f"Background image does not exist: {self.image_url}")
+            self.background_image = self.pygame.image.load(self.image_url).convert_alpha()
             self.background_image = self.pygame.transform.scale(self.background_image, (self.width, self.height))
         else:
             self.background_image = None
-            self.background_image_url = None
+
+        self.debug_color = BLACK
+        self.need_to_update = True
+        self.active = True
+
+        print(f"Initialized UIComponent: {self.name}")
+
+    # ----------------------------------------------------------------------
+    # Validation
+    # ----------------------------------------------------------------------
+    def validate(self):
+        """
+        Node-level validations plus UI-specific checks.
+        """
+        super().validate()  # Node validations
+
+        # UI-specific checks
+        if self.width is None or self.height is None:
+            raise ValueError("UIComponent must have a width and height.")
+        if self.x_coordinate is None or self.y_coordinate is None:
+            raise ValueError("UIComponent must have x and y coordinates.")
+        if self.debug_color is not None and not isinstance(self.debug_color, tuple):
+            raise ValueError("Debug color must be a tuple.")
+        if self.text is not None and not isinstance(self.text, str):
+            raise ValueError("Text must be a string.")
+        if self.text_size is not None and not isinstance(self.text_size, int):
+            raise ValueError("Text size must be an integer.")
+        if self.text_position is not None and not isinstance(self.text_position, tuple):
+            raise ValueError("Text position must be a tuple.")
+        if self.text_color is not None and not isinstance(self.text_color, tuple):
+            raise ValueError("Text color must be a tuple.")
+
+        return True
+
+    # ----------------------------------------------------------------------
+    # Helper Function System
+    # ----------------------------------------------------------------------
+    def add_helper_function(
+        self,
+        name: str,
+        func,
+        contexts=None,
+        enabled=True
+    ):
+        """
+        Registers a named helper function with optional auto-run contexts.
         
-        self.helper_function = helper_function
-        self.helper_function_enabled = helper_function_enabled
-
-        self.validate()
-
-    def add_helper_function(self, helper_function):
-        self.helper_function = helper_function
-
-    def run_helper_function(self):
-        if self.helper_function is not None and self.active and self.helper_function_enabled:
-            self.helper_function(self)
-
-    def enable_helper_function(self):
-        self.helper_function_enabled = True
-
-    def disable_helper_function(self):
-        self.helper_function_enabled = False
-
-    def data(self, recursive=False, as_json=False, visited=None):
+        :param name: Unique string name for the helper function.
+        :param func: A callable with signature func(self, context, from_helper=None).
+        :param contexts: A string, list of strings, or set of strings indicating
+                         when this helper function should auto-run. e.g. {"update", "draw", "handle_events"}.
+                         If None, defaults to {"manual"} only.
+        :param enabled: Whether the function is initially enabled.
         """
-        Return either the data dictionary itself (default)
-        or a JSON string (if as_json=True).
-
-        :param recursive: If True, include child data (unless already visited).
-        :param as_json: If True, return a JSON string of the data.
-        :param visited: Used internally to track which containers have been visited.
-        :return: dict or str
-        """
-        # If we haven't yet created a visited set, do so now.
-        if visited is None:
-            visited = set()
-
-        # If we've already visited this container, return the "hidden" message.
-        if id(self) in visited:
-            if self is None:
-                return "Hidden so that limited recursion does not occur - None"
-            return f"Hidden so that limited recursion does not occur - {self.name}"
-
-        # Mark this container as visited.
-        visited.add(id(self))
-
-        # Determine the parent data
-        if self.name == "main_container":
-            parent_data = "Top-level container - no parent"
-        elif self.parent is None:
-            parent_data = "No Parent"
+        if not callable(func):
+            raise ValueError("Helper function must be callable.")
+        if contexts is None:
+            contexts = {"manual"}
+        elif isinstance(contexts, str):
+            contexts = {contexts}
         else:
-            if recursive:
-                # Recursively fetch the parent's data (without re-visiting)
-                parent_data = self.parent.data(recursive=False, as_json=False, visited=visited)
-            else:
-                # Show the parent's name or a placeholder
-                parent_data = getattr(self.parent, "name", "No Parent")
+            contexts = set(contexts)
 
-        # Gather children data if recursive=True, otherwise show a placeholder if children exist
-        if recursive:
-            children_data = []
-            for child in self.children:
-                child_info = child.data(recursive=True, as_json=False, visited=visited)
-                children_data.append(child_info)
-        else:
-            if len(self.children) > 0:
-                children_data = f"Hidden so that limited recursion does not occur - {len(self.children)} child{'ren' if (len(self.children) > 1) else ''}: {[child.name for child in self.children]}"
-            else:
-                children_data = []
-
-        data_dict = {
-            "name": self.name,
-            "width": self.width,
-            "height": self.height,
-            "x_coordinate": self.x_coordinate,
-            "y_coordinate": self.y_coordinate,
-            "background_image": self.background_image_url,
-            "background_color": self.background_color,
-            "text": self.text,
-            "text_size": self.text_size,
-            "text_color": self.text_color,
-            "text_position": self.text_position,
-            "active": self.active,
-            "need_to_update": self.need_to_update,
-            "debug_color": self.debug_color,
-            "parent": parent_data,
-            "children": children_data,
+        self.helper_functions[name] = {
+            "func": func,
+            "enabled": enabled,
+            "contexts": contexts
         }
 
-        # Return JSON if requested
-        if as_json:
-            return json.dumps(data_dict, indent=4)
+    def enable_helper_function(self, name: str):
+        if name not in self.helper_functions:
+            raise ValueError(f"No helper function named '{name}'.")
+        self.helper_functions[name]["enabled"] = True
 
-        # Otherwise, return the dictionary
-        return data_dict
+    def disable_helper_function(self, name: str):
+        if name not in self.helper_functions:
+            raise ValueError(f"No helper function named '{name}'.")
+        self.helper_functions[name]["enabled"] = False
 
-    def display_data(self, data, recursive=False, indent_level=0):
+    def set_helper_function_contexts(self, name: str, contexts):
         """
-        Pretty-print the data dictionary (or placeholder text) to the console.
-        :param data: A dictionary (or string) generated from self.data(...)
-        :param recursive: If True, display child data recursively.
-        :param indent_level: Helps control indentation for nested calls.
+        Updates the set of contexts for a helper function.
         """
+        if name not in self.helper_functions:
+            raise ValueError(f"No helper function named '{name}'.")
+        if isinstance(contexts, str):
+            contexts = {contexts}
+        else:
+            contexts = set(contexts)
+        self.helper_functions[name]["contexts"] = contexts
 
-        # If data is a string (the "Hidden..." placeholder), print and return early.
-        if isinstance(data, str):
-            indent = "    " * indent_level
-            print(f"{indent}{data}")
+    def get_helper_function_contexts(self, name: str):
+        """
+        Returns the set of contexts for the given helper function.
+        """
+        if name not in self.helper_functions:
+            raise ValueError(f"No helper function named '{name}'.")
+        return self.helper_functions[name]["contexts"]
+
+    def get_helper_function(self, name: str):
+        """
+        Retrieve the helper function callable itself (if you want to do something advanced).
+        """
+        if name not in self.helper_functions:
+            raise ValueError(f"No helper function named '{name}'.")
+        return self.helper_functions[name]["func"]
+
+    def call_helper_function(
+        self,
+        name: str,
+        context: str = "manual",
+        from_helper: str = None,
+        force: bool = False
+    ):
+        """
+        Call one helper function by name.
+        
+        :param context: Which context to simulate. By default "manual".
+        :param from_helper: If this call originates from another helper function, pass its name here.
+        :param force: If True, ignore the function's context set. 
+                      (Still won't call if the function is disabled—adapt as needed.)
+        """
+        if name not in self.helper_functions:
+            raise ValueError(f"No helper function named '{name}'.")
+        info = self.helper_functions[name]
+        if not info["enabled"]:
+            # If you want to allow calling even if disabled, remove this check:
+            print(f"Helper function '{name}' is disabled. Not calling.")
+            return
+        if not force and context not in info["contexts"]:
+            print(f"Helper function '{name}' does not handle context '{context}'. Not calling.")
             return
 
-        indent = "    " * indent_level
-        if indent_level == 0:
-            print(f"{indent}Displaying data for: {data['name']}")
+        # Call the function
+        info["func"](self, context, from_helper)
 
-        for key, value in data.items():
-            # Handle children
-            if key == "children":
-                if isinstance(value, list) and len(value) > 0:
-                    print(f"{indent}  {key}:")
-                    for child_dict in value:
-                        self.display_data(child_dict, recursive, indent_level + 1)
-                elif isinstance(value, str):
-                    # "Hidden so that limited recursion does not occur"
-                    print(f"{indent}  {key}: {value}")
-                else:
-                    # Probably an empty list
-                    print(f"{indent}  {key}: []")
-
-            # Handle parent
-            elif key == "parent":
-                if isinstance(value, dict):
-                    print(f"{indent}  {key}:")
-                    self.display_data(value, recursive, indent_level + 1)
-                else:
-                    print(f"{indent}  {key}: {value}")
-
-            else:
-                print(f"{indent}  {key}: {value}")
-
-        print()
-
-    def validate(self):
-        if not self.name:
-            raise ValueError("Component must have a name")
-        if self.width is None or self.height is None:
-            raise ValueError("Component must have a width and height")
-        if self.x_coordinate is None or self.y_coordinate is None:
-            raise ValueError("Component must have x and y coordinates")
-        if self.debug_color is not None and not isinstance(self.debug_color, tuple):
-            raise ValueError("Debug color must be a tuple")
-        if self.parent is not None and not isinstance(self.parent, UIComponent):
-            raise ValueError("Parent must be a UIComponent")
-        if self.children is not None and not isinstance(self.children, list):
-            raise ValueError("Children must be a list")
-        if self.active is not None and not isinstance(self.active, bool):
-            raise ValueError("Active must be a boolean")
-        if self.need_to_update is not None and not isinstance(self.need_to_update, bool):
-            raise ValueError("Need to update must be a boolean")
-        if self.debug is not None and not isinstance(self.debug, bool):
-            raise ValueError("Debug must be a boolean")
-        if self.text is not None and not isinstance(self.text, str):
-            raise ValueError("Text must be a string")   
-        if self.text_size is not None and not isinstance(self.text_size, int):
-            raise ValueError("Text size must be an integer")
-        if self.text_position is not None and not isinstance(self.text_position, tuple):
-            raise ValueError("Text position must be a tuple")
-        if self.text_color is not None and not isinstance(self.text_color, tuple):
-            raise ValueError("Text color must be a tuple")
-        return True
-
-    def validate_disabled(self):
-        # validates that the component is disabled prior to enabling
-        if self.active:
-            raise ValueError("Component must be disabled before enabling")
-        if self.parent is None and self.name != "main_container":
-            raise ValueError("Component must have a parent")
-        if self.parent.name is None:
-            raise ValueError("Parent must have a name")
-        if not self.parent.active:
-            raise ValueError("Parent must be enabled before enabling child")
-        if self.parent.name == self.name:
-            raise ValueError("Parent and child cannot have the same name")
-        return True
+    def run_helper_functions(self, context: str, from_helper: str = None):
+        """
+        Calls all helper functions whose contexts include `context` and are enabled.
         
-    def validate_enabled(self):
-        # validates that the component is enabled prior to disabling
-        if not self.active:
-            raise ValueError("Component must be enabled")
-        if self.parent is None and self.name != "main_container":
-            raise ValueError("Component must have a parent before disabling")
-        if not self.parent.active:
-            raise ValueError("Parent must be enabled before disabling child")
-        if self.parent.name is None:
-            raise ValueError("Parent must have a name")
-        if self.parent.name == self.name:
-            raise ValueError("Parent and child cannot have the same name")
-        return True
-        
-    def validate_enabled_children(self):
-        # validates that the component is enabled prior to enabling children
-        if not self.active:
-            raise ValueError("Component must be enabled before enabling children")
-        if self.children is None or len(self.children) == 0:
-            raise ValueError("Component has no children")
-        for child in self.children:
-            if not child.name:
-                raise ValueError("Child must have a name")
-            if not child.active:
-                raise ValueError("Child must be disabled before enabling")
-            if not child.parent:
-                raise ValueError("Child must have a parent")
-            if child.parent.name != self.name:
-                raise ValueError("Child must have the same parent as the parent")
-        return True
-            
-    def validate_disabled_children(self):
-        # validates that the component is enabled prior to diabling children
-        if not self.active:
-            raise ValueError("Component must be enabled before disabling children")
-        if self.children is None or len(self.children) == 0:
-            raise ValueError("Component has no children")
-        for child in self.children:
-            if not child.name:
-                raise ValueError("Child must have a name")
-            if child.active:
-                raise ValueError("Child must be disabled before disabling parent")
-            if not child.parent:
-                raise ValueError("Child must have a parent")
-            if child.parent.name != self.name:
-                print(f'child.parent.name: {child.parent.name} - self.name: {self.name}')
-                raise ValueError("Child must have the same parent as the parent")
-        return True
+        :param context: Something like "update", "draw", "handle_events", "manual".
+        :param from_helper: If this is triggered from some other named helper function.
+        """
+        for name, info in self.helper_functions.items():
+            if info["enabled"] and context in info["contexts"]:
+                info["func"](self, context, from_helper)
 
-    def enable(self, spacing=0):
-        self.validate_disabled()
-        print(f"{spacing * '     '}Enabling {self.name}")
-        self.active = True
-        if not self.need_to_update:
-            self.need_to_update = True
-            print(f"{spacing * '     '}     Enabled {self.name}")
-        else:
-            print(f"{spacing * '     '}     {self.name} already needs to update")
-        if len(self.children) > 0:
-            print(f"{spacing * '     '}     Enabling children")
-            self.enable_children(spacing+1)
-        else:
-            print(f"{spacing * '     '}     No children to enable")
-        if not self.parent.need_to_update:
-            self.parent.need_to_update = True
-            print(f"{spacing * '     '}     Parent: {self.parent.name} needs to update")
-        else:
-            print(f"{spacing * '     '}     Parent: {self.parent.name} already needs to update")
-
-    def disable(self, spacing=0):
-        validated = self.validate_enabled()    
-        print(f"validated {self.name}: {validated}")
-        print(f"{spacing * '     '}Disabling {self.name}")
-        data = self.data(True)
-        self.display_data(data, recursive=True)
-        if len(self.children) > 0:
-            print(f"{spacing * '     '}     Disabling children")
-            self.disable_children(spacing+1)
-        else:
-            print(f"{spacing * '     '}     No children to disable")
-        if not self.parent.need_to_update:
-            self.parent.need_to_update = True
-            print(f"{spacing * '     '}     Parent: {self.parent.name} needs to update")
-        else:
-            print(f"{spacing * '     '}     Parent: {self.parent.name} already needs to update")
-        if self.active:
-            self.active = False
-            print(f"{spacing * '     '}     Disabled {self.name}")
-        else:
-            print(f"{spacing * '     '}     {self.name} already disabled")
-        if self.need_to_update:
-            self.need_to_update = False
-            print(f"{spacing * '     '}     Disabled {self.name}'s need to update")
-        else:
-            print(f"{spacing * '     '}     already disabled {self.name}'s needs to update")
-
-    def enable_children(self,spacing=0):
-        self.validate_enabled_children()
-        print(f"Enabling children of parent: {self.name}")
-        for child in self.children:
-            name = child.name
-            print(f"     Enabling child: {name} of parent: {self.name}")
-            child.enable(spacing)
-            print(f"          Enabled child: {name} of parent: {self.name}")
-        print(f"     Enabled children of parent: {self.name}")
-
-    def disable_children(self, spacing=0):
-        print(f"Disabling children of parent: {self.name}")
-        validated = self.validate_disabled_children()
-        print(f"validated {self.name}: {validated}")
-        for child in self.children:
-            name = child.name
-            print(f"     Disabling child: {name} of parent: {self.name}")
-            child.disable(spacing)
-            print(f"          Disabled child: {name} of parent: {self.name}")
-        print(f"     Disabled children of parent: {self.name}")
-    
-    def add_child(self, child):
-        child.validate()
-        if not isinstance(child, UIComponent):
-            raise ValueError("Child must be a UIComponent")
-        print(f"Adding child: {child.name} to parent: {self.name}")
-        child.rect.x += self.rect.x
-        child.rect.y += self.rect.y
-        if self.children is None:
-            self.children = []
-        self.children.append(child)
-        print(f"     Added child: {child.name} to parent: {self.name}")
-
-    def remove_child(self, child):
-        if not isinstance(child, UIComponent):
-            raise ValueError("Child must be a UIComponent")
-        print(f"Removing child: {child.name} from parent: {self.name}")
-        child_name = child.name
-        self.children.remove(child)
-        print(f"     Removed child: {child_name} from parent: {self.name}")
-
-    def get_child(self, name):
-        print(f"Getting child: {name} from parent: {self.name}")
-        # Returns the first child with the given name
-        if isinstance(name, UIComponent):
-            name = name.name
-        if not isinstance(name, str):
-            raise ValueError("Name must be a string")
-        for child in self.children:
-            if child.name == name:
-                print(f"     Found child: {name} in parent: {self.name}")
-                return child
-        print(f"     Child: {name} not found in parent: {self.name}")
-        return None
-    
-    def has_child(self, child):
-        print(f"Checking if parent: {self.name} has child: {child.name}")
-        if not isinstance(child, UIComponent):
-            raise ValueError("Child must be a UIComponent")
-        for c in self.children:
-            if c.name == child.name:
-                if len(c.children) > 0:
-                    return c.has_child(child)
-                print(f"     Parent: {self.name} has child: {child.name}")
-                return True
-        print(f"     Parent: {self.name} does not have child: {child.name}")
-        return False
-    
-    def get_parent(self):
-        print(f"Getting parent of child: {self.name}")
-        if self.parent is None:
-            raise ValueError("Parent must not be None")
-        print(f"     Parent of child: {self.name} is: {self.parent.name}")
-        return self.parent
-    
-    def add_parent(self, parent):
-        print(f"Adding parent: {parent.name} to child: {self.name}")
-        parent.validate()
-        self.parent = parent
-        print(f"     Added parent: {parent.name} to child: {self.name}")
-
-    def remove_parent(self):
-        print(f"Removing parent: {self.parent.name} from child: {self.name}")
-        parent_name = self.parent.name
-        self.parent = None
-        print(f"     Removed parent: {parent_name} from child: {self.name}")
-
-    def get_rect(self):
-        return self.rect
-
+    # ----------------------------------------------------------------------
+    # Event Handling
+    # ----------------------------------------------------------------------
     def in_rect(self, coordinates):
+        if not self.rect:
+            return False
         return self.rect.collidepoint(coordinates)
 
     def hovering(self):
-        hover = self.in_rect(self.pygame.mouse.get_pos())
-        return hover
-    
+        if not self.initialized or not self.pygame:
+            return False
+        return self.in_rect(self.pygame.mouse.get_pos())
+
     def clicked(self):
         if not self.hovering():
             return False
         for child in self.children:
-            if child.active and child.hovering():
+            if child.active and isinstance(child, UIComponent) and child.hovering():
                 return False
         for event in self.pygame.event.get():
             if event.type == self.pygame.MOUSEBUTTONDOWN:
                 return True
-
-    def render_text(self):
-        if self.text:
-            text_surface = self.text_font.render(self.text, True, self.text_color)
-            text_rect = text_surface.get_rect()
-            if self.text_position == "center":
-                text_rect.center = (self.width // 2, self.height // 2)
-            else:
-                text_rect.topleft = self.text_position
-            self.surface.blit(text_surface, text_rect)
+        return False
 
     def handle_events_(self):
+        """
+        Internally handle events (for active components).
+        Then run any helper functions that respond to "handle_events" context.
+        """
+        # Let children handle events first
         for child in self.children:
-            if child.active:
+            if child.active and isinstance(child, UIComponent):
                 child.handle_events()
 
-    def handle_events(self):
-        if self.active:
-            return self.handle_events_()
-        return None
+        # Now run all enabled helper functions that respond to "handle_events".
+        self.run_helper_functions("handle_events")
 
+    def handle_events(self):
+        if not self.initialized:
+            raise ValueError("UIComponent must be initialized before handling events.")
+        if self.active:
+            self.handle_events_()
+
+    # ----------------------------------------------------------------------
+    # Updating
+    # ----------------------------------------------------------------------
     def update_(self):
+        """
+        Internal update: checks debug hover, updates children, runs helper functions for "update".
+        """
+        if not self.initialized:
+            raise ValueError("UIComponent must be initialized before updating.")
+
+        # Debug hover color
         if self.debug and self.debug_color is not None:
             if self.hovering() and self.debug_color == BLACK:
                 self.need_to_update = True
@@ -459,59 +311,170 @@ class UIComponent:
             elif not self.hovering() and self.debug_color == RED:
                 self.need_to_update = True
                 self.debug_color = BLACK
+
+        # Update children
         for child in self.children:
-            if child.active:
+            if child.active and isinstance(child, UIComponent):
                 child.update()
                 if child.need_to_update:
                     self.need_to_update = True
-        self.run_helper_function()
+
+        # Run all enabled helper functions in "update" context
+        self.run_helper_functions("update")
 
     def update(self):
+        if not self.initialized:
+            raise ValueError("UIComponent must be initialized before updating.")
         if self.active:
-            return self.update_()
-        return None
+            self.update_()
+
+    # ----------------------------------------------------------------------
+    # Rendering
+    # ----------------------------------------------------------------------
+    def render_text(self):
+        if not self.text or not self.initialized:
+            return
+        text_surface = self.text_font.render(self.text, True, self.text_color)
+        text_rect = text_surface.get_rect()
+        if self.text_position == "center":
+            text_rect.center = (self.width // 2, self.height // 2)
+        else:
+            text_rect.topleft = self.text_position
+        self.surface.blit(text_surface, text_rect)
 
     def draw_(self):
+        """
+        Internal draw:
+          - Draw background / image
+          - Render text
+          - Draw debug border if needed
+          - Draw children
+          - Run helper functions for "draw"
+        """
+        if not self.initialized:
+            raise ValueError("UIComponent must be initialized before drawing.")
         if not self.active or self.width == 0 or self.height == 0:
             return None
 
-        if self.active:
-            if self.need_to_update:
-                if self.background_image is not None:
-                    self.surface.blit(self.background_image, (0, 0))
-                elif self.background_color is not None:
-                    self.surface.fill(self.background_color)
-                else:
-                    self.surface.fill((0, 0, 0, 0))
+        # If we need to update background
+        if self.need_to_update:
+            if self.background_image is not None:
+                self.surface.blit(self.background_image, (0, 0))
+            elif self.background_color is not None:
+                self.surface.fill(self.background_color)
+            else:
+                self.surface.fill((0, 0, 0, 0))
 
         # Render text
         self.render_text()
 
-        # Redraw children selectively
+        # Debug border
+        if self.debug and self.debug_color and self.need_to_update:
+            self.pygame.draw.rect(
+                self.surface, self.debug_color,
+                (0, 0, self.width, self.height), 5
+            )
+
+        # Run all enabled helper functions in "draw" context
+        self.run_helper_functions("draw")
+
+        # Draw children
         for child in self.children:
-            
-            if self.need_to_update or child.need_to_update:
-                
+            if isinstance(child, UIComponent) and (self.need_to_update or child.need_to_update):
                 child_surface = child.draw()
                 if child_surface is not None:
-                    x = child.get_rect().x - self.rect.x
-                    y = child.get_rect().y - self.rect.y
-                    self.surface.blit(child_surface,(x, y))
-                # Reset the child's update flag
+                    x = child.x_coordinate - self.x_coordinate
+                    y = child.y_coordinate - self.y_coordinate
+                    self.surface.blit(child_surface, (x, y))
                 child.need_to_update = False
 
-        # Draw the debug border if necessary
-       
-        if self.debug and self.debug_color is not None and self.need_to_update:
-            self.pygame.draw.rect(self.surface, self.debug_color, (0, 0, self.width, self.height), 5)
-            
-        # Reset the UI Component's need to update flag
         if self.need_to_update:
             self.need_to_update = False
-           
+
         return self.surface
 
     def draw(self):
-        if self.active:
-            return self.draw_()
-        return None
+        if not self.initialized:
+            raise ValueError("UIComponent must be initialized before drawing.")
+        if not self.active:
+            raise ValueError("UIComponent must be enabled before drawing.")
+        return self.draw_()
+
+    # ----------------------------------------------------------------------
+    # Data & Display
+    # ----------------------------------------------------------------------
+    def data(self, recursive=False, as_json=False, visited=None):
+        if visited is None:
+            visited = set()
+        if id(self) in visited:
+            return f"Hidden so that limited recursion does not occur - {self.name}"
+        visited.add(id(self))
+
+        base_data = {
+            "name": self.name,
+            "active": self.active,
+            "initialized": self.initialized,
+            "need_to_update": self.need_to_update,
+            "parent": self.parent.name if self.parent else None,
+            "width": self.width,
+            "height": self.height,
+            "x_coordinate": self.x_coordinate,
+            "y_coordinate": self.y_coordinate,
+            "image_url": self.image_url,
+            "background_color": self.background_color,
+            "text": self.text,
+            "text_size": self.text_size,
+            "text_color": self.text_color,
+            "text_position": self.text_position,
+            "debug_color": self.debug_color,
+            "helper_functions": {
+                fname: {
+                    "enabled": fdata["enabled"],
+                    "contexts": list(fdata["contexts"])
+                }
+                for fname, fdata in self.helper_functions.items()
+            },
+        }
+
+        if recursive:
+            child_data = []
+            for child in self.children:
+                if isinstance(child, UIComponent):
+                    child_data.append(child.data(True, as_json=False, visited=visited))
+                else:
+                    child_data.append(f"Node child: {child.name}")
+            base_data["children"] = child_data
+        else:
+            base_data["children"] = (
+                f"{len(self.children)} child{('ren' if len(self.children) > 1 else '')}" if self.children else "No children"
+            )
+
+        if as_json:
+            return json.dumps(base_data, indent=4)
+        return base_data
+
+    def display_data(self, data, recursive=False, indent_level=0):
+        indent = "    " * indent_level
+        if isinstance(data, str):
+            print(f"{indent}{data}")
+            return
+
+        if indent_level == 0:
+            print(f"{indent}Displaying data for UIComponent: {data['name']}")
+
+        for key, value in data.items():
+            if key == "children" and recursive and isinstance(value, list):
+                print(f"{indent}  {key}:")
+                for child_dict in value:
+                    self.display_data(child_dict, True, indent_level + 1)
+            elif key == "helper_functions":
+                print(f"{indent}  {key}:")
+                for fn_name, fn_info in value.items():
+                    contexts_str = ", ".join(fn_info["contexts"])
+                    print(f"{indent}    {fn_name} -> enabled={fn_info['enabled']}, contexts=[{contexts_str}]")
+            else:
+                print(f"{indent}  {key}: {value}")
+        print()
+
+    def get_rect(self):
+        return self.rect
