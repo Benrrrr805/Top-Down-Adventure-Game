@@ -42,11 +42,12 @@ class Game(GameComponent):
     def closeWindow(self):
         self.running = False
 
-    def is_terminated(self, event):
-        return (
-            event.type == self.pygame.QUIT
-            or (event.type == self.pygame.KEYDOWN and event.key == self.pygame.K_ESCAPE)
-        )
+    def is_terminated(self):
+        if self.event_queue.has_event('QUIT'):
+            return True
+        elif self.event_queue.has_event('KEYDOWN', {'key': 27}):
+            return True
+        return False
     
     def handle_events(self):
         # Use the event queue
@@ -54,6 +55,9 @@ class Game(GameComponent):
 
         if self.scene:
             self.scene.handle_events()
+
+        if self.is_terminated():
+            self.closeWindow()
 
     def update(self):
         # Lazy-load or create the scene
