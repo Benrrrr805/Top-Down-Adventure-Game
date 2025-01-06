@@ -78,14 +78,16 @@ class Node:
     # ------------------------------------------------------------------------
     def initialize(self) -> None:
         if self.initialized:
-            return
+            raise ValueError(f"{self.name} already initialized.")
         self.initialized = True
         self.validate()
 
     def validate(self) -> bool:
         """Validates this node's core properties."""
-        if self.parent is not None and not isinstance(self.parent, Node):
-            raise ValueError("Parent must be a Node (or None).")
+        if not self.top_level and not isinstance(self.parent, Node):
+            raise ValueError("Parent must be a Node.")
+        if self.top_level and isinstance(self.parent, Node):
+            raise ValueError("Top-level node must not have a parent.")
         if not isinstance(self.children, list):
             raise ValueError("Children must be a list.")
         if not isinstance(self.active, bool):
@@ -357,6 +359,15 @@ class Node:
         child.remove_parent()
         parent.remove_child(child)
 
+    def link(self, parent, child=None, children=None):
+        """
+        Example helper that links a parent to a child or children.
+        """
+        if child:
+            self.link_parent_child(parent, child)
+        if children:
+            for child in children:
+                self.link_parent_child(parent, child)
     # ------------------------------------------------------------------------
     #  Additional Relationship Queries
     # ------------------------------------------------------------------------

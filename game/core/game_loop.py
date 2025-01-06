@@ -1,56 +1,88 @@
-# Core game logic
-from game.scenes.startingScene import StartingScene
-from game.core.game_resources import GameResources
+# game/core/game_loop.py (or wherever your Game class was)
+
+import pygame
 from game.core.event_queue import EventQueue
+from game.core.game_component import GameComponent
+from game.scenes.startingScene import StartingScene
+from game.settings import SCREEN_WIDTH, SCREEN_HEIGHT
 
-
-class Game:
+class Game(GameComponent):
     def __init__(self):
-        self.pygame = GameResources.pygame
-        self.debug = GameResources.debug
-        self.sreen = GameResources.screen
-        self.display = GameResources.display
+        super().__init__(name="Game", top_level=True)
+
+        # Initialize pygame once (instead of using GameResources)
+        pygame.init()
+        pygame.font.init()
+
+        # Store references as instance properties
+        self.pygame = pygame
+        self.display = pygame.display
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))  # or your SCREEN_WIDTH, SCREEN_HEIGHT
+        self.debug = True
+        self.running = True
+
+        # Window caption
+        pygame.display.set_caption("Top-Down Adventure Game")
+
+        # Create an EventQueue
+        self.event_queue = EventQueue(self.pygame, self.debug)
+        self.event_queue.initialize()
+
+        # Game states
         self.clock = self.pygame.time.Clock()
-        self.running = GameResources.running
-        GameResources.event_queue = EventQueue(self.pygame, self.debug)
-        self.event_queue = GameResources.event_queue
         self.state = "startingScene"
         self.scene = None
         self.frame_rate = None
         self.show_fps = False
 
-    def handle_events(self):
-        for event in self.pygame.event.get():
-            if self.is_terminated(event):
-                self.closeWindow()
-            if event.type == self.pygame.MOUSEBUTTONDOWN:
-                self.pygame.event.post(event)
-        if self.scene:
-            self.scene.handle_events()
+        # Mark ourselves initialized
+        self.initialize()  # or do it explicitly later
+        print("Game initialized")
 
     def closeWindow(self):
-        GameResources.running = False
         self.running = False
 
     def is_terminated(self, event):
-        return event.type == self.pygame.QUIT or (event.type == self.pygame.KEYDOWN and event.key == self.pygame.K_ESCAPE)
+        return (
+            event.type == self.pygame.QUIT
+            or (event.type == self.pygame.KEYDOWN and event.key == self.pygame.K_ESCAPE)
+        )
+    
+    def handle_events(self):
+        # Use the event queue
+        self.event_queue.handle_events()
+
+        if self.scene:
+            self.scene.handle_events()
 
     def update(self):
-        if self.state == "startingScene" and self.scene == None:
-            self.scene = StartingScene()
+        # Lazy-load or create the scene
+        if self.state == "startingScene" and self.scene is None:
+            self.scene = StartingScene() 
             self.scene.initialize()
-        self.scene.update()
+
+        if self.scene:
+            self.scene.update()
+
+        # Optionally run any helper functions with "update" context
+        self.run_helper_functions("update")
 
     def draw(self):
-        self.scene.draw()
+        if self.scene:
+            self.scene.draw()
+            # Optionally run any helper functions with "draw" context
+            self.run_helper_functions("draw")
+
 
     def run(self):
-        while GameResources.running:
+        while self.running:
             self.handle_events()
             self.update()
             self.draw()
+
             ticks = self.clock.tick()
             self.frame_rate = int(self.clock.get_fps())
             if self.show_fps and self.frame_rate:
                 print(f'frame_rate: {self.frame_rate}  -  milliseconds since last call: {ticks}')
+
         self.pygame.quit()
