@@ -75,15 +75,20 @@ class UIComponent(Node):
     # ----------------------------------------------------------------------
     def initialize(self):
         if self.initialized:
-            return
+            raise ValueError("UIComponent is already initialized.")
         super().initialize()  # Node-level init + validate()
 
-        from game.core.game_resources import GameResources
+        # from game.core.game_resources import GameResources
         self.pygame = GameResources.pygame
         self.screen = GameResources.screen
         self.display = GameResources.display
         self.debug = GameResources.debug
         self.event_queue = GameResources.event_queue
+
+        # Set coordinates relative to parent if parent exists
+        if self.parent:
+            self.x_coordinate += self.parent.x_coordinate
+            self.y_coordinate += self.parent.y_coordinate
 
         # Create pygame rect & surface
         self.rect = self.pygame.Rect(self.x_coordinate, self.y_coordinate, self.width, self.height)
@@ -105,7 +110,8 @@ class UIComponent(Node):
             self.background_image = None
 
         self.debug_color = BLACK
-        self.need_to_update = True
+        if not self.need_to_update:
+            self.need_to_update = True
         self.active = True
 
         print(f"Initialized UIComponent: {self.name}")
@@ -124,16 +130,23 @@ class UIComponent(Node):
             raise ValueError("UIComponent must have a width and height.")
         if self.x_coordinate is None or self.y_coordinate is None:
             raise ValueError("UIComponent must have x and y coordinates.")
+        # self.coordinates are within parents coordinates if parent exists TODO: check this
         if self.debug_color is not None and not isinstance(self.debug_color, tuple):
             raise ValueError("Debug color must be a tuple.")
+        if self.debug_color is not None and len(self.debug_color) != 3 and len(self.debug_color) != 4:
+            raise ValueError("Debug color must be an RGB tuple.")
         if self.text is not None and not isinstance(self.text, str):
             raise ValueError("Text must be a string.")
         if self.text_size is not None and not isinstance(self.text_size, int):
             raise ValueError("Text size must be an integer.")
         if self.text_position is not None and not isinstance(self.text_position, tuple):
             raise ValueError("Text position must be a tuple.")
+        if self.text_position is not None and len(self.text_position) != 2:
+            raise ValueError("Text position must be an (x, y) tuple.")
         if self.text_color is not None and not isinstance(self.text_color, tuple):
             raise ValueError("Text color must be a tuple.")
+        if self.text_color is not None and len(self.text_color) != 3 and len(self.text_color) != 4:
+            raise ValueError("Text color must be an RGB or RGBA tuple.")
 
         return True
 
@@ -356,20 +369,25 @@ class UIComponent(Node):
         if not self.active or self.width == 0 or self.height == 0:
             return None
 
+        if not self.need_to_update:
+            return self.surface
+
+        print(f"Drawing UIComponent: {self.name}")
+        # Redraws every element above this one in the hierarchy TODO: optimize
+
         # If we need to update background
-        if self.need_to_update:
-            if self.background_image is not None:
-                self.surface.blit(self.background_image, (0, 0))
-            elif self.background_color is not None:
-                self.surface.fill(self.background_color)
-            else:
-                self.surface.fill((0, 0, 0, 0))
+        if self.background_image is not None:
+            self.surface.blit(self.background_image, (0, 0))
+        elif self.background_color is not None:
+            self.surface.fill(self.background_color)
+        else:
+            self.surface.fill((0, 0, 0, 0))
 
         # Render text
         self.render_text()
 
         # Debug border
-        if self.debug and self.debug_color and self.need_to_update:
+        if self.debug and self.debug_color:
             self.pygame.draw.rect(
                 self.surface, self.debug_color,
                 (0, 0, self.width, self.height), 5
@@ -378,18 +396,18 @@ class UIComponent(Node):
         # Run all enabled helper functions in "draw" context
         self.run_helper_functions("draw")
 
-        # Draw children
+        # # # Draw children
         for child in self.children:
             if isinstance(child, UIComponent) and (self.need_to_update or child.need_to_update):
                 child_surface = child.draw()
+                # explanation: child.x_coordinate and child.y_coordinate are relative to the parent
                 if child_surface is not None:
                     x = child.x_coordinate - self.x_coordinate
                     y = child.y_coordinate - self.y_coordinate
                     self.surface.blit(child_surface, (x, y))
                 child.need_to_update = False
 
-        if self.need_to_update:
-            self.need_to_update = False
+        self.need_to_update = False
 
         return self.surface
 
