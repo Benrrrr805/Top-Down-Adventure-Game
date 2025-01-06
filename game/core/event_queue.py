@@ -1,4 +1,4 @@
-
+import json
 class EventQueue:
     def __init__(self):
         self.event_queue = None
@@ -13,7 +13,6 @@ class EventQueue:
         self.pygame = pygame
         self.debug = debug
         self.event_queue = []
-        self.event_set = set()
         self.event_mapping = {
                 self.pygame.MOUSEBUTTONDOWN: self.MOUSEBUTTONDOWN,
                 self.pygame.MOUSEBUTTONUP: self.MOUSEBUTTONUP,
@@ -28,9 +27,7 @@ class EventQueue:
     def add_event(self, event):
         if self.event_queue is None:
             self.event_queue = []
-            self.event_set = set()
         self.event_queue.append(event)
-        self.event_set.add(event['type'])
 
     def get_last_event(self):
         if len(self.event_queue) > 0:
@@ -38,25 +35,32 @@ class EventQueue:
         else:
             return None
 
-    def has_event(self, event):
-        return event in self.event_set
+    def has_event(self, event_type, extras=None):
+        for e in self.event_queue:
+            if e['type'] == event_type:
+                print(e)
+                if extras is None:
+                    return True
+                for key, value in extras.items():
+                    if e[key] != value:
+                        return False
+                return True
+        return False
 
     def remove_event(self, event):
-        if event in self.event_set:
-            self.event_set.remove(event)
+        self.event_queue = [e for e in self.event_queue if e['type'] != event.type]
 
     def clear_events(self):
         self.event_queue = None
-        self.event_set = set()
         
     def handle_events(self):
         for event in self.pygame.event.get():
             if event.type in self.event_mapping:
                 self.add_event(self.event_mapping[event.type](event))
 
-    def base_event(self, event, extras):
+
+    def base_event(self, extras):
         event = {
-            'type': event.type,
             'timestamp': self.pygame.time.get_ticks()
         }
         for key, value in extras.items():
@@ -67,15 +71,17 @@ class EventQueue:
         extras = {
             'button': event.button,
             'pos': event.pos,
+            'type': 'MOUSEBUTTONDOWN'
         }
-        return self.base_event(event, extras)
+        return self.base_event(extras)
     
     def MOUSEBUTTONUP(self, event):
         extras = {
             'button': event.button,
-            'pos': event.pos
+            'pos': event.pos,
+            'type': 'MOUSEBUTTONUP'
         }
-        return self.base_event(event, extras)
+        return self.base_event(extras)
         
     
     def KEYDOWN(self, event):
@@ -83,31 +89,37 @@ class EventQueue:
             'key': event.key,
             'mod': event.mod,
             'unicode': event.unicode,
+            'type': 'KEYDOWN'
         }
-        return self.base_event(event, extras)
+        return self.base_event(extras)
 
     def KEYUP(self, event):
         extras = {
             'key': event.key,
-            'mod': event.mod
+            'mod': event.mod,
+            'type': 'KEYUP'
         }
-        return self.base_event(event, extras)
+        return self.base_event(extras)
     
     def QUIT(self, event):
-        extras = {}
-        return self.base_event(event, extras)
+        extras = {
+            'type': 'QUIT'
+        }
+        return self.base_event(extras)
 
     def MOUSEMOTION(self, event):
         extras = {
             'pos': event.pos,
             'rel': event.rel,
             'buttons': event.buttons,
+            'type': 'MOUSEMOTION'
         }
-        return self.base_event(event, extras)
+        return self.base_event(extras)
     
     def MOUSEWHEEL(self, event):
         extras = {
             'flipped': event.flipped,
-            'pos': event.pos
+            'pos': event.pos,
+            'type': 'MOUSEWHEEL'
         }
-        return self.base_event(event, extras)
+        return self.base_event(extras)
