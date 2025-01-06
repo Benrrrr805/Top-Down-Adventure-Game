@@ -70,7 +70,6 @@ class Node:
         """
         if child in self.children:
             self.children.remove(child)
-            child.parent = None
         else:
             raise ValueError(f"Child {child.name} is not in {self.name}'s children")
 
@@ -268,6 +267,10 @@ class Node:
     #  Relationship Management
     # ------------------------------------------------------------------------
     def add_child(self, child) -> None:
+        """
+        Add a child to this node's children list (and only that).
+        Does NOT set child.parent; that is now the sole job of `add_parent`.
+        """
         self._verify_node_or_ui_component(child)
         child.validate()
         child.validate_no_cyclical_parents()
@@ -275,14 +278,18 @@ class Node:
         print(f"Adding child {child.name} to parent {self.name}")
         self._adjust_child_position(child)
 
+        # Only add to self.children
         self.children.append(child)
-        child.parent = self
 
         # Validate again after re-parenting, to ensure no newly created cycle
         child.validate_no_cyclical_parents()
         print(f"Child {child.name} added to parent {self.name}")
 
     def remove_child(self, child) -> None:
+        """
+        Remove a child from this node's children list (and only that).
+        Does NOT unset child.parent; that is now the sole job of `remove_parent`.
+        """
         self._verify_node_or_ui_component(child)
         print(f"Removing child {child.name} from parent {self.name}")
         self._remove_child_from_list(child)
@@ -313,20 +320,42 @@ class Node:
         return self.parent
 
     def add_parent(self, parent: 'Node') -> None:
+        """
+        Sets this node's `parent` to the given `parent` (and only that).
+        Does NOT automatically add self to parent's children. That is now the job of `add_child`.
+        """
         print(f"Adding parent '{parent.name}' to child '{self.name}'")
         self.parent = parent
-        if self not in parent.children:
-            parent.children.append(self)
         self.validate_no_cyclical_parents()
         print(f"Parent '{parent.name}' added to child '{self.name}'")
 
     def remove_parent(self) -> None:
+        """
+        Unsets this node's `parent`.
+        Does NOT remove self from parent's children list. That is now the job of `remove_child`.
+        """
         if self.parent:
             print(f"Removing parent '{self.parent.name}' from child '{self.name}'")
-            if self in self.parent.children:
-                self.parent.children.remove(self)
             self.parent = None
             print(f"Parent removed from child '{self.name}'")
+
+    # ------------------------------------------------------------------------
+    #  Linking Helpers (Optional)
+    # ------------------------------------------------------------------------
+    def link_parent_child(self, parent: 'Node', child: 'Node'):
+        """
+        Example helper that adds the parent to the child AND the child to the parent,
+        so references remain in sync if you still prefer that usage in some places.
+        """
+        child.add_parent(parent)
+        parent.add_child(child)
+
+    def unlink_parent_child(self, parent: 'Node', child: 'Node'):
+        """
+        Example helper that removes the parent from the child AND the child from the parent.
+        """
+        child.remove_parent()
+        parent.remove_child(child)
 
     # ------------------------------------------------------------------------
     #  Additional Relationship Queries
@@ -400,3 +429,8 @@ class Node:
             for child in self.children:
                 child_data = child.data(verbose=True)
                 child.display_data(child_data, recursive=True, spacing=spacing + 1)
+
+
+class UIComponent(Node):
+    """Example subclass to show that `_verify_node_or_ui_component` allows UIComponent too."""
+    pass
