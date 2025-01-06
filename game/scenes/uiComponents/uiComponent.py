@@ -1,8 +1,6 @@
-# game/scenes/uiComponents/uiComponent.py
-
 import os
 import json
-from game.core.game_component import GameComponent  # the new base class
+from game.core.game_component import GameComponent
 from game.settings import BLACK, RED
 
 class UIComponent(GameComponent):
@@ -120,7 +118,7 @@ class UIComponent(GameComponent):
         # Attempt to load background image if provided
         if self.image_url is not None:
             if not os.path.exists(self.image_url):
-                raise ValueError(f"Background image does not exist: {self.image_url}")
+                raise ValueError(f"Background image does not exist: {self.image_url} - {self.name}")
             self.background_image = self.pygame.image.load(self.image_url).convert_alpha()
             self.background_image = self.pygame.transform.scale(
                 self.background_image, (self.width, self.height)
@@ -144,34 +142,34 @@ class UIComponent(GameComponent):
 
         # UI-specific checks
         if self.width is None or self.height is None:
-            raise ValueError("UIComponent must have a width and height.")
+            raise ValueError(f"UIComponent must have a width and height. - {self.name}")
         if self.x_coordinate is None or self.y_coordinate is None:
-            raise ValueError("UIComponent must have x and y coordinates.")
+            raise ValueError(f"UIComponent must have x and y coordinates. - {self.name}")
         if self.debug_color is not None and not isinstance(self.debug_color, tuple):
-            raise ValueError("Debug color must be a tuple.")
+            raise ValueError(f"Debug color must be a tuple. - {self.name}")
         if (
             self.debug_color is not None
             and len(self.debug_color) not in (3, 4)
         ):
-            raise ValueError("Debug color must be an RGB or RGBA tuple.")
+            raise ValueError(f"Debug color must be an RGB or RGBA tuple. - {self.name}")
         if self.text is not None and not isinstance(self.text, str):
-            raise ValueError("Text must be a string.")
+            raise ValueError(f"Text must be a string. - {self.name}")
         if self.text_size is not None and not isinstance(self.text_size, int):
-            raise ValueError("Text size must be an integer.")
+            raise ValueError(f"Text size must be an integer. - {self.name}")
         if self.text_position is not None and not isinstance(self.text_position, tuple):
-            raise ValueError("Text position must be a tuple.")
+            raise ValueError(f"Text position must be a tuple. - {self.name}")
         if (
             self.text_position is not None
             and len(self.text_position) != 2
         ):
-            raise ValueError("Text position must be an (x, y) tuple.")
+            raise ValueError(f"Text position must be an (x, y) tuple. - {self.name}")
         if self.text_color is not None and not isinstance(self.text_color, tuple):
-            raise ValueError("Text color must be a tuple.")
+            raise ValueError(f"Text color must be a tuple. - {self.name}")
         if (
             self.text_color is not None
             and len(self.text_color) not in (3, 4)
         ):
-            raise ValueError("Text color must be an RGB or RGBA tuple.")
+            raise ValueError(f"Text color must be an RGB or RGBA tuple. - {self.name}")
 
         return True
 
@@ -222,7 +220,7 @@ class UIComponent(GameComponent):
 
     def handle_events(self):
         if not self.initialized:
-            raise ValueError("UIComponent must be initialized before handling events.")
+            raise ValueError(f"UIComponent must be initialized before handling events. - {self.name}")
         if self.active:
             self.handle_events_()
 
@@ -231,7 +229,7 @@ class UIComponent(GameComponent):
     # ----------------------------------------------------------------------
     def update_(self):
         if not self.initialized:
-            raise ValueError("UIComponent must be initialized before updating.")
+            raise ValueError(f"UIComponent must be initialized before updating. - {self.name}")
 
         # Debug hover color
         if self.debug and self.debug_color is not None:
@@ -254,7 +252,7 @@ class UIComponent(GameComponent):
 
     def update(self):
         if not self.initialized:
-            raise ValueError("UIComponent must be initialized before updating.")
+            raise ValueError(f"UIComponent must be initialized before updating. - {self.name}")
         if self.active:
             self.update_()
 
@@ -278,7 +276,7 @@ class UIComponent(GameComponent):
 
     def draw_(self):
         if not self.initialized:
-            raise ValueError("UIComponent must be initialized before drawing.")
+            raise ValueError(f"UIComponent must be initialized before drawing. - {self.name}")
         if not self.active or self.width == 0 or self.height == 0:
             return None
 
@@ -327,9 +325,9 @@ class UIComponent(GameComponent):
 
     def draw(self):
         if not self.initialized:
-            raise ValueError("UIComponent must be initialized before drawing.")
+            raise ValueError(f"UIComponent must be initialized before drawing. - {self.name}")
         if not self.active:
-            raise ValueError("UIComponent must be enabled before drawing.")
+            raise ValueError(f"UIComponent must be enabled before drawing. - {self.name}")
         return self.draw_()
 
     # ----------------------------------------------------------------------

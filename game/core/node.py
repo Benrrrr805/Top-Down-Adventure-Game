@@ -54,7 +54,7 @@ class Node:
         Ensures the child is either a Node or UIComponent, raising ValueError if not.
         """
         if not isinstance(child, Node) and not isinstance(child, UIComponent):
-            raise ValueError("Child must be a Node or UIComponent.")
+            raise ValueError(f"Child must be a Node or UIComponent. - {child.name}: child of {self.name}")
 
     def _adjust_child_position(self, child) -> None:
         """
@@ -85,13 +85,13 @@ class Node:
     def validate(self) -> bool:
         """Validates this node's core properties."""
         if not self.top_level and not isinstance(self.parent, Node):
-            raise ValueError("Parent must be a Node.")
+            raise ValueError(f"Parent must be a Node. - {self.name}")
         if self.top_level and isinstance(self.parent, Node):
-            raise ValueError("Top-level node must not have a parent.")
+            raise ValueError(f"Top-level node must not have a parent. - {self.name}")
         if not isinstance(self.children, list):
-            raise ValueError("Children must be a list.")
+            raise ValueError(f"Children must be a list. - {self.name}")
         if not isinstance(self.active, bool):
-            raise ValueError("Active must be a boolean.")
+            raise ValueError(f"Active must be a boolean. - {self.name}")
         return True
 
     def validate_no_cyclical_parents(self) -> bool:
@@ -110,27 +110,27 @@ class Node:
     # ------------------------------------------------------------------------
     def validate_has_parent(self) -> bool:
         if self.parent is None and not self.top_level:
-            raise ValueError("Parent must not be None, or node must be top-level.")
+            raise ValueError(f"Parent must not be None, or node must be top-level. - {self.name}")
 
         if self.parent is not None:
             if not isinstance(self.parent, Node):
-                raise ValueError("Parent must be a Node.")
+                raise ValueError(f"Parent must be a Node. - {self.name}")
             if not self.parent.initialized:
-                raise ValueError("Parent must be initialized.")
+                raise ValueError(f"Parent must be initialized. - {self.name}")
             if not self.parent.active:
-                raise ValueError("Parent must be enabled.")
+                raise ValueError(f"Parent must be enabled. - {self.name}")
             if not self.parent.name:
-                raise ValueError("Parent must have a name.")
+                raise ValueError(f"Parent must have a name. - {self.name}")
             if self.parent.name == self.name:
-                raise ValueError("Parent and child cannot have the same name.")
+                raise ValueError(f"Parent and child cannot have the same name. - {self.name}")
             if not self.parent.children:
-                raise ValueError("Parent must have children.")
+                raise ValueError(f"Parent must have children. - {self.name}")
             if not self.parent.has_child(self):
-                raise ValueError("Parent must have this child.")
+                raise ValueError(f"Parent must have this child. - {self.name}")
             if self.parent.get_child(self.name) is None:
-                raise ValueError("Parent must have this child.")
+                raise ValueError(f"Parent must have this child. - {self.name}")
             if self.parent.get_child(self.name) != self:
-                raise ValueError("Parent must have this child.")
+                raise ValueError(f"Parent must have this child. - {self.name}")
         return True
 
     def validate_is_enabled(self) -> bool:
@@ -221,20 +221,20 @@ class Node:
         indent = self._indent(spacing)
         # Check that we can enable
         if not self.active:
-            raise ValueError("Component must be enabled before enabling children.")
+            raise ValueError(f"Component must be enabled before enabling children. - {self.name}")
         if not self.children:
-            raise ValueError("Component has no children.")
+            raise ValueError(f"Component has no children. - {self.name}")
 
         print(f"{indent}Enabling children of parent: {self.name}")
         for child in self.children:
             if not child.name:
-                raise ValueError("Child must have a name.")
+                raise ValueError(f"Child must have a name. - some child of {self.name}")
             if not child.initialized:
-                raise ValueError(f"Child '{child.name}' must be initialized.")
+                raise ValueError(f"Child '{child.name}' must be initialized. - child of {self.name}")
             if child.active:
-                raise ValueError(f"Child '{child.name}' must be disabled before enabling.")
+                raise ValueError(f"Child '{child.name}' must be disabled before enabling. - child of {self.name}")
             if child.parent != self:
-                raise ValueError(f"Child '{child.name}' must have this node as parent.")
+                raise ValueError(f"Child '{child.name}' must have this node as parent. - child of {self.name}")
 
             print(f"{indent}    Enabling child: {child.name}")
             child.enable(spacing + 1)
@@ -245,20 +245,20 @@ class Node:
         indent = self._indent(spacing)
         # Check that we can disable
         if not self.active:
-            raise ValueError("Component must be enabled before disabling children.")
+            raise ValueError(f"Component must be enabled before disabling children. - {self.name}")
         if not self.children:
-            raise ValueError("Component has no children.")
+            raise ValueError(f"Component has no children. - {self.name}")
 
         print(f"{indent}Disabling children of parent: {self.name}")
         for child in self.children:
             if not child.name:
-                raise ValueError("Child must have a name.")
+                raise ValueError(f"Child must have a name. - some child of {self.name}")
             if not child.initialized:
-                raise ValueError(f"Child '{child.name}' must be initialized.")
+                raise ValueError(f"Child '{child.name}' must be initialized. - child of {self.name}")
             if not child.active:
-                raise ValueError(f"Child '{child.name}' must be enabled before disabling the parent.")
+                raise ValueError(f"Child '{child.name}' must be enabled before disabling the parent. - child of {self.name}")
             if child.parent != self:
-                raise ValueError(f"Child '{child.name}' must have this node as parent.")
+                raise ValueError(f"Child '{child.name}' must have this node as parent. - child of {self.name}")
 
             print(f"{indent}    Disabling child: {child.name}")
             child.disable(spacing + 1)
@@ -318,7 +318,7 @@ class Node:
 
     def get_parent(self):
         if not self.parent:
-            raise ValueError("This node has no parent.")
+            raise ValueError(f"This node has no parent. - {self.name}")
         return self.parent
 
     def add_parent(self, parent: 'Node') -> None:

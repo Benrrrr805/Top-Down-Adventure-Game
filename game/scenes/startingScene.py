@@ -2,7 +2,6 @@
 
 from game.core.game_component import GameComponent
 from game.scenes.uiComponents.containers.main_container import main_container
-from game.scenes.uiComponents.uiComponent import UIComponent
 from game.scenes.uiComponents.menus.main_menu import main_menu, new_game_button, load_game_button, settings_button, exit_button
 
 class StartingScene(GameComponent):
@@ -26,9 +25,19 @@ class StartingScene(GameComponent):
 
         self.screen = game.screen
         self.display = game.display
-
         self.link(self, child=main_container)
-        self.link(main_container, children=[main_menu, new_game_button, load_game_button, settings_button, exit_button])
+        self.link(main_container, main_menu)
+        self.link(main_menu, children=[new_game_button, load_game_button, settings_button, exit_button])
+
+        self.main_container = main_container
+
+        # Mark UIComponents initialized
+        self.main_container.initialize()
+        main_menu.initialize()
+        new_game_button.initialize()
+        load_game_button.initialize()
+        settings_button.initialize()
+        exit_button.initialize()
 
         self.initialized = True
 

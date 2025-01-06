@@ -24,7 +24,7 @@ class GameComponent(Node):
         Registers a named helper function with optional auto-run contexts.
         """
         if not callable(func):
-            raise ValueError("Helper function must be callable.")
+            raise ValueError(f"Helper function must be callable. - {name}")
         if contexts is None:
             contexts = {"manual"}
         elif isinstance(contexts, str):

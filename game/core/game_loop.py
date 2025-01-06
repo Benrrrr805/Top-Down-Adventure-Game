@@ -25,8 +25,8 @@ class Game(GameComponent):
         pygame.display.set_caption("Top-Down Adventure Game")
 
         # Create an EventQueue
-        self.event_queue = EventQueue(self.pygame, self.debug)
-        self.event_queue.initialize()
+        self.event_queue = EventQueue()
+        self.event_queue.initialize(self.pygame, self.debug)
 
         # Game states
         self.clock = self.pygame.time.Clock()
@@ -59,6 +59,7 @@ class Game(GameComponent):
         # Lazy-load or create the scene
         if self.state == "startingScene" and self.scene is None:
             self.scene = StartingScene() 
+            self.link(self, child=self.scene)
             self.scene.initialize()
 
         if self.scene:

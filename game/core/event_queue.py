@@ -1,6 +1,6 @@
 
 class EventQueue:
-    def __init__(self, pygame, debug):
+    def __init__(self):
         self.event_queue = None
         self.pygame = None
         self.debug = None
