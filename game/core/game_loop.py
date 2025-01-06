@@ -38,6 +38,7 @@ class Game:
     def update(self):
         if self.state == "startingScene" and self.scene == None:
             self.scene = StartingScene()
+            self.scene.initialize()
         self.scene.update()
 
     def draw(self):
