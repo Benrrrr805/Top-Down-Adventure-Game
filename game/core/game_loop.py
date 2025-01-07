@@ -1,5 +1,3 @@
-# game/core/game_loop.py (or wherever your Game class was)
-
 import pygame
 from game.core.event_queue import EventQueue
 from game.core.game_component import GameComponent
@@ -8,8 +6,9 @@ from game.settings import SCREEN_WIDTH, SCREEN_HEIGHT
 
 class Game(GameComponent):
     def __init__(self):
-        super().__init__(name="Game", top_level=True)
+        super().__init__(name="Game")
 
+    def initialize(self):
         # Initialize pygame once (instead of using GameResources)
         pygame.init()
         pygame.font.init()
@@ -19,7 +18,7 @@ class Game(GameComponent):
         self.display = pygame.display
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))  # or your SCREEN_WIDTH, SCREEN_HEIGHT
         self.debug = True
-        self.running = True
+        self.running = False
 
         # Window caption
         pygame.display.set_caption("Top-Down Adventure Game")
@@ -35,9 +34,21 @@ class Game(GameComponent):
         self.frame_rate = None
         self.show_fps = False
 
-        # Mark ourselves initialized
-        self.initialize()  # or do it explicitly later
-        print("Game initialized")
+        # 1. Initialize Parent Node
+        # 2. Enable Parent Node
+        # 3. Initialize Child Node
+        # 4. Link Child Node to Parent Node
+        # 5. Enable Child Node
+        # 6. Repeat #3 - #5 for each child node
+
+        super().initialize(parent=None, top_level=True)
+        self.scene = StartingScene()
+        self.enable()
+        self.scene.initialize(self, top_level=False)
+        self.link(self, child=self.scene)
+        self.scene.enable()
+
+        self.running = True
 
     def closeWindow(self):
         self.running = False
@@ -61,10 +72,11 @@ class Game(GameComponent):
 
     def update(self):
         # Lazy-load or create the scene
-        if self.state == "startingScene" and self.scene is None:
-            self.scene = StartingScene() 
-            self.link(self, child=self.scene)
-            self.scene.initialize()
+            # self.scene = StartingScene()
+            # self.scene.initialize(self, top_level=False)
+            # self.link(self, child=self.scene)
+            # self.scene.enable()
+            # pass
 
         if self.scene:
             self.scene.update()
@@ -80,6 +92,7 @@ class Game(GameComponent):
 
 
     def run(self):
+        self.initialize()  # or do it explicitly later
         while self.running:
             self.handle_events()
             self.update()

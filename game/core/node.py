@@ -4,20 +4,13 @@ class Node:
     and validating hierarchical relationships.
     """
 
-    def __init__(self, name: str, top_level: bool = False):
+    def __init__(self, name: str):
         self.name: str = name
-        self.children: list['Node'] = []
-        self.parent: 'Node' | None = None
-        self.active: bool = True
-        self.top_level: bool = top_level
         self.initialized: bool = False
 
         # Track geometry
         self.rect_x: int = 0
         self.rect_y: int = 0
-
-        # Whether node needs to be updated/redrawn
-        self.need_to_update: bool = False
 
     # ------------------------------------------------------------------------
     #  Private Helpers for DRY
@@ -76,14 +69,26 @@ class Node:
     # ------------------------------------------------------------------------
     #  Initialization & Basic Validation
     # ------------------------------------------------------------------------
-    def initialize(self) -> None:
+    def initialize(self, parent, top_level=False) -> None:
+
         if self.initialized:
             raise ValueError(f"{self.name} already initialized.")
-        self.initialized = True
+        
+        self.children: list['Node'] = []
+        self.parent: 'Node' | None = parent
+        self.active: bool = False
+        # Whether node needs to be updated/redrawn
+        self.top_level: bool = top_level
+        self.need_to_update: bool = False
+        print(f"Initializing {self.name} under parent {parent.name if parent else 'None'}")
         self.validate()
+
+        self.initialized = True
 
     def validate(self) -> bool:
         """Validates this node's core properties."""
+        if not self.name:
+            raise ValueError(f"Node must have a name. {self.parent.name if self.parent and isinstance(self.parent, Node) else 'No parent'}")
         if not self.top_level and not isinstance(self.parent, Node):
             raise ValueError(f"Parent must be a Node. - {self.name}")
         if self.top_level and isinstance(self.parent, Node):
@@ -187,7 +192,7 @@ class Node:
         self._mark_parent_needs_update(spacing)
 
     def disable(self, spacing: int = 0) -> None:
-        self.validate_enabled()
+        self.validate_is_enabled()
         self._log_enable_disable(spacing, "Disabling")
         indent = self._indent(spacing)
 
@@ -368,6 +373,16 @@ class Node:
         if children:
             for child in children:
                 self.link_parent_child(parent, child)
+
+    def unlink(self, parent, child=None, children=None):
+        """
+        Example helper that unlinks a parent from a child or children.
+        """
+        if child:
+            self.unlink_parent_child(parent, child)
+        if children:
+            for child in children:
+                self.unlink_parent_child(parent, child)
     # ------------------------------------------------------------------------
     #  Additional Relationship Queries
     # ------------------------------------------------------------------------
@@ -440,8 +455,3 @@ class Node:
             for child in self.children:
                 child_data = child.data(verbose=True)
                 child.display_data(child_data, recursive=True, spacing=spacing + 1)
-
-
-class UIComponent(Node):
-    """Example subclass to show that `_verify_node_or_ui_component` allows UIComponent too."""
-    pass

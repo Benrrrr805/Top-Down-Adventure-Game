@@ -42,7 +42,7 @@ class UIComponent(GameComponent):
         :param text_color: (R, G, B, [A]) for text color
         :param text_position: (x, y) offset for text, or None to center
         """
-        super().__init__(name=name, top_level=False)
+        super().__init__(name)
 
         self.width = width
         self.height = height
@@ -81,8 +81,8 @@ class UIComponent(GameComponent):
     # ----------------------------------------------------------------------
     # Initialization
     # ----------------------------------------------------------------------
-    def initialize(self):
-        super().initialize()  # Node-level init + validate()
+    def initialize(self, parent, top_level=False):
+        super().initialize(parent, top_level)  # Node-level init + validate()
 
         # Access the root game
         game = self.get_game()
@@ -188,10 +188,15 @@ class UIComponent(GameComponent):
         return self.in_rect(self.pygame.mouse.get_pos())
 
     def clicked(self):
+        
         """
         Return True if the mouse button is down *within* this component
         and no child component is also hovered.
         """
+
+        if not self.active:
+            return False
+        
         if not self.hovering():
             return False
 
@@ -199,8 +204,10 @@ class UIComponent(GameComponent):
         for child in self.children:
             if child.active and isinstance(child, UIComponent) and child.hovering():
                 return False
-
-        if self.event_queue.has_event(self.pygame.MOUSEBUTTONDOWN):
+            
+        if self.hovering() and self.event_queue.has_event('MOUSEBUTTONDOWN'):
+            print(f"Clicked on UIComponent: {self.name}")
+            self.event_queue.remove_event('MOUSEBUTTONDOWN')
             return True
         
         return False

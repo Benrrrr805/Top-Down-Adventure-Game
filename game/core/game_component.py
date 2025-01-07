@@ -1,5 +1,3 @@
-# game/core/game_component.py
-
 from game.core.node import Node
 
 class GameComponent(Node):
@@ -10,12 +8,15 @@ class GameComponent(Node):
     - Access to 'Game' (the root) for global references
     """
 
-    def __init__(self, name: str, top_level: bool = False):
-        super().__init__(name=name, top_level=top_level)
+    def __init__(self, name):
+        super().__init__(name)
+        
+
+    def initialize(self, parent, top_level: bool = False):
         # This dictionary holds each helper function by name.
         # Each entry is: { "func": <callable>, "enabled": bool, "contexts": set_of_strings }
         self.helper_functions = {}
-
+        super().initialize(parent, top_level)
     # ----------------------------------------------------------------------
     # Helper Function System
     # ----------------------------------------------------------------------

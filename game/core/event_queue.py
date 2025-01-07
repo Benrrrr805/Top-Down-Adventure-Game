@@ -1,4 +1,3 @@
-import json
 class EventQueue:
     def __init__(self):
         self.event_queue = None
@@ -22,6 +21,7 @@ class EventQueue:
                 self.pygame.MOUSEMOTION: self.MOUSEMOTION,
                 self.pygame.MOUSEWHEEL: self.MOUSEWHEEL
         }
+        self.last_mouse_pos = None
         self.initialized = True
 
     def add_event(self, event):
@@ -47,8 +47,8 @@ class EventQueue:
                 return True
         return False
 
-    def remove_event(self, event):
-        self.event_queue = [e for e in self.event_queue if e['type'] != event.type]
+    def remove_event(self, event_type):
+        self.event_queue = [e for e in self.event_queue if e['type'] != event_type]
 
     def clear_events(self):
         self.event_queue = None
@@ -56,7 +56,10 @@ class EventQueue:
     def handle_events(self):
         for event in self.pygame.event.get():
             if event.type in self.event_mapping:
-                self.add_event(self.event_mapping[event.type](event))
+                if event.type == self.pygame.MOUSEMOTION:
+                    self.last_mouse_pos = event.pos
+                else:
+                    self.add_event(self.event_mapping[event.type](event))
 
 
     def base_event(self, extras):
