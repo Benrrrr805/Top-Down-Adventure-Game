@@ -46,7 +46,7 @@ class Node:
         """
         Ensures the child is either a Node or UIComponent, raising ValueError if not.
         """
-        if not isinstance(child, Node) and not isinstance(child, UIComponent):
+        if not isinstance(child, Node):
             raise ValueError(f"Child must be a Node or UIComponent. - {child.name}: child of {self.name}")
 
     def _adjust_child_position(self, child) -> None:
