@@ -49,7 +49,6 @@ class EventQueue:
         self.validate_queue()
         for e in self.event_queue:
             if e['type'] == event_type:
-                print(e)
                 if extras is None:
                     return True
                 for key, value in extras.items():
