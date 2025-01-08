@@ -82,6 +82,10 @@ class UIComponent(GameComponent):
     def init_game_values(self, game):
         super().init_game_values(game)
         
+        if self.parent and isinstance(self.parent, UIComponent):
+            self.x_coordinate += self.parent.x_coordinate
+            self.y_coordinate += self.parent.y_coordinate
+        
         # Create pygame rect & surface
         self.rect = self.pygame.Rect(self.x_coordinate, self.y_coordinate, self.width, self.height)
         self.surface = self.pygame.Surface((self.width, self.height), self.pygame.SRCALPHA)
@@ -101,9 +105,6 @@ class UIComponent(GameComponent):
                 self.background_image, (self.width, self.height)
             )
 
-        if self.parent and isinstance(self.parent, UIComponent):
-            self.x_coordinate += self.parent.x_coordinate
-            self.y_coordinate += self.parent.y_coordinate
 
         for child in self.children:
             child.init_game_values(game)
@@ -162,7 +163,11 @@ class UIComponent(GameComponent):
         if not self.active:
             raise ValueError(f"UIComponent must be enabled before checking for hover. - {self.name}")
         # Make sure we have pygame references
-        return self.in_rect(self.pygame.mouse.get_pos())
+        mouse_pos = self.pygame.mouse.get_pos()
+        in_rect = self.in_rect(mouse_pos)
+        if self.name == "new_game_button":
+            print(f"mouse_pos: {mouse_pos}, in_rect: {in_rect}, rect: {self.rect}")
+        return in_rect
 
     def clicked(self):
         
@@ -213,10 +218,11 @@ class UIComponent(GameComponent):
     def update_(self):
         # Debug hover color
         if self.debug and self.debug_color is not None:
-            if self.hovering() and self.debug_color == BLUE:
+            hovering = self.hovering()
+            if hovering and self.debug_color == BLUE:
                 self.need_to_update = True
                 self.debug_color = RED
-            elif not self.hovering() and self.debug_color == RED:
+            elif not hovering and self.debug_color == RED:
                 self.need_to_update = True
                 self.debug_color = BLUE
 
@@ -266,6 +272,7 @@ class UIComponent(GameComponent):
             return self.surface
 
         print(f"Drawing UIComponent: {self.name}")
+        self.display_()
 
         # Draw background image or fill color
         if self.background_image is not None:
