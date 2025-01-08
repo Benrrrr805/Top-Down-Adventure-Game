@@ -4,13 +4,19 @@ class Node:
     and validating hierarchical relationships.
     """
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, top_level: bool = False):
         self.name: str = name
-        self.initialized: bool = False
 
         # Track geometry
         self.rect_x: int = 0
         self.rect_y: int = 0
+
+        self.children: list['Node'] = None
+        self.parent: 'Node' | None = None
+        self.active: bool = False
+        # Whether node needs to be updated/redrawn
+        self.top_level: bool = top_level
+        self.need_to_update: bool = False
 
     # ------------------------------------------------------------------------
     #  Private Helpers for DRY
@@ -69,21 +75,28 @@ class Node:
     # ------------------------------------------------------------------------
     #  Initialization & Basic Validation
     # ------------------------------------------------------------------------
-    def initialize(self, parent, top_level=False) -> None:
+    def validate_ready_to_link(self, parent, child) -> bool:
+        """Validates that this node is ready to be linked to a parent."""
+        if not isinstance(parent, Node):
+            raise ValueError(f"Parent must be a Node. - {self.name}")
+        if not isinstance(child, Node) and isinstance(child, list):
+            for c in child:
+                if not isinstance(c, Node):
+                    raise ValueError(f"Children must be Nodes. - {self.name}")
+                if c.parent is not None:
+                    print(f"Resetting parent of {c.name} to None before linking to {parent.name}")
+                    c.parent = None
+        elif not isinstance(child, Node):
+            raise ValueError(f"Child must be a Node. - {self.name}")
+        else:
+            if child.parent is not None:
+                print(f"Resetting parent of {child.name} to None before linking to {parent.name}")
+                child.parent = None
+                
+        if not isinstance(parent.children, list):
+            parent.children = []
 
-        if self.initialized:
-            raise ValueError(f"{self.name} already initialized.")
-        
-        self.children: list['Node'] = []
-        self.parent: 'Node' | None = parent
-        self.active: bool = False
-        # Whether node needs to be updated/redrawn
-        self.top_level: bool = top_level
-        self.need_to_update: bool = False
-        print(f"Initializing {self.name} under parent {parent.name if parent else 'None'}")
-        self.validate()
-
-        self.initialized = True
+        return True
 
     def validate(self) -> bool:
         """Validates this node's core properties."""
@@ -101,6 +114,8 @@ class Node:
 
     def validate_no_cyclical_parents(self) -> bool:
         """Ensures no cyclical reference in parent chain."""
+        if self.parent.top_level:
+            return True
         visited = set()
         current = self
         while current:
@@ -120,8 +135,6 @@ class Node:
         if self.parent is not None:
             if not isinstance(self.parent, Node):
                 raise ValueError(f"Parent must be a Node. - {self.name}")
-            if not self.parent.initialized:
-                raise ValueError(f"Parent must be initialized. - {self.name}")
             if not self.parent.active:
                 raise ValueError(f"Parent must be enabled. - {self.name}")
             if not self.parent.name:
@@ -139,15 +152,11 @@ class Node:
         return True
 
     def validate_is_enabled(self) -> bool:
-        if not self.initialized:
-            raise ValueError(f"Component must be initialized - {self.name}")
         if not self.active:
             raise ValueError(f"Component must be enabled - {self.name}")
         return True
 
     def validate_is_disabled(self) -> bool:
-        if not self.initialized:
-            raise ValueError(f"Component must be initialized - {self.name}")
         if self.active:
             raise ValueError(f"Component must be disabled - {self.name}")
         return True
@@ -234,8 +243,6 @@ class Node:
         for child in self.children:
             if not child.name:
                 raise ValueError(f"Child must have a name. - some child of {self.name}")
-            if not child.initialized:
-                raise ValueError(f"Child '{child.name}' must be initialized. - child of {self.name}")
             if child.active:
                 raise ValueError(f"Child '{child.name}' must be disabled before enabling. - child of {self.name}")
             if child.parent != self:
@@ -258,8 +265,6 @@ class Node:
         for child in self.children:
             if not child.name:
                 raise ValueError(f"Child must have a name. - some child of {self.name}")
-            if not child.initialized:
-                raise ValueError(f"Child '{child.name}' must be initialized. - child of {self.name}")
             if not child.active:
                 raise ValueError(f"Child '{child.name}' must be enabled before disabling the parent. - child of {self.name}")
             if child.parent != self:
@@ -279,10 +284,14 @@ class Node:
         Does NOT set child.parent; that is now the sole job of `add_parent`.
         """
         self._verify_node_or_ui_component(child)
+        if self.children is None:
+            self.children = []
+        if child.children is None:
+            child.children = []
         child.validate()
         child.validate_no_cyclical_parents()
-
-        print(f"Adding child {child.name} to parent {self.name}")
+        
+        # print(f"Adding child {child.name} to parent {self.name}")
         self._adjust_child_position(child)
 
         # Only add to self.children
@@ -364,15 +373,18 @@ class Node:
         child.remove_parent()
         parent.remove_child(child)
 
-    def link(self, parent, child=None, children=None):
+    def link(self, parent, children):
         """
         Example helper that links a parent to a child or children.
         """
-        if child:
-            self.link_parent_child(parent, child)
-        if children:
+        self.validate_ready_to_link(parent, child=children)
+        if isinstance(children, Node):
+            self.link_parent_child(parent, child=children)
+        elif isinstance(children, list):
             for child in children:
                 self.link_parent_child(parent, child)
+        else:
+            raise ValueError(f"Children must be a Node or list of Nodes when attempting to link child to parent. - {parent.name}")
 
     def unlink(self, parent, child=None, children=None):
         """
@@ -437,7 +449,6 @@ class Node:
         payload = {
             "name": self.name,
             "active": self.active,
-            "initialized": self.initialized,
             "top_level": self.top_level,
             "has_children": bool(self.children)
         }

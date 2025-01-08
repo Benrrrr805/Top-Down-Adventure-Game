@@ -1,17 +1,9 @@
 class EventQueue:
-    def __init__(self):
+    def __init__(self, pygame, debug):
         self.event_queue = None
-        self.pygame = None
-        self.debug = None
-        self.event_mapping = None
-        self.initialized = False
-
-    def initialize(self, pygame, debug):
-        if self.initialized:
-            raise Exception("EventQueue already initialized")
+        self.last_mouse_pos = None
         self.pygame = pygame
         self.debug = debug
-        self.event_queue = []
         self.event_mapping = {
                 self.pygame.MOUSEBUTTONDOWN: self.MOUSEBUTTONDOWN,
                 self.pygame.MOUSEBUTTONUP: self.MOUSEBUTTONUP,
@@ -21,21 +13,40 @@ class EventQueue:
                 self.pygame.MOUSEMOTION: self.MOUSEMOTION,
                 self.pygame.MOUSEWHEEL: self.MOUSEWHEEL
         }
-        self.last_mouse_pos = None
-        self.initialized = True
+
+    def init_queue(self):
+        self.event_queue = []
+
+    def validate_queue(self):
+        if self.event_queue is None:
+            raise ValueError('Event queue is None')
+        if not isinstance(self.event_queue, list):
+            raise ValueError('Event queue is not a list')
+        return True
+
+    def validate_event(self, event):
+        if not isinstance(event, dict):
+            raise ValueError('Event is not a dictionary')   
+        if 'type' not in event:
+            raise ValueError('Event does not have a type')
+        if 'timestamp' not in event:
+            raise ValueError('Event does not have a timestamp')
+        return True
+            
 
     def add_event(self, event):
-        if self.event_queue is None:
-            self.event_queue = []
+        self.validate_event(event)
         self.event_queue.append(event)
 
     def get_last_event(self):
+        self.validate_queue()
         if len(self.event_queue) > 0:
             return self.event_queue.pop(0)
         else:
             return None
 
     def has_event(self, event_type, extras=None):
+        self.validate_queue()
         for e in self.event_queue:
             if e['type'] == event_type:
                 print(e)
@@ -48,10 +59,8 @@ class EventQueue:
         return False
 
     def remove_event(self, event_type):
+        self.validate_queue()
         self.event_queue = [e for e in self.event_queue if e['type'] != event_type]
-
-    def clear_events(self):
-        self.event_queue = None
         
     def handle_events(self):
         for event in self.pygame.event.get():

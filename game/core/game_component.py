@@ -8,18 +8,16 @@ class GameComponent(Node):
     - Access to 'Game' (the root) for global references
     """
 
-    def __init__(self, name):
-        super().__init__(name)
-        
+    def __init__(self, name, top_level=False):
+        super().__init__(name, top_level)
+        self.init_helper_functions()
 
-    def initialize(self, parent, top_level: bool = False):
-        # This dictionary holds each helper function by name.
-        # Each entry is: { "func": <callable>, "enabled": bool, "contexts": set_of_strings }
-        self.helper_functions = {}
-        super().initialize(parent, top_level)
     # ----------------------------------------------------------------------
     # Helper Function System
     # ----------------------------------------------------------------------
+    def init_helper_functions(self):
+        self.helper_functions = {}
+
     def add_helper_function(self, name: str, func, contexts=None, enabled=True):
         """
         Registers a named helper function with optional auto-run contexts.
@@ -92,17 +90,41 @@ class GameComponent(Node):
                 info["func"](self, context, from_helper)
 
     # ----------------------------------------------------------------------
-    # Getting a reference to the 'root' Game
+    # Linking the parent and children and initializing game values
     # ----------------------------------------------------------------------
-    def get_game(self):
+    
+    def link(self, parent, children):
         """
-        Traverse up the parent chain until we find the Game instance
-        (the top-level GameComponent). For convenience,
-        we assume the root is an instance of Game.
+        Links a parent and child together.
         """
-        current = self
-        while current:
-            if current.top_level:
-                return current
-            current = current.parent
-        return None
+        if self.top_level:
+            game = self
+        else:
+            game = self.game
+        if not game:
+            raise ValueError("Prior to linking child, parent must have a reference to the game.")
+        super().link(parent, children)
+        if isinstance(children, Node):
+            children.init_game_values(game)
+        if isinstance(children, list):
+            for child in children:
+                if isinstance(child, GameComponent):
+                    child.recurrsive_init_game_values(game)
+
+    def init_game_values(self, game):
+        print(f"Initializing game values for {self.name}")
+        self.pygame = game.pygame
+        self.screen = game.screen
+        self.display = game.display
+        self.debug = game.debug
+        self.debug_color = game.debug_color
+        self.event_queue = game.event_queue
+        self.game = game
+
+
+    def recurrsive_init_game_values(self, game):
+        self.init_game_values(game)
+        for child in self.children:
+            if isinstance(child, GameComponent) and isinstance(child.children, list) and len(child.children) > 0:
+                child.recurrsive_init_game_values(game)
+            child.init_game_values(game)

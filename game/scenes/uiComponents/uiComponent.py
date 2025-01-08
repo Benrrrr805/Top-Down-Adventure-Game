@@ -1,7 +1,7 @@
 import os
 import json
 from game.core.game_component import GameComponent
-from game.settings import BLACK, RED
+from game.settings import BLACK, RED, BLUE
 
 class UIComponent(GameComponent):
     """
@@ -15,6 +15,7 @@ class UIComponent(GameComponent):
     def __init__(
         self,
         name: str,
+        top_level: bool,
         width: int,
         height: int,
         x_coordinate: int,
@@ -42,7 +43,7 @@ class UIComponent(GameComponent):
         :param text_color: (R, G, B, [A]) for text color
         :param text_position: (x, y) offset for text, or None to center
         """
-        super().__init__(name)
+        super().__init__(name, top_level)
 
         self.width = width
         self.height = height
@@ -57,13 +58,7 @@ class UIComponent(GameComponent):
         self.text_font = text_font
         self.text_size = text_size
         self.text_color = text_color
-        self.text_position = (
-            text_position if text_position else (width // 2, height // 2)
-        )
-
-        # Debug flags
-        self.debug_color = None
-        self.debug = False
+        self.text_position = (text_position if text_position else (width // 2, height // 2))
 
         # pygame references set during initialize()
         self.pygame = None
@@ -75,38 +70,20 @@ class UIComponent(GameComponent):
         self.rect = None
         self.surface = None
 
+        # Debugging
+        self.debug = False
+        self.debug_color = None
+
         # For optional background image
         self.background_image = None
+        self.pygame_values_set = False
+        self.game = None
 
-    # ----------------------------------------------------------------------
-    # Initialization
-    # ----------------------------------------------------------------------
-    def initialize(self, parent, top_level=False):
-        super().initialize(parent, top_level)  # Node-level init + validate()
-
-        # Access the root game
-        game = self.get_game()
-        if not game:
-            raise ValueError(
-                "UIComponent requires a parent chain that eventually links to Game."
-            )
-
-        # Store references from game
-        self.pygame = game.pygame
-        self.screen = game.screen
-        self.display = game.display
-        self.debug = game.debug
-        self.event_queue = game.event_queue
-
-        # If the parent is also a UIComponent, offset the coordinates
-        if self.parent and isinstance(self.parent, UIComponent):
-            self.x_coordinate += self.parent.x_coordinate
-            self.y_coordinate += self.parent.y_coordinate
-
+    def init_game_values(self, game):
+        super().init_game_values(game)
+        
         # Create pygame rect & surface
-        self.rect = self.pygame.Rect(
-            self.x_coordinate, self.y_coordinate, self.width, self.height
-        )
+        self.rect = self.pygame.Rect(self.x_coordinate, self.y_coordinate, self.width, self.height)
         self.surface = self.pygame.Surface((self.width, self.height), self.pygame.SRCALPHA)
 
         # Load or create the font
@@ -124,12 +101,12 @@ class UIComponent(GameComponent):
                 self.background_image, (self.width, self.height)
             )
 
-        self.debug_color = BLACK
-        if not self.need_to_update:
-            self.need_to_update = True
-        self.active = True
+        if self.parent and isinstance(self.parent, UIComponent):
+            self.x_coordinate += self.parent.x_coordinate
+            self.y_coordinate += self.parent.y_coordinate
 
-        print(f"Initialized UIComponent: {self.name}")
+        for child in self.children:
+            child.init_game_values(game)
 
     # ----------------------------------------------------------------------
     # Validation
@@ -182,9 +159,9 @@ class UIComponent(GameComponent):
         return self.rect.collidepoint(coordinates)
 
     def hovering(self):
+        if not self.active:
+            raise ValueError(f"UIComponent must be enabled before checking for hover. - {self.name}")
         # Make sure we have pygame references
-        if not self.initialized or not self.pygame:
-            return False
         return self.in_rect(self.pygame.mouse.get_pos())
 
     def clicked(self):
@@ -195,7 +172,7 @@ class UIComponent(GameComponent):
         """
 
         if not self.active:
-            return False
+            raise ValueError(f"UIComponent must be enabled before checking for click. - {self.name}")
         
         if not self.hovering():
             return False
@@ -226,26 +203,22 @@ class UIComponent(GameComponent):
         self.run_helper_functions("handle_events")
 
     def handle_events(self):
-        if not self.initialized:
-            raise ValueError(f"UIComponent must be initialized before handling events. - {self.name}")
-        if self.active:
-            self.handle_events_()
+        if not self.active:
+            raise ValueError(f"UIComponent must be enabled before handling events. - {self.name}")
+        self.handle_events_()
 
     # ----------------------------------------------------------------------
     # Updating
     # ----------------------------------------------------------------------
     def update_(self):
-        if not self.initialized:
-            raise ValueError(f"UIComponent must be initialized before updating. - {self.name}")
-
         # Debug hover color
         if self.debug and self.debug_color is not None:
-            if self.hovering() and self.debug_color == BLACK:
+            if self.hovering() and self.debug_color == BLUE:
                 self.need_to_update = True
                 self.debug_color = RED
             elif not self.hovering() and self.debug_color == RED:
                 self.need_to_update = True
-                self.debug_color = BLACK
+                self.debug_color = BLUE
 
         # Update children
         for child in self.children:
@@ -258,16 +231,17 @@ class UIComponent(GameComponent):
         self.run_helper_functions("update")
 
     def update(self):
-        if not self.initialized:
-            raise ValueError(f"UIComponent must be initialized before updating. - {self.name}")
-        if self.active:
-            self.update_()
+        if not self.active:
+            raise ValueError(f"UIComponent must be enabled before updating. - {self.name}")
+        self.update_()
 
     # ----------------------------------------------------------------------
     # Rendering
     # ----------------------------------------------------------------------
     def render_text(self):
-        if not self.text or not self.initialized:
+        if not self.active:
+            raise ValueError(f"UIComponent must be enabled before rendering text. - {self.name}")
+        if not self.text:
             return
 
         text_surface = self.text_font.render(self.text, True, self.text_color)
@@ -282,9 +256,9 @@ class UIComponent(GameComponent):
         self.surface.blit(text_surface, text_rect)
 
     def draw_(self):
-        if not self.initialized:
-            raise ValueError(f"UIComponent must be initialized before drawing. - {self.name}")
-        if not self.active or self.width == 0 or self.height == 0:
+        if not self.active:
+            raise ValueError(f"UIComponent must be enabled before drawing. - {self.name}")
+        if self.width == 0 or self.height == 0:
             return None
 
         if not self.need_to_update:
@@ -306,13 +280,9 @@ class UIComponent(GameComponent):
         self.render_text()
 
         # Debug border
+        print(f"Debug: {self.debug}, Debug Color: {self.debug_color}")
         if self.debug and self.debug_color:
-            self.pygame.draw.rect(
-                self.surface,
-                self.debug_color,
-                (0, 0, self.width, self.height),
-                5
-            )
+            self.pygame.draw.rect(self.surface,self.debug_color,  (0, 0, self.width, self.height), 5)
 
         # Run helper functions for "draw" context
         self.run_helper_functions("draw")
@@ -328,18 +298,22 @@ class UIComponent(GameComponent):
                 child.need_to_update = False
 
         self.need_to_update = False
+        if not isinstance(self.surface, self.pygame.Surface):
+            raise ValueError(f"UIComponent draw_() must return a pygame.Surface. - {self.name}")
         return self.surface
 
     def draw(self):
-        if not self.initialized:
-            raise ValueError(f"UIComponent must be initialized before drawing. - {self.name}")
         if not self.active:
             raise ValueError(f"UIComponent must be enabled before drawing. - {self.name}")
         return self.draw_()
-
+    
     # ----------------------------------------------------------------------
     # Data & Display
     # ----------------------------------------------------------------------
+    def display_(self):
+        data = self.data(True)
+        self.display_data(data, recursive=True)
+
     def data(self, recursive=False, as_json=False, visited=None):
         if visited is None:
             visited = set()
@@ -350,7 +324,6 @@ class UIComponent(GameComponent):
         base_data = {
             "name": self.name,
             "active": self.active,
-            "initialized": self.initialized,
             "need_to_update": self.need_to_update,
             "parent": self.parent.name if self.parent else None,
             "width": self.width,
@@ -372,6 +345,8 @@ class UIComponent(GameComponent):
                 }
                 for fname, fdata in self.helper_functions.items()
             },
+            "surface": self.surface,
+            "game": self.game
         }
 
         if recursive:

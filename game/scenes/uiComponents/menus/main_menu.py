@@ -30,23 +30,22 @@ button_text_size = 24
 button_text_position = (button_width // 2, button_height // 2)
 button_background_color = None
 
-new_game_button = Button("new_game_button", button_width, button_height,  button_x, new_game_button_y,
+new_game_button = Button("new_game_button", False, button_width, button_height,  button_x, new_game_button_y,
                          text="New Game", text_size=button_text_size, text_position=button_text_position, 
                         background_color=button_background_color)
 
-load_game_button = Button("load_game_button", button_width, button_height, button_x, load_game_button_y,
+load_game_button = Button("load_game_button", False, button_width, button_height, button_x, load_game_button_y,
                           text="Load Game", text_size=button_text_size, text_position=button_text_position,
                           background_color=button_background_color)
 
-settings_button = Button("settings_button", button_width, button_height, button_x, settings_button_y,
+settings_button = Button("settings_button", False, button_width, button_height, button_x, settings_button_y,
                          text="Settings", text_size=button_text_size, text_position=button_text_position, 
                             background_color=button_background_color)
 
-exit_button = Button("exit_button", button_width, button_height, button_x, exit_button_y,
+exit_button = Button("exit_button", False, button_width, button_height, button_x, exit_button_y,
                      text="Exit", text_size=button_text_size, text_position=button_text_position, 
                         background_color=button_background_color)
 
-main_menu = Menu("main_menu", main_menu_width, main_menu_height, main_menu_x, main_menu_y, 
+main_menu = Menu("main_menu", False, main_menu_width, main_menu_height, main_menu_x, main_menu_y, 
                  text=main_menu_text, text_size=main_menu_text_size, text_position=main_menu_text_position, 
                  image_url=main_menu_background_image)
-
