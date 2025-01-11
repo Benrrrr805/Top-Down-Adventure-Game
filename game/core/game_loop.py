@@ -77,14 +77,16 @@ class Game(GameComponent):
     def set_starting_scene(self):
 
         # Create the Starting Scene
-        self.scene = StartingScene("Starting Scene",  False)
+        scene = StartingScene("Starting Scene",  False)
 
         # Link the Starting Scene to the Game
-        self.link_child(self.scene)
-        self.scene.link_child(self.scene.main_container)
-        self.scene.main_container.link_child(self.scene.main_menu)
-        self.scene.link_main_menu_to_children()
-
+        self.link_child(scene)
+        scene.link_child(scene.main_container)
+        scene.main_container.link_child(scene.main_menu)
+        scene.link_main_menu_to_children()
+        scene.set_game_values(self)
+        scene.set_game_values_for_children()
+        self.scene = scene
         # Enable the scene
         self.enable()
 

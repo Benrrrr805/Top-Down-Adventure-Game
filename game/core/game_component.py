@@ -93,8 +93,8 @@ class GameComponent(Node):
     # Linking the parent and children and initializing game values
     # ----------------------------------------------------------------------
     
-    def init_game_values(self, game):
-        print(f"Initializing game values for {self.name}")
+    def set_game_values(self, game):
+        print(f"Setting game values for {self.name}")
         self.pygame = game.pygame
         self.screen = game.screen
         self.display = game.display
@@ -104,9 +104,10 @@ class GameComponent(Node):
         self.game = game
 
 
-    def recurrsive_init_game_values(self, game):
-        self.init_game_values(game)
+    def set_game_values_for_children(self, game=None):
+        if game is None:
+            game = self.game
         for child in self.children:
             if isinstance(child, GameComponent) and isinstance(child.children, list) and len(child.children) > 0:
-                child.recurrsive_init_game_values(game)
-            child.init_game_values(game)
+                child.set_game_values_for_children(game)
+            child.set_game_values(game)
