@@ -87,7 +87,7 @@ class Node:
         """Validates this node's core properties."""
         if not isinstance(self.name, str):
             if self.validate_has_parent():
-                self.parent.validate()
+                self.parent.validate_base_values()
             raise ValueError(f"Node: Unknown. Failed validation. Does not have a name. Parent - {self.parent.name}")
         if not isinstance(self.top_level, bool):
             raise ValueError(f"Node: {self.name} - Failed validation. top_level must be a boolean.")
