@@ -93,24 +93,6 @@ class GameComponent(Node):
     # Linking the parent and children and initializing game values
     # ----------------------------------------------------------------------
     
-    def link(self, parent, children):
-        """
-        Links a parent and child together.
-        """
-        if self.top_level:
-            game = self
-        else:
-            game = self.game
-        if not game:
-            raise ValueError("Prior to linking child, parent must have a reference to the game.")
-        super().link(parent, children)
-        if isinstance(children, Node):
-            children.init_game_values(game)
-        if isinstance(children, list):
-            for child in children:
-                if isinstance(child, GameComponent):
-                    child.recurrsive_init_game_values(game)
-
     def init_game_values(self, game):
         print(f"Initializing game values for {self.name}")
         self.pygame = game.pygame
