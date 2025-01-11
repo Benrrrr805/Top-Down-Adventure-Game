@@ -80,9 +80,9 @@ class Game(GameComponent):
         self.scene = StartingScene("Starting Scene",  False)
 
         # Link the Starting Scene to the Game
-        self.link(self, self.scene)
-        self.link(self.scene, self.scene.main_container)
-        self.link(self.scene.main_container, self.scene.main_menu)
+        self.link_child(self.scene)
+        self.scene.link_child(self.scene.main_container)
+        self.scene.main_container.link_child(self.scene.main_menu)
         self.scene.link_main_menu_to_children()
 
         # Enable the scene

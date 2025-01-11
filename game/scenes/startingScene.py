@@ -1,5 +1,3 @@
-# game/scenes/startingScene.py
-
 from game.core.game_component import GameComponent
 from game.scenes.uiComponents.containers.main_container import main_container
 from game.scenes.uiComponents.menus.main_menu import main_menu, new_game_button, load_game_button, settings_button, exit_button
@@ -22,16 +20,16 @@ class StartingScene(GameComponent):
         self.main_container = main_container
 
     def set_main_container(self):
-        self.link(self, main_container)
+        self.link_child(self, main_container)
 
     def set_main_menu(self):
-        self.link(self.main_container, main_menu)
+        self.main_container.link_child(main_menu)
 
     def unset_main_menu(self):
-        self.unlink(self.main_container, main_menu)
+        self.main_container.unlink_child(main_menu)
 
     def link_main_menu_to_children(self):
-        self.link(main_menu, [new_game_button, load_game_button, settings_button, exit_button])
+        self.main_menu.link_children([new_game_button, load_game_button, settings_button, exit_button])
         
     def handle_events(self):
         if not self.active:
