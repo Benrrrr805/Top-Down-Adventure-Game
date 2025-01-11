@@ -102,9 +102,9 @@ class Node:
         
         return True
         
-    def validate_is_node(self) -> bool:
-        if not isinstance(self, Node):
-            raise ValueError(f'Expected: Node. Recieved: {type(self)}')
+    def validate_is_node(self, node) -> bool:
+        if not isinstance(node, Node):
+            raise ValueError(f'Expected: Node. Recieved: {type(node)}')
         return True
 
     def validate_is_top_level(self) -> bool:
@@ -129,19 +129,9 @@ class Node:
         return True
 
     def validate_has_parent(self) -> bool:
-        # Validates top-level node does not have a parent.
-        if self.top_level:
-            if self.parent is not None:
-                raise ValueError("Top Level Node Must Be None. Should not attempt to validate it's parent.")
-            else:
-                return True
-        else:
-            # validates non top-level node's parent
-            if not isinstance(self.parent, Node):
-                raise ValueError(f"Parent of {self.name} is not a node.")
-            else:
-                self.validate_not_self(self.parent)
-                self.validate_base_values()
+        self.validate_is_node(self.parent)
+        self.validate_not_self(self.parent)
+        self.parent.validate_base_values()
         return True
     
     def validate_not_self(self, node: 'Node') -> bool:
