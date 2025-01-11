@@ -46,7 +46,8 @@ class Node:
     
     def validate_relationships(self) -> bool:
         self.validate_children()
-        self.validate_has_parent()
+        if self.validate_is_not_top_level():
+            self.validate_has_parent()
         return True
     
     def top_level_validation(self) -> bool:
@@ -65,7 +66,8 @@ class Node:
         self.validate_is_node()
         self.validate_base_values()
         self.validate_children()
-        self.validate_has_parent()
+        if self.validate_is_not_top_level():
+            self.validate_has_parent()
         return True
 
     def validate_ready_to_link_child(parent, child: 'Node' ) -> bool:
@@ -86,7 +88,7 @@ class Node:
     def validate_base_values(self) -> bool:
         """Validates this node's core properties."""
         if not isinstance(self.name, str):
-            if self.validate_has_parent():
+            if self.validate_is_not_top_level() and self.validate_has_parent():
                 self.parent.validate_base_values()
             raise ValueError(f"Node: Unknown. Failed validation. Does not have a name. Parent - {self.parent.name}")
         if not isinstance(self.top_level, bool):
@@ -102,20 +104,19 @@ class Node:
         
         return True
         
-    def validate_is_node(self, node) -> bool:
+    def validate_is_node(self, node=None) -> bool:
+        if node is None:
+            node = self
         if not isinstance(node, Node):
             raise ValueError(f'Expected: Node. Recieved: {type(node)}')
         return True
 
     def validate_is_top_level(self) -> bool:
-        if not self.top_level:
-            raise ValueError(f"{self.name} must be a top_level")
-        return True
+        return self.top_level
         
     def validate_is_not_top_level(self) -> bool:
-        if self.top_level:
-            raise ValueError(f"{self.name} must not be a top_level")
-        return True
+        return not self.top_level
+    
     def validate_children(self) -> bool:
         if self.children is None:
             self.children = []
@@ -129,6 +130,8 @@ class Node:
         return True
 
     def validate_has_parent(self) -> bool:
+        if self.validate_is_top_level():
+            raise ValueError(f"{self.name} does not have parent, since it is a top-level node.")
         self.validate_is_node(self.parent)
         self.validate_not_self(self.parent)
         self.parent.validate_base_values()
