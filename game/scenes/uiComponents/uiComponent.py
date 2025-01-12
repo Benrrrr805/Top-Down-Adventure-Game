@@ -79,8 +79,8 @@ class UIComponent(GameComponent):
         self.pygame_values_set = False
         self.game = None
 
-    def init_game_values(self, game):
-        super().init_game_values(game)
+    def set_game_values(self, game):
+        super().set_game_values(game)
         
         if self.parent and isinstance(self.parent, UIComponent):
             self.x_coordinate += self.parent.x_coordinate
@@ -105,18 +105,14 @@ class UIComponent(GameComponent):
                 self.background_image, (self.width, self.height)
             )
 
-
-        for child in self.children:
-            child.init_game_values(game)
-
     # ----------------------------------------------------------------------
     # Validation
     # ----------------------------------------------------------------------
-    def validate(self):
+    def validate_base_values(self):
         """
         Node-level validations plus UI-specific checks.
         """
-        super().validate()  # Node validations
+        super().validate_base_values()  # Node validations
 
         # UI-specific checks
         if self.width is None or self.height is None:
@@ -162,11 +158,8 @@ class UIComponent(GameComponent):
     def hovering(self):
         if not self.active:
             raise ValueError(f"UIComponent must be enabled before checking for hover. - {self.name}")
-        # Make sure we have pygame references
         mouse_pos = self.pygame.mouse.get_pos()
         in_rect = self.in_rect(mouse_pos)
-        if self.name == "new_game_button":
-            print(f"mouse_pos: {mouse_pos}, in_rect: {in_rect}, rect: {self.rect}")
         return in_rect
 
     def clicked(self):
@@ -272,8 +265,6 @@ class UIComponent(GameComponent):
             return self.surface
 
         print(f"Drawing UIComponent: {self.name}")
-        self.display_()
-
         # Draw background image or fill color
         if self.background_image is not None:
             self.surface.blit(self.background_image, (0, 0))

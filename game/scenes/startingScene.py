@@ -16,21 +16,13 @@ class StartingScene(GameComponent):
         self.main_container = main_container
         self.main_menu = main_menu
 
-    def create_main_container(self):
-        self.main_container = main_container
-
-    def set_main_container(self):
-        self.link_child(self, main_container)
-
-    def set_main_menu(self):
-        self.main_container.link_child(main_menu)
-
-    def unset_main_menu(self):
-        self.main_container.unlink_child(main_menu)
-
-    def link_main_menu_to_children(self):
+    def set_scene(self, game=None):
+        self.link_child(self.main_container)
+        self.main_container.link_child(self.main_menu)
         self.main_menu.link_children([new_game_button, load_game_button, settings_button, exit_button])
-        
+        self.set_game_values(game)
+        self.set_game_values_for_children(self.game)
+            
     def handle_events(self):
         if not self.active:
             raise ValueError("StartingScene is not active.")

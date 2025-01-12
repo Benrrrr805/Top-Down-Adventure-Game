@@ -93,7 +93,7 @@ class GameComponent(Node):
     # Linking the parent and children and initializing game values
     # ----------------------------------------------------------------------
     
-    def set_game_values(self, game):
+    def set_game_values(self, game: 'GameComponent'):
         print(f"Setting game values for {self.name}")
         self.pygame = game.pygame
         self.screen = game.screen

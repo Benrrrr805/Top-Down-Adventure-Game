@@ -75,19 +75,10 @@ class Game(GameComponent):
             self.run_helper_functions("draw")
 
     def set_starting_scene(self):
-
-        # Create the Starting Scene
         scene = StartingScene("Starting Scene",  False)
-
-        # Link the Starting Scene to the Game
         self.link_child(scene)
-        scene.link_child(scene.main_container)
-        scene.main_container.link_child(scene.main_menu)
-        scene.link_main_menu_to_children()
-        scene.set_game_values(self)
-        scene.set_game_values_for_children()
+        scene.set_scene(self)
         self.scene = scene
-        # Enable the scene
         self.enable()
 
     def run(self):
