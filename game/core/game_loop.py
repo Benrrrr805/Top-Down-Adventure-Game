@@ -13,6 +13,7 @@ class Game(GameComponent):
         self.show_fps = False
         self.running = True
         self.debug_color = BLUE
+        self.graphics_enabled = False
 
         # Initialize PyGame
         pygame.init()

@@ -15,6 +15,7 @@ class StartingScene(GameComponent):
         self.game = None
         self.main_container = main_container
         self.main_menu = main_menu
+        self.graphics_enabled = False
 
     def set_scene(self, game=None):
         self.link_child(self.main_container)
