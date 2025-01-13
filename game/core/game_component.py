@@ -1,7 +1,10 @@
 import os
 import json
 import pygame
-from pygame import font, surface
+from pygame.surface import Surface
+from pygame.font import Font
+from pygame.rect import Rect
+from pygame import display
 from game.settings import BLACK, RED, BLUE
 from game.core.event_queue import EventQueue
 
@@ -26,7 +29,7 @@ class GameComponent:
         image_url: str = None,
         background_color: tuple[int, int, int]=None,
         text: str = None,
-        text_font =None,
+        text_font: Font =None,
         text_size: int = 24,
         text_color: tuple[int, int, int]=BLACK,
         text_position=None
@@ -34,15 +37,15 @@ class GameComponent:
         # --------------------------------------------------------------
         # Base node attributes
         # --------------------------------------------------------------
-        self.children: list['GameComponent'] = None
-        self.parent: 'GameComponent' = None
+        self.children: list[GameComponent] = None
+        self.parent: GameComponent = None
         self.top_level: bool = top_level
 
         # --------------------------------------------------------------
         # Base game-logic attributes
         # --------------------------------------------------------------
-        self.game: 'GameComponent' = None
-        self.event_queue: 'EventQueue' = None
+        self.game: GameComponent = None
+        self.event_queue: EventQueue = None
         self.name: str = name
         self.active: bool = False
         self.pygame_values_set: bool = False
@@ -58,9 +61,9 @@ class GameComponent:
         # UI/Graphical mode toggles & attributes
         # --------------------------------------------------------------
         self.need_to_update: bool = False    
-        self.pygame = None
-        self.screen = None
-        self.display = None
+        self.pygame: pygame = None
+        self.screen: Surface = None
+        self.display: display = None
         self.debug_color: tuple[int, int, int] = None
         self.graphics_enabled: bool = graphics_enabled
         
@@ -72,15 +75,15 @@ class GameComponent:
         self.background_color: tuple[int, int, int] = background_color
 
         self.text: str = text
-        self.text_font = text_font
+        self.text_font: Font = text_font
         self.text_size: int = text_size
         self.text_color: tuple[int, int, int] = text_color
 
         self.text_position: int = (text_position if text_position else (width // 2, height // 2))
 
-        self.rect = None
-        self.surface = None
-        self.background_image = None
+        self.rect: Rect = None
+        self.surface: Surface = None
+        self.background_image: Surface = None
 
     # ----------------------------------------------------------------------
     # Helper Function System (from original GameComponent)
@@ -167,9 +170,9 @@ class GameComponent:
         """
         print(f"Setting game values for {self.name}")
         self.game: GameComponent = game
-        self.pygame = game.pygame
-        self.screen = game.screen
-        self.display = game.display
+        self.pygame: pygame = game.pygame
+        self.screen: Surface = game.screen
+        self.display: display = game.display
         self.debug: bool = game.debug
         self.debug_color: tuple[int, int, int] = game.debug_color
         self.event_queue: EventQueue = game.event_queue
@@ -181,23 +184,23 @@ class GameComponent:
                 self.y_coordinate: int = self.y_coordinate+self.parent.y_coordinate
 
             # Create pygame Rect & Surface
-            self.rect = self.pygame.Rect(self.x_coordinate, self.y_coordinate,
+            self.rect: Rect = self.pygame.Rect(self.x_coordinate, self.y_coordinate,
                                          self.width, self.height)
-            self.surface = self.pygame.Surface((self.width, self.height), self.pygame.SRCALPHA)
+            self.surface: Surface = self.pygame.Surface((self.width, self.height), self.pygame.SRCALPHA)
 
             # Load or create the font
             if self.text_font:
-                self.text_font = self.pygame.font.Font(self.text_font, self.text_size)
+                self.text_font: Font = self.pygame.font.Font(self.text_font, self.text_size)
             else:
                 # If None, use default system font
-                self.text_font = self.pygame.font.SysFont(None, self.text_size)
+                self.text_font: Font = self.pygame.font.SysFont(None, self.text_size)
 
             # Attempt to load background image if provided
             if self.image_url is not None:
                 if not os.path.exists(self.image_url):
                     raise ValueError(f"Background image does not exist: {self.image_url} - {self.name}")
-                img = self.pygame.image.load(self.image_url).convert_alpha()
-                self.background_image = self.pygame.transform.scale(img, (self.width, self.height))
+                img: Surface = self.pygame.image.load(self.image_url).convert_alpha()
+                self.background_image: Surface = self.pygame.transform.scale(img, (self.width, self.height))
 
         self.pygame_values_set: bool = True
 
