@@ -7,7 +7,8 @@ from pygame.rect import Rect
 from pygame import display
 from game.settings import BLACK, RED, BLUE
 from game.core.event_queue import EventQueue
-
+from types import FunctionType
+from typing import Optional
 class GameComponent:
     """
     A unified component class. It can be used:
@@ -90,7 +91,7 @@ class GameComponent:
     def init_helper_functions(self) -> None:
         self.helper_functions: dict = {}
 
-    def add_helper_function(self, name: str, func: function, contexts: dict | str | set = None, enabled: bool = True) -> None:
+    def add_helper_function(self, name: str, func: FunctionType, contexts: dict | str | set = None, enabled: bool = True) -> None:
         """
         Registers a named helper function with optional auto-run contexts.
         """
@@ -133,7 +134,7 @@ class GameComponent:
             raise ValueError(f"No helper function named '{name}'.")
         return self.helper_functions[name]["contexts"]
 
-    def get_helper_function(self, name: str) -> function:
+    def get_helper_function(self, name: str) -> FunctionType:
         if name not in self.helper_functions:
             raise ValueError(f"No helper function named '{name}'.")
         return self.helper_functions[name]["func"]
@@ -332,7 +333,7 @@ class GameComponent:
         text_rect.topleft = self.text_position
         self.surface.blit(text_surface, text_rect)
 
-    def draw_(self) -> None | Surface:
+    def draw_(self) -> Optional[Surface]:
         if not self.graphics_enabled:
             return None
         if not self.active:
@@ -391,7 +392,7 @@ class GameComponent:
             raise ValueError(f"UIComponent must be enabled before drawing. - {self.name}")
         return self.draw_()
 
-    def get_rect(self) -> None | Rect:
+    def get_rect(self) -> Optional[Rect]:
         return self.rect if self.graphics_enabled else None
 
     # ----------------------------------------------------------------------
@@ -608,7 +609,7 @@ class GameComponent:
         self.parent = None
         print(f"Parent removed from child '{self.name}'")
 
-    def get_child(self, name: str) -> None | 'GameComponent':
+    def get_child(self, name: str) -> Optional['GameComponent']:
         for c in self.children:
             if c.name == name:
                 return c
