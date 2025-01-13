@@ -8,7 +8,6 @@ from pygame import display
 from game.settings import BLACK, RED, BLUE
 from game.core.event_queue import EventQueue
 
-
 class GameComponent:
     """
     A unified component class. It can be used:
@@ -32,7 +31,7 @@ class GameComponent:
         text_font: Font =None,
         text_size: int = 24,
         text_color: tuple[int, int, int]=BLACK,
-        text_position=None
+        text_position: tuple[int, int]=None
     ):
         # --------------------------------------------------------------
         # Base node attributes
@@ -79,7 +78,7 @@ class GameComponent:
         self.text_size: int = text_size
         self.text_color: tuple[int, int, int] = text_color
 
-        self.text_position: int = (text_position if text_position else (width // 2, height // 2))
+        self.text_position: tuple[int, int] = (text_position if text_position else (width // 2, height // 2))
 
         self.rect: Rect = None
         self.surface: Surface = None
@@ -330,13 +329,7 @@ class GameComponent:
 
         text_surface = self.text_font.render(self.text, True, self.text_color)
         text_rect = text_surface.get_rect()
-
-        # If text_position == "center", override with center
-        if self.text_position == "center":
-            text_rect.center = (self.width // 2, self.height // 2)
-        else:
-            text_rect.topleft = self.text_position
-
+        text_rect.topleft = self.text_position
         self.surface.blit(text_surface, text_rect)
 
     def draw_(self):
