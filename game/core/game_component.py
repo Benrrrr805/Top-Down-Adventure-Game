@@ -91,18 +91,12 @@ class GameComponent:
     def init_helper_functions(self) -> None:
         self.helper_functions: dict = {}
 
-    def add_helper_function(self, name: str, func: FunctionType, contexts: dict | str | set = None, enabled: bool = True) -> None:
+    def add_helper_function(self, name: str, func: FunctionType, contexts: list[str] = None, enabled: bool = True) -> None:
         """
         Registers a named helper function with optional auto-run contexts.
         """
         if not callable(func):
             raise ValueError(f"Helper function must be callable. - {name}")
-        if contexts is None:
-            contexts = {"manual"}
-        elif isinstance(contexts, str):
-            contexts = {contexts}
-        else:
-            contexts = set(contexts)
 
         self.helper_functions[name] = {
             "func": func,
@@ -120,16 +114,12 @@ class GameComponent:
             raise ValueError(f"No helper function named '{name}'.")
         self.helper_functions[name]["enabled"] = False
 
-    def set_helper_function_contexts(self, name: str, contexts: str | set | dict) -> None:
+    def set_helper_function_contexts(self, name: str, contexts: list[str]) -> None:
         if name not in self.helper_functions:
             raise ValueError(f"No helper function named '{name}'.")
-        if isinstance(contexts, str):
-            contexts = {contexts}
-        else:
-            contexts = set(contexts)
         self.helper_functions[name]["contexts"] = contexts
 
-    def get_helper_function_contexts(self, name: str) -> str | set | dict:
+    def get_helper_function_contexts(self, name: str) -> list[str]:
         if name not in self.helper_functions:
             raise ValueError(f"No helper function named '{name}'.")
         return self.helper_functions[name]["contexts"]
