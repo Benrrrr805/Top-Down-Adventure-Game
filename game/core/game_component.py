@@ -26,12 +26,12 @@ class GameComponent:
         x_coordinate: int = 0,
         y_coordinate: int = 0,
         image_url: str = None,
-        background_color: tuple[int, int, int]=None,
+        background_color: tuple[int, int, int] = None,
         text: str = None,
-        text_font: Font =None,
+        text_font: Font = None,
         text_size: int = 24,
-        text_color: tuple[int, int, int]=BLACK,
-        text_position: tuple[int, int]=None
+        text_color: tuple[int, int, int] = BLACK,
+        text_position: tuple[int, int] = None
     ):
         # --------------------------------------------------------------
         # Base node attributes
@@ -90,7 +90,7 @@ class GameComponent:
     def init_helper_functions(self):
         self.helper_functions: dict = {}
 
-    def add_helper_function(self, name: str, func, contexts=None, enabled=True):
+    def add_helper_function(self, name: str, func, contexts = None, enabled = True):
         """
         Registers a named helper function with optional auto-run contexts.
         """
@@ -732,9 +732,6 @@ class GameComponent:
             "active": self.active,
             "need_to_update": self.need_to_update,
             "parent": self.parent.name if self.parent else None,
-
-
-            # UI-related (null or 0 if graphics_enabled=False)
             "graphics_enabled": self.graphics_enabled,
             "width": self.width,
             "height": self.height,
@@ -747,8 +744,6 @@ class GameComponent:
             "text_color": self.text_color,
             "text_position": self.text_position,
             "debug_color": self.debug_color,
-
-            # Helper functions
             "helper_functions": {
                 fname: {
                     "enabled": fdata["enabled"],
@@ -757,7 +752,7 @@ class GameComponent:
                 for fname, fdata in self.helper_functions.items()
             },
             "surface": str(self.surface),
-            "game": str(self.game),
+            "game": str(self.game)
         }
 
         if recursive:
