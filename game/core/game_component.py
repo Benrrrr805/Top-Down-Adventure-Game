@@ -87,10 +87,10 @@ class GameComponent:
     # ----------------------------------------------------------------------
     # Helper Function System (from original GameComponent)
     # ----------------------------------------------------------------------
-    def init_helper_functions(self):
+    def init_helper_functions(self) -> None:
         self.helper_functions: dict = {}
 
-    def add_helper_function(self, name: str, func, contexts = None, enabled = True):
+    def add_helper_function(self, name: str, func: function, contexts: dict | str | set = None, enabled: bool = True) -> None:
         """
         Registers a named helper function with optional auto-run contexts.
         """
@@ -109,17 +109,17 @@ class GameComponent:
             "contexts": contexts
         }
 
-    def enable_helper_function(self, name: str):
+    def enable_helper_function(self, name: str) -> None:
         if name not in self.helper_functions:
             raise ValueError(f"No helper function named '{name}'.")
         self.helper_functions[name]["enabled"] = True
 
-    def disable_helper_function(self, name: str):
+    def disable_helper_function(self, name: str) -> None:
         if name not in self.helper_functions:
             raise ValueError(f"No helper function named '{name}'.")
         self.helper_functions[name]["enabled"] = False
 
-    def set_helper_function_contexts(self, name: str, contexts):
+    def set_helper_function_contexts(self, name: str, contexts: str | set | dict) -> None:
         if name not in self.helper_functions:
             raise ValueError(f"No helper function named '{name}'.")
         if isinstance(contexts, str):
@@ -128,17 +128,17 @@ class GameComponent:
             contexts = set(contexts)
         self.helper_functions[name]["contexts"] = contexts
 
-    def get_helper_function_contexts(self, name: str):
+    def get_helper_function_contexts(self, name: str) -> str | set | dict:
         if name not in self.helper_functions:
             raise ValueError(f"No helper function named '{name}'.")
         return self.helper_functions[name]["contexts"]
 
-    def get_helper_function(self, name: str):
+    def get_helper_function(self, name: str) -> function:
         if name not in self.helper_functions:
             raise ValueError(f"No helper function named '{name}'.")
         return self.helper_functions[name]["func"]
 
-    def call_helper_function(self, name: str, context: str = "manual", from_helper: str = None, force: bool = False):
+    def call_helper_function(self, name: str, context: str = "manual", from_helper: str = None, force: bool = False) -> None:
         if name not in self.helper_functions:
             raise ValueError(f"No helper function named '{name}'.")
         info = self.helper_functions[name]
@@ -151,7 +151,7 @@ class GameComponent:
 
         info["func"](self, context, from_helper)
 
-    def run_helper_functions(self, context: str, from_helper: str = None):
+    def run_helper_functions(self, context: str, from_helper: str = None) -> None:
         """
         Calls all helper functions whose contexts include `context` and are enabled.
         """
@@ -162,7 +162,7 @@ class GameComponent:
     # ----------------------------------------------------------------------
     # Linking the parent/children and setting game (pygame) references
     # ----------------------------------------------------------------------
-    def set_game_values(self, game: 'GameComponent'):
+    def set_game_values(self, game: 'GameComponent') -> None:
         """
         Set references needed to access Pygame or global game resources.
         For UI usage, also create surfaces/rect if graphics_enabled=True.
@@ -203,7 +203,7 @@ class GameComponent:
 
         self.pygame_values_set: bool = True
 
-    def set_game_values_for_children(self, game=None):
+    def set_game_values_for_children(self, game: 'GameComponent'=None) -> None:
         if game is None:
             game: GameComponent = self.game
         for child in self.children:
@@ -215,12 +215,12 @@ class GameComponent:
     # ----------------------------------------------------------------------
     # UI-Related Utility Functions (wrapped with graphics_enabled checks)
     # ----------------------------------------------------------------------
-    def in_rect(self, coordinates):
+    def in_rect(self, coordinates) -> bool:
         if not self.graphics_enabled or not self.rect:
             return False
         return self.rect.collidepoint(coordinates)
 
-    def hovering(self):
+    def hovering(self) -> bool:
         """
         Return True if the mouse is over this component's rect.
         """
@@ -231,7 +231,7 @@ class GameComponent:
         mouse_pos = self.pygame.mouse.get_pos()
         return self.in_rect(mouse_pos)
 
-    def clicked(self):
+    def clicked(self) -> bool:
         """
         Return True if the mouse button is down *within* this component
         and no child component is also hovered.
@@ -258,7 +258,7 @@ class GameComponent:
     # ----------------------------------------------------------------------
     # Event Handling
     # ----------------------------------------------------------------------
-    def handle_events_(self):
+    def handle_events_(self) -> None:
         """
         Internal method to handle events recursively in children,
         then call any helper functions for 'handle_events' context.
@@ -271,7 +271,7 @@ class GameComponent:
         # Then run any helpers
         self.run_helper_functions("handle_events")
 
-    def handle_events(self):
+    def handle_events(self) -> None:
         """
         Public method to handle events - raises error if inactive.
         """
@@ -282,7 +282,7 @@ class GameComponent:
     # ----------------------------------------------------------------------
     # Updating
     # ----------------------------------------------------------------------
-    def update_(self):
+    def update_(self) -> None:
         """
         Internal update logic: handle debugging color changes, update children,
         run update helpers, etc.
@@ -308,7 +308,7 @@ class GameComponent:
         # Run helper functions
         self.run_helper_functions("update")
 
-    def update(self):
+    def update(self) -> None:
         """
         Public update method - raises error if inactive.
         """
@@ -319,7 +319,7 @@ class GameComponent:
     # ----------------------------------------------------------------------
     # Rendering (Only if graphics_enabled)
     # ----------------------------------------------------------------------
-    def render_text(self):
+    def render_text(self) -> None:
         if not self.graphics_enabled:
             return
         if not self.active:
@@ -332,7 +332,7 @@ class GameComponent:
         text_rect.topleft = self.text_position
         self.surface.blit(text_surface, text_rect)
 
-    def draw_(self):
+    def draw_(self) -> None | Surface:
         if not self.graphics_enabled:
             return None
         if not self.active:
@@ -384,20 +384,20 @@ class GameComponent:
 
         return self.surface
 
-    def draw(self):
+    def draw(self) -> Surface:
         if not self.graphics_enabled:
             return None
         if not self.active:
             raise ValueError(f"UIComponent must be enabled before drawing. - {self.name}")
         return self.draw_()
 
-    def get_rect(self):
+    def get_rect(self) -> None | Rect:
         return self.rect if self.graphics_enabled else None
 
     # ----------------------------------------------------------------------
     # Validation
     # ----------------------------------------------------------------------
-    def validate_base_values(self):
+    def validate_base_values(self) -> bool:
         """
         Validate base GameComponent values, then optionally validate UI details.
         """
@@ -608,7 +608,7 @@ class GameComponent:
         self.parent = None
         print(f"Parent removed from child '{self.name}'")
 
-    def get_child(self, name: str):
+    def get_child(self, name: str) -> None | 'GameComponent':
         for c in self.children:
             if c.name == name:
                 return c
@@ -623,7 +623,7 @@ class GameComponent:
                 return True
         return False
 
-    def get_parent(self):
+    def get_parent(self) -> 'GameComponent':
         if not self.parent:
             raise ValueError(f"This node has no parent. - {self.name}")
         return self.parent
@@ -631,7 +631,7 @@ class GameComponent:
     # ------------------------------------------------------------------------
     #  Linking Helpers (Optional)
     # ------------------------------------------------------------------------
-    def link_child(parent: 'GameComponent', child: 'GameComponent'):
+    def link_child(parent: 'GameComponent', child: 'GameComponent') -> None:
         """
         Example helper that links a parent to a child or children.
         """
@@ -639,7 +639,7 @@ class GameComponent:
         parent.add_child(child)
         child.add_parent(parent)
 
-    def link_children(parent: 'GameComponent', children: list['GameComponent']):
+    def link_children(parent: 'GameComponent', children: list['GameComponent']) -> None:
         """
         Example helper that links a parent to a child or children.
         """
@@ -648,14 +648,14 @@ class GameComponent:
             parent.add_child(child)
             child.add_parent(parent)
 
-    def unlink_child(parent, child: 'GameComponent'):
+    def unlink_child(parent, child: 'GameComponent') -> None:
         """
         Example helper that unlinks a parent from a child or children.
         """
         parent.remove_child(child)
         child.remove_parent()
 
-    def unlink_children(parent, children: list['GameComponent']):
+    def unlink_children(parent, children: list['GameComponent']) -> None:
         """
         Example helper that unlinks a parent from a child or children.
         """
@@ -713,14 +713,14 @@ class GameComponent:
     # ------------------------------------------------------------------------
     #  Data & Display
     # ------------------------------------------------------------------------
-    def display_(self):
+    def display_(self) -> None:
         """
         Print or log the data for debugging (recursively).
         """
         data = self.data(True)
         self.display_data(data, recursive=True)
 
-    def data(self, recursive=False, as_json=False, visited=None):
+    def data(self, recursive=False, as_json=False, visited=None) -> str | dict:
         if visited is None:
             visited = set()
         if id(self) in visited:
@@ -773,7 +773,7 @@ class GameComponent:
             return json.dumps(base_data, indent=4)
         return base_data
 
-    def display_data(self, data, recursive=False, indent_level=0):
+    def display_data(self, data, recursive=False, indent_level=0) -> None:
         indent = "    " * indent_level
         if isinstance(data, str):
             print(f"{indent}{data}")
