@@ -12,8 +12,8 @@ from typing import Optional
 class GameComponent:
     """
     A unified component class. It can be used:
-      - As a simple game logic component (if graphics_enabled=False).
-      - As a UI component with drawing & event handling (if graphics_enabled=True).
+      - As a simple game logic component (if graphics_enabled = False).
+      - As a UI component with drawing & event handling (if graphics_enabled = True).
       - As a node in a tree-like structure. Supported: Parents, children, enabling, disabling
     """
 
@@ -156,7 +156,7 @@ class GameComponent:
     def set_game_values(self, game: 'GameComponent') -> None:
         """
         Set references needed to access Pygame or global game resources.
-        For UI usage, also create surfaces/rect if graphics_enabled=True.
+        For UI usage, also create surfaces/rect if graphics_enabled = True.
         """
         print(f"Setting game values for {self.name}")
         self.game: GameComponent = game
@@ -194,7 +194,7 @@ class GameComponent:
 
         self.pygame_values_set: bool = True
 
-    def set_game_values_for_children(self, game: 'GameComponent'=None) -> None:
+    def set_game_values_for_children(self, game: 'GameComponent' = None) -> None:
         if game is None:
             game: GameComponent = self.game
         for child in self.children:
@@ -485,7 +485,7 @@ class GameComponent:
             child.validate_add_child()
         return True
         
-    def validate_is_game_component(self, game_component=None) -> bool:
+    def validate_is_game_component(self, game_component = None) -> bool:
         if game_component is None:
             game_component = self
         if not isinstance(game_component, GameComponent):
@@ -709,9 +709,9 @@ class GameComponent:
         Print or log the data for debugging (recursively).
         """
         data = self.data(True)
-        self.display_data(data, recursive=True)
+        self.display_data(data, recursive = True)
 
-    def data(self, recursive=False, as_json=False, visited=None) -> str | dict:
+    def data(self, recursive = False, as_json = False, visited = None) -> str | dict:
         if visited is None:
             visited = set()
         if id(self) in visited:
@@ -750,7 +750,7 @@ class GameComponent:
             child_data = []
             for child in self.children:
                 if isinstance(child, GameComponent):
-                    child_data.append(child.data(True, as_json=False, visited=visited))
+                    child_data.append(child.data(True, as_json = False, visited = visited))
                 else:
                     child_data.append(f"GameComponent child: {child.name}")
             base_data["children"] = child_data
@@ -761,10 +761,10 @@ class GameComponent:
             )
 
         if as_json:
-            return json.dumps(base_data, indent=4)
+            return json.dumps(base_data, indent = 4)
         return base_data
 
-    def display_data(self, data, recursive=False, indent_level=0) -> None:
+    def display_data(self, data, recursive = False, indent_level = 0) -> None:
         indent = "    " * indent_level
         if isinstance(data, str):
             print(f"{indent}{data}")
@@ -782,7 +782,7 @@ class GameComponent:
                 print(f"{indent}  {key}:")
                 for fn_name, fn_info in value.items():
                     contexts_str = ", ".join(fn_info["contexts"])
-                    print(f"{indent}    {fn_name} -> enabled={fn_info['enabled']}, contexts=[{contexts_str}]")
+                    print(f"{indent}    {fn_name} -> enabled = {fn_info['enabled']}, contexts = [{contexts_str}]")
             else:
                 print(f"{indent}  {key}: {value}")
         print()
