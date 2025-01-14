@@ -132,7 +132,7 @@ class GameComponent:
     def call_helper_function(self, name: str, context: str = "manual", from_helper: str = None, force: bool = False) -> None:
         if name not in self.helper_functions:
             raise ValueError(f"No helper function named '{name}'.")
-        info = self.helper_functions[name]
+        info: dict = self.helper_functions[name]
         if not info["enabled"]:
             print(f"Helper function '{name}' is disabled. Not calling.")
             return
@@ -206,7 +206,7 @@ class GameComponent:
     # ----------------------------------------------------------------------
     # UI-Related Utility Functions (wrapped with graphics_enabled checks)
     # ----------------------------------------------------------------------
-    def in_rect(self, coordinates) -> bool:
+    def in_rect(self, coordinates: tuple[int, int]) -> bool:
         if not self.graphics_enabled or not self.rect:
             return False
         return self.rect.collidepoint(coordinates)
@@ -219,7 +219,7 @@ class GameComponent:
             return False
         if not self.active:
             raise ValueError(f"UIComponent must be enabled before checking for hover. - {self.name}")
-        mouse_pos = self.pygame.mouse.get_pos()
+        mouse_pos: tuple[int, int] = self.pygame.mouse.get_pos()
         return self.in_rect(mouse_pos)
 
     def clicked(self) -> bool:
@@ -280,21 +280,21 @@ class GameComponent:
         """
         # Hover-based debug color change
         if self.graphics_enabled and self.debug and self.debug_color is not None:
-            hovering = self.hovering()
+            hovering: bool = self.hovering()
             # Example: toggles between BLUE and RED
             if hovering and self.debug_color == BLUE:
-                self.need_to_update = True
-                self.debug_color = RED
+                self.need_to_update: bool = True
+                self.debug_color: tuple[int, int, int] = RED
             elif not hovering and self.debug_color == RED:
-                self.need_to_update = True
-                self.debug_color = BLUE
+                self.need_to_update: bool = True
+                self.debug_color: tuple[int, int, int ] = BLUE
 
         # Update children
         for child in self.children:
             if child.active and isinstance(child, GameComponent):
                 child.update()
                 if getattr(child, 'need_to_update', False):
-                    self.need_to_update = True
+                    self.need_to_update: bool = True
 
         # Run helper functions
         self.run_helper_functions("update")
@@ -318,8 +318,8 @@ class GameComponent:
         if not self.text:
             return
 
-        text_surface = self.text_font.render(self.text, True, self.text_color)
-        text_rect = text_surface.get_rect()
+        text_surface: Surface = self.text_font.render(self.text, True, self.text_color)
+        text_rect: Rect = text_surface.get_rect()
         text_rect.topleft = self.text_position
         self.surface.blit(text_surface, text_rect)
 
@@ -362,14 +362,14 @@ class GameComponent:
         # Draw children surfaces:
         for child in self.children:
             if isinstance(child, GameComponent) and child.graphics_enabled:
-                child_surface = child.draw()
+                child_surface: Surface = child.draw()
                 if child_surface is not None:
-                    x = child.x_coordinate - self.x_coordinate
-                    y = child.y_coordinate - self.y_coordinate
+                    x: int = child.x_coordinate - self.x_coordinate
+                    y: int = child.y_coordinate - self.y_coordinate
                     self.surface.blit(child_surface, (x, y))
                 child.need_to_update = False
 
-        self.need_to_update = False
+        self.need_to_update: bool = False
         if not isinstance(self.surface, self.pygame.Surface):
             raise ValueError(f"UIComponent draw_() must return a pygame.Surface. - {self.name}")
 
@@ -485,9 +485,9 @@ class GameComponent:
             child.validate_add_child()
         return True
         
-    def validate_is_game_component(self, game_component = None) -> bool:
+    def validate_is_game_component(self, game_component: 'GameComponent' = None) -> bool:
         if game_component is None:
-            game_component = self
+            game_component: 'GameComponent' = self
         if not isinstance(game_component, GameComponent):
             raise ValueError(f'Expected: GameComponent. Recieved: {type(game_component)}')
         return True
@@ -500,7 +500,7 @@ class GameComponent:
     
     def validate_children(self) -> bool:
         if self.children is None:
-            self.children = []
+            self.children: list['GameComponent'] = []
         if not isinstance(self.children, list):
             raise ValueError(f"Children must be a list. - {self.name}")
         if len(self.children) > 0:
@@ -541,15 +541,15 @@ class GameComponent:
     def enable(self) -> None:
         if not self.top_level:
             self.parent.need_to_update = True
-        self.active = True
-        self.need_to_update = True
+        self.active: bool = True
+        self.need_to_update: bool = True
         self.enable_children()
 
     def disable(self) -> None:
         if not self.top_level:
             self.parent.need_to_update = True
-        self.active = False
-        self.need_to_update = False
+        self.active: bool = False
+        self.need_to_update: bool = False
         self.disable_children()
 
     def enable_children(self) -> None:
@@ -587,7 +587,7 @@ class GameComponent:
         Does NOT automatically add self to parent's children. That is now the job of `add_child`.
         """
         print(f"Adding parent '{parent.name}' to child '{self.name}'")
-        self.parent = parent
+        self.parent: 'GameComponent' = parent
         print(f"Parent '{parent.name}' added to child '{self.name}'")
 
     def remove_parent(self) -> None:
@@ -596,7 +596,7 @@ class GameComponent:
         Does NOT remove self from parent's children list. That is now the job of `remove_child`.
         """
         print(f"Removing parent '{self.parent.name}' from child '{self.name}'")
-        self.parent = None
+        self.parent: GameComponent = None
         print(f"Parent removed from child '{self.name}'")
 
     def get_child(self, name: str) -> Optional['GameComponent']:
@@ -666,16 +666,16 @@ class GameComponent:
 
     def get_ancestors(self) -> list['GameComponent']:
         """Returns a list of this node's ancestors up the tree."""
-        ancestors = []
-        current = self.parent
+        ancestors: list['GameComponent'] = []
+        current: 'GameComponent' = self.parent
         while current:
             ancestors.append(current)
-            current = current.parent
+            current: 'GameComponent' = current.parent
         return ancestors
 
     def get_descendants(self) -> list['GameComponent']:
         """Returns a list of all descendants (children, grandchildren, etc.) of this node."""
-        descendants = []
+        descendants: list['GameComponent'] = []
         for child in self.children:
             descendants.append(child)
             descendants.extend(child.get_descendants())
@@ -708,17 +708,17 @@ class GameComponent:
         """
         Print or log the data for debugging (recursively).
         """
-        data = self.data(True)
+        data: str | dict = self.data(True)
         self.display_data(data, recursive = True)
 
-    def data(self, recursive = False, as_json = False, visited = None) -> str | dict:
+    def data(self, recursive: bool = False, as_json: bool = False, visited: set = None) -> str | dict:
         if visited is None:
-            visited = set()
+            visited: set = set()
         if id(self) in visited:
             return f"Hidden to prevent infinite recursion - {self.name}"
         visited.add(id(self))
 
-        base_data = {
+        base_data: dict = {
             "name": self.name,
             "active": self.active,
             "need_to_update": self.need_to_update,
@@ -747,7 +747,7 @@ class GameComponent:
         }
 
         if recursive:
-            child_data = []
+            child_data: list[str | dict] = []
             for child in self.children:
                 if isinstance(child, GameComponent):
                     child_data.append(child.data(True, as_json = False, visited = visited))
@@ -755,7 +755,7 @@ class GameComponent:
                     child_data.append(f"GameComponent child: {child.name}")
             base_data["children"] = child_data
         else:
-            count = len(self.children)
+            count: int = len(self.children)
             base_data["children"] = (
                 f"{count} child{'ren' if count > 1 else ''}" if count else "No children"
             )
@@ -764,8 +764,8 @@ class GameComponent:
             return json.dumps(base_data, indent = 4)
         return base_data
 
-    def display_data(self, data, recursive = False, indent_level = 0) -> None:
-        indent = "    " * indent_level
+    def display_data(self, data: dict | str, recursive: bool = False, indent_level: int = 0) -> None:
+        indent: str = "    " * indent_level
         if isinstance(data, str):
             print(f"{indent}{data}")
             return
@@ -781,7 +781,7 @@ class GameComponent:
             elif key == "helper_functions":
                 print(f"{indent}  {key}:")
                 for fn_name, fn_info in value.items():
-                    contexts_str = ", ".join(fn_info["contexts"])
+                    contexts_str: str = ", ".join(fn_info["contexts"])
                     print(f"{indent}    {fn_name} -> enabled = {fn_info['enabled']}, contexts = [{contexts_str}]")
             else:
                 print(f"{indent}  {key}: {value}")
