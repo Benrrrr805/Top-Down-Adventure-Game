@@ -1,4 +1,4 @@
-from game.scenes.uiComponents.containers.container import Container
+from game.entities.uiComponents.containers.container import Container
 from game.settings import SCREEN_WIDTH, SCREEN_HEIGHT
 
 main_container_background_image_url = "./assets/images/startingScene/starting_scene_background_1792x1024.png"

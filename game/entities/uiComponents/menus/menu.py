@@ -1,4 +1,3 @@
-# from game.scenes.uiComponents.uiComponent import UIComponent
 from game.core.game_component import GameComponent
 
 from game.settings import BLACK

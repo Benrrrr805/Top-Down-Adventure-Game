@@ -1,7 +1,7 @@
 from game.core.game_component import GameComponent
-from game.scenes.uiComponents.containers.main_container import main_container
-from game.scenes.uiComponents.menus.main_menu import main_menu, new_game_button, load_game_button, settings_button, exit_button
-from game.scenes.uiComponents.menus.settings_menu import settings_menu, sound_button, music_button, back_button, darkness_button, show_fps_button
+from game.entities.uiComponents.containers.main_container import main_container
+from game.entities.uiComponents.menus.main_menu import main_menu, new_game_button, load_game_button, settings_button, exit_button
+from game.entities.uiComponents.menus.settings_menu import settings_menu, sound_button, music_button, back_button, darkness_button, show_fps_button
 class StartingScene(GameComponent):
     """
     Example of a Scene that is also a GameComponent,

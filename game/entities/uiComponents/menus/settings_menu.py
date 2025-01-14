@@ -1,5 +1,5 @@
-from game.scenes.uiComponents.menus.menu import Menu
-from game.scenes.uiComponents.buttons.button import Button
+from game.entities.uiComponents.menus.menu import Menu
+from game.entities.uiComponents.buttons.button import Button
 from game.settings import SCREEN_WIDTH, SCREEN_HEIGHT
 
 settings_menu_width = SCREEN_WIDTH - 100
