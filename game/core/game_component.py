@@ -436,9 +436,9 @@ class GameComponent:
         return True
     
     def validate_relationships(self) -> bool:
-        self.validate_children()
         if self.validate_is_not_top_level():
             self.validate_has_parent()
+        self.validate_children()
         return True
     
     def top_level_validation(self) -> bool:
@@ -446,22 +446,18 @@ class GameComponent:
         self.validate_base_values()
         self.validate_children()
         return True
-    
-    def validate_add_child(self) -> bool:
-        self.validate_is_game_component()
-        self.validate_base_values()
-        self.validate_children()
-        return True
 
-    def validate_add_parent(self) -> bool:
-        self.validate_is_game_component()
+    def validate_ready_to_be_added_as_parent(self) -> bool:
+        self.validate_is_game_component(game_component=self, override=True)
         self.validate_base_values()
         self.validate_children()
         if self.validate_is_not_top_level():
             self.validate_has_parent()
         return True
     
-    def validate_ready_to_add_child(self) -> bool:
+    def validate_ready_to_be_added_as_child(self) -> bool:
+        if self.validate_is_top_level():
+            raise ValueError(f"GameComponent must not be top-level to be added as a child. - {self.name}")
         self.validate_is_game_component()
         self.validate_base_values()
         self.validate_children()
@@ -471,23 +467,28 @@ class GameComponent:
     def validate_ready_to_link_child(parent, child: 'GameComponent' ) -> bool:
         """Validates that this node is ready to be linked to a parent."""
         
-        parent.validate_add_parent()
-        child.validate_add_child()
+        parent.validate_ready_to_be_added_as_parent()
+        child.validate_ready_to_be_added_as_child()
         return True
 
     def validate_ready_to_link_children(parent, children: list['GameComponent'] ) -> bool:
         """Validates that this node is ready to be linked to a parent."""
         
-        parent.validate_add_parent()
+        parent.validate_ready_to_be_added_as_parent()
         for child in children:
-            child.validate_add_child()
+            child.validate_ready_to_be_added_as_child()
         return True
         
-    def validate_is_game_component(self, game_component: 'GameComponent' = None) -> bool:
-        if game_component is None:
+    def validate_is_game_component(self, game_component: 'GameComponent' = None, override=False) -> bool:
+        """
+        Validates that the given object is a GameComponent.
+        If no object is given and override is False - which is what it defaults to, it will validate self.
+        If override is True, it will validate the given object.
+        """
+        if game_component is None and not override:
             game_component: 'GameComponent' = self
         if not isinstance(game_component, GameComponent):
-            raise ValueError(f'Expected: GameComponent. Recieved: {type(game_component)}')
+            raise ValueError(f'Expected: GameComponent. Recieved: {type(game_component).__name__}')
         return True
 
     def validate_is_top_level(self) -> bool:
@@ -511,12 +512,14 @@ class GameComponent:
     def validate_has_parent(self) -> bool:
         if self.validate_is_top_level():
             raise ValueError(f"{self.name} does not have parent, since it is a top-level GameComponent.")
-        self.validate_is_game_component(self.parent)
-        self.validate_not_self(self.parent)
+        self.validate_is_game_component(game_component=self.parent, override=True)
         self.parent.validate_base_values()
+        self.validate_not_self(self.parent)
         return True
     
     def validate_not_self(self, game_component: 'GameComponent') -> bool:
+        if game_component is None:
+            raise ValueError(f"GameComponent is None. - {self.name} - validate_not_self")
         if game_component == self:
             raise ValueError(f"{game_component.name} is the same as {self.name}")
         if game_component.name == self.name:

@@ -1,2 +1,5 @@
 pygame
 pytmx
+pytest
+pytest-mock
+pytest-cov

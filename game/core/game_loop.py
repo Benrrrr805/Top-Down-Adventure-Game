@@ -37,9 +37,7 @@ class Game(GameComponent):
         self.name = "Game"
         self.children = None
         self.parent = None
-
-        self.rect_x = 0
-        self.rect_y = 0
+        self.pygame_values_set = True
 
     def closeWindow(self):
         self.running = False
