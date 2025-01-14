@@ -1,5 +1,5 @@
 class EventQueue:
-    def __init__(self, pygame, debug):
+    def __init__(self, pygame, debug, max_events=1000):
         self.event_queue = None
         self.last_mouse_pos = None
         self.pygame = pygame
@@ -13,6 +13,7 @@ class EventQueue:
                 self.pygame.MOUSEMOTION: self.MOUSEMOTION,
                 self.pygame.MOUSEWHEEL: self.MOUSEWHEEL
         }
+        self.max_events = max_events
 
     def init_queue(self):
         self.event_queue = []
@@ -62,12 +63,20 @@ class EventQueue:
         self.event_queue = [e for e in self.event_queue if e['type'] != event_type]
         
     def handle_events(self):
-        for event in self.pygame.event.get():
+        raw_pygame_events = self.pygame.event.get()
+        
+
+        for event in raw_pygame_events:
             if event.type in self.event_mapping:
                 if event.type == self.pygame.MOUSEMOTION:
                     self.last_mouse_pos = event.pos
                 else:
                     self.add_event(self.event_mapping[event.type](event))
+            else:
+                if self.debug:
+                    print('Event type not handled: {}'.format(event.type))
+        while len(self.event_queue) > self.max_events:
+            self.event_queue.pop(0)
 
 
     def base_event(self, extras):

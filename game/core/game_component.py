@@ -55,8 +55,6 @@ class GameComponent:
         # Base debug attributes
         # --------------------------------------------------------------
         self.debug: bool = False
-        self.need_to_update: bool = True
-
         # --------------------------------------------------------------
         # UI/Graphical mode toggles & attributes
         # --------------------------------------------------------------
