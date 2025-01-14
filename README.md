@@ -1,177 +1,159 @@
-# File Structure Documentation for Top-Down Adventure Game
+# Pygame Base Project
 
-This document provides a comprehensive guide to the file structure for a basic top-down adventure game. The structure is designed to be modular, maintainable, scalable, and easy to navigate for both new and experienced developers. By adhering to this structure, you can efficiently manage your game's components and ensure a smooth development workflow.
+This is a boilerplate for a Pygame-based application, structured to let you quickly build 2D games, interactive scenes, and user interface components. The code in this repository is designed with extensibility in mind, allowing you to easily plug in new game logic, scenes, and UI elements.
+
+## Table of Contents
+- Overview
+- Project Structure
+- How to Run
+- Adding New Scenes or Game Logic
+- Adding New UI Components
+- Validation and Debugging
+- Known Issues & Recommendations
+- License
+
+## Overview
+
+### The core idea is to encapsulate game components into a node-like hierarchy. Each GameComponent can have:
+
+- **Children**: Other GameComponents.
+- **Parent**: Another GameComponent (unless it’s top-level).
+- **Event handling**: Through an EventQueue.
+- **Drawing/Rendering** (if `graphics_enabled = True`).
+- **Helper functions**: Additional logic triggered in specific contexts (e.g., `update`, `draw`, `handle_events`).
+
+A main `Game` class acts as the root GameComponent and also manages the main loop (`handle_events`, `update`, `draw`).
 
 ## Project Structure
 
+Below is a simplified look at the directory layout mentioned in the code:
+
+```plaintext
+.
+├─ main.py
+├─ assets/
+│  ├─ images/
+│  ├─ sounds/
+│  └─ ...
+├─ game/
+│  ├─ core/
+│  │  ├─ event_queue.py
+│  │  ├─ game_loop.py
+│  │  └─ game_component.py
+│  ├─ entities/
+│  │  ├─ uiComponents/
+│  │  │  ├─ buttons/
+│  │  │  ├─ containers/
+│  │  │  └─ menus/
+│  ├─ scenes/
+│  │  ├─ startingScene.py
+│  │  └─ (additional scenes)
+│  ├─ utils/
+│  │  └─ settings.py
+│  └─ settings.py (or equivalent)
+└─ README.md
 ```
-top_down_adventure_game/
-├── main.py
-├── game/
-│   ├── __init__.py
-│   ├── core.py
-│   ├── settings.py
-│   ├── entities/
-│   │   ├── __init__.py
-│   │   ├── player.py
-│   │   └── enemy.py
-│   ├── scenes/
-│   │   ├── __init__.py
-│   │   ├── menu.py
-│   │   └── level_one.py
-│   └── utils/
-│       ├── __init__.py
-│       └── helpers.py
-├── assets/
-│   ├── images/
-│   ├── sounds/
-│   └── fonts/
-|   └── maps/
-└── requirements.txt
+
+### Key Files
+
+- **`main.py`**: The entry point. Instantiates the main `Game` and runs it.
+
+- **`game/core/game_loop.py`**: Contains the `Game` class, which is a special kind of GameComponent responsible for the main loop.
+
+- **`game/core/event_queue.py`**: Defines the EventQueue system for capturing and storing Pygame events in a custom dictionary-based structure.
+
+- **`game/core/game_component.py`**: The foundational class for all interactive items, scenes, or UI elements in the game. Supports:
+  - Parenting and child relationships
+  - Enabling and disabling
+  - Event handling and drawing
+  - Helper function system
+
+- **`game/scenes/startingScene.py`**: Example “scene” logic that can display a main menu or other UI components.
+
+- **`game/entities/`**: Placeholder folder for creating classes like Player, Monster, or different interactive objects.
+
+## How to Run
+
+### Install dependencies:
+
+Make sure you have Python 3 and Pygame installed:
+
+```bash
+pip install pygame
 ```
 
-### 1. **main.py**
+### Run the entry script:
 
-- The main entry point for the game.
-- Responsible for initializing Pygame, setting up the game window, and starting the primary game loop.
-- Acts as the central hub, calling upon other modules to manage various aspects of the game.
-- Example tasks:
-  - Handling command-line arguments.
-  - Transitioning between different game states (e.g., menu, gameplay).
+From the project root, run:
 
-### 2. **game/**
+```bash
+python main.py
+```
 
-- Houses the core logic and essential components of the game.
-- Organized into submodules for clarity and reusability.
+This will create a window titled “Top-Down Adventure Game,” instantiate the Game object, and enter the main loop.
 
-#### 2.1 `core.py`
+### Quit:
 
-- Defines the main `Game` class, which manages the lifecycle of the game.
-- Handles initialization, the primary game loop, and communication between different modules.
-- Facilitates interactions with other components, such as using `entities` to update and render game objects or leveraging `scenes` to transition between game states.
-- Includes methods for:
-  - Updating game logic.
-  - Rendering visuals.
-  - Processing user input. Defines the main `Game` class, which manages the lifecycle of the game.
-- Handles initialization, the primary game loop, and communication between different modules.
-- Includes methods for:
-  - Updating game logic.
-  - Rendering visuals.
-  - Processing user input.
+- Press the ESC key, or
+- Close the window by clicking the close button
 
-#### 2.2 `settings.py`
+## Adding New Scenes or Game Logic
 
-- Centralizes game configuration and constants.
-- Includes:
-  - Screen dimensions (e.g., `SCREEN_WIDTH`, `SCREEN_HEIGHT`).
-  - Frame rate (`FPS`).
-  - Predefined color values for consistency (e.g., `COLORS = {'WHITE': (255, 255, 255), ...}`).
-- Facilitates easy adjustments without modifying multiple files.
+### Create a new scene:
 
-### 3. **entities/**
+1. Make a new file under `game/scenes`, e.g., `myNewScene.py`.
+2. Create a class that inherits `GameComponent` (similar to `StartingScene`).
+3. Implement `handle_events`, `update`, and `draw`.
 
-- Contains definitions for game objects, such as the player, enemies, and NPCs.
-- Each file corresponds to a specific entity type, ensuring modularity.
+### Connect your scene to the Game:
 
-#### 3.1 `player.py`
+1. Instantiate your new scene in the `Game` class or from `main.py`.
+2. Use `GameComponent.link_child(parent, child)` or the convenience methods in `GameComponent` to link.
+3. Optionally call `scene.set_scene(self.game)` or similar to pass references.
 
-- Implements the `Player` class, which manages:
-  - Player-specific attributes like health, speed, and inventory.
-  - Movement mechanics, including collision detection.
-  - Interaction with other game objects and the environment.
+### Enable your scene:
 
-#### 3.2 `enemy.py`
+- Mark it as active (`scene.enable()`).
+- Or set it as the current scene in the `Game` class.
 
-- Implements the `Enemy` class, which governs:
-  - Enemy behaviors such as patrolling, chasing, or attacking.
-  - AI logic for decision-making.
-  - Rendering and animation.
+## Adding New UI Components
 
-### 4. **scenes/**
+### Create a new UI component:
 
-- Manages different game states, such as menus, levels, and pause screens.
-- Each scene is encapsulated in its own file for clarity and scalability.
+1. Extend `GameComponent` (or a specialized version) for custom logic.
+2. If it’s fully UI-based, set `graphics_enabled = True`.
 
-#### 4.1 `menu.py`
+### Implement `draw()`, `handle_events()`, etc.:
 
-- Implements the `MenuScene` class, which:
-  - Displays menu options and transitions between game states.
-  - Processes input for navigation (e.g., keyboard, mouse).
-  - Handles visual elements like background images or animated titles.
+- `draw()` is where you render background, text, or images.
+- `handle_events()` uses the injected EventQueue.
 
-#### 4.2 `level_one.py`
+### Register the component within a scene:
 
-- Implements the `LevelOne` class, responsible for:
-  - Level-specific setup, such as loading assets and initializing objects.
-  - Managing gameplay elements unique to the level (e.g., puzzles, enemy waves).
-  - Monitoring the player's progress and triggering events.
+- Link your component to the scene’s main container or directly to the scene.
 
-### 5. **utils/**
+### Add helper functions (optional):
 
-- Provides helper functions and reusable utilities to streamline development.
+- Use `add_helper_function("my_fn_name", my_function, ["update", "handle_events"])`
+- This allows your function to run automatically in the specified contexts.
 
-#### 5.1 `helpers.py`
+## Validation and Debugging
 
-- Common functions include:
-  - `load_image(file_path)`: Simplifies image loading and error handling.
-  - `load_sound(file_path)`: Streamlines audio loading.
-  - Utility methods for mathematical calculations or data formatting.
+### Validation
 
-### 6. **assets/**
+Each `GameComponent` can call `full_validate()` to check:
 
-- Stores external resources, ensuring separation from the codebase.
-- Subdirectories:
-  - `images/`: Sprites, backgrounds, and UI elements.
-  - `sounds/`: Sound effects and music tracks.
-  - `fonts/`: Font files for text rendering.
-- Ensures organized and consistent asset management.
+- Relationship correctness (parent-child).
+- Required fields like `name`.
+- UI constraints if `graphics_enabled` is True.
 
-### 7. **requirements.txt**
+### Debugging
 
-- Lists all project dependencies.
-- Facilitates environment setup with `pip install -r requirements.txt`.
-- Example content:
-  ```
-  pygame
-  numpy
-  ```
-- Update this file as new dependencies are added.
+- Set `self.debug = True` in a `GameComponent` to toggle debug colors or console logs.
+- `self.debug_color` is used for drawing rect borders, toggling between colors on hover, etc.
 
-## Usage
+### Helper Functions
 
-### 1. Setup
-
-- Ensure Python and Pygame are installed.
-- Install dependencies using:
-  ```
-  pip install -r requirements.txt
-  ```
-
-### 2. Run
-
-- Start the game by executing:
-  ```
-  python main.py
-  ```
-
-### 3. Extend
-
-- To add new features:
-  - **Scenes**: Create a new file in `scenes/` and define a class for the scene.
-  - **Entities**: Add a new file in `entities/` for the object, and implement its logic.
-  - **Assets**: Place new resources in the appropriate subdirectory under `assets/` and update code references.
-
-### 4. Debug
-
-- Use logging or breakpoints to identify and resolve issues.
-- Regularly test new features to ensure they integrate smoothly.
-
-## Benefits of This Structure
-
-- **Clarity**: Each module has a clear purpose, making the code easier to navigate.
-- **Modularity**: Components can be developed, tested, and reused independently.
-- **Scalability**: Supports adding new features without significant restructuring.
-- **Maintainability**: Organized structure reduces technical debt and simplifies debugging.
-
-This structure ensures a solid foundation for building and maintaining a robust top-down adventure game.
+- `run_helper_functions("update")` calls all helper functions that handle the "update" context.
+- You can intercept certain events or UI states without mixing them into a single `update()` method.
 
