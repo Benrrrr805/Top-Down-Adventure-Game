@@ -66,15 +66,14 @@ class Game(GameComponent):
 
             self.run_helper_functions("draw")
 
-    def set_starting_scene(self):
-        scene = StartingScene("Starting Scene",  False)
+    def set_scene(self, scene: 'StartingScene'):
         self.link_child(scene)
         scene.set_scene(self)
         self.scene = scene
         self.enable()
 
     def run(self):
-        self.set_starting_scene()
+        self.set_scene(StartingScene("Starting Scene", False))
         while self.running:
             self.handle_events()
             self.update()
