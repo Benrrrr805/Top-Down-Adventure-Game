@@ -46,6 +46,16 @@ def test_game_handle_events_terminated(mock_game):
     mock_game.event_queue.handle_events.assert_called_once()
     assert mock_game.running is False
 
+def test_is_terminated(mock_game):
+    mock_game.event_queue.event_queue = [{'type': 'QUIT', 'timestamp': 123}]
+    assert mock_game.is_terminated() is True
+    mock_game.event_queue.event_queue = [{'type': 'KEYDOWN', 'timestamp': 123, 'key': 27}]
+    assert mock_game.is_terminated() is True
+    mock_game.event_queue.event_queue = [{'type': 'KEYDOWN', 'timestamp': 123, 'key': 32}]
+    assert mock_game.is_terminated() is False
+    mock_game.event_queue.event_queue = [{'type': 'MOUSEBUTTONDOWN', 'timestamp': 123}]
+    assert mock_game.is_terminated() is False
+
 def test_game_update(mock_game):
     mock_game.active = True
     scene = MagicMock()

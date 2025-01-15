@@ -1,5 +1,3 @@
-# Entry point for the game
-
 from game.core.game_loop import Game
 
 def main():

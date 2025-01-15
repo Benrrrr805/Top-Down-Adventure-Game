@@ -35,6 +35,12 @@ def test_validate_queue_raises_when_none(mock_pygame):
     with pytest.raises(ValueError, match="Event queue is None"):
         eq.validate_queue()
 
+def test_validate_queue_raises_when_not_list(mock_pygame):
+    eq = EventQueue(mock_pygame, debug=False)
+    eq.event_queue = "NOT A LIST"
+    with pytest.raises(ValueError, match="Event queue is not a list"):
+        eq.validate_queue()
+
 def test_add_event_success(mock_pygame):
     eq = EventQueue(mock_pygame, debug=False)
     eq.init_queue()
@@ -112,7 +118,7 @@ def test_max_events_truncation(mock_pygame):
 
     # Return no new events for this test
     mock_pygame.event.get.return_value = []
-    
+
     # Add 3 events and ensure the queue is truncated down to 2
     e1 = {"type": "KEYDOWN", "timestamp": 1}
     e2 = {"type": "KEYUP", "timestamp": 2}
@@ -128,3 +134,6 @@ def test_max_events_truncation(mock_pygame):
     assert len(eq.event_queue) == 2
     assert eq.event_queue[0] == e2
     assert eq.event_queue[1] == e3
+
+
+

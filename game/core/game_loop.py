@@ -7,7 +7,6 @@ from game.settings import SCREEN_WIDTH, SCREEN_HEIGHT, BLACK, BLUE
 class Game(GameComponent):
     def __init__(self):
 
-        # Game settings
         self.debug = True
         self.frame_rate = None
         self.show_fps = False
@@ -15,18 +14,15 @@ class Game(GameComponent):
         self.debug_color = BLUE
         self.graphics_enabled = False
 
-        # Initialize PyGame
         pygame.init()
         pygame.font.init()
 
-        # Set PyGame variables
         self.pygame = pygame
         self.display = pygame.display
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.pygame.display.set_caption("Top-Down Adventure Game")
         self.clock = self.pygame.time.Clock()
 
-        # Create an EventQueue
         self.event_queue = EventQueue(self.pygame, self.debug)
         self.event_queue.init_queue()
 
@@ -50,7 +46,6 @@ class Game(GameComponent):
         return False
     
     def handle_events(self):
-        # Use the event queue
         self.event_queue.handle_events()
 
         if self.active:
@@ -63,14 +58,12 @@ class Game(GameComponent):
         if self.active:
             self.scene.update()
 
-        # Optionally run any helper functions with "update" context
         self.run_helper_functions("update")
 
     def draw(self):
         if self.active:
             self.scene.draw()
 
-            # Optionally run any helper functions with "draw" context
             self.run_helper_functions("draw")
 
     def set_starting_scene(self):

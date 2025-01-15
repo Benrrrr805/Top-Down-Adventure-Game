@@ -26,17 +26,17 @@ class StartingScene(GameComponent):
             
     def handle_events(self):
         if not self.active:
-            raise ValueError("StartingScene is not active.")
+            raise ValueError(f"{self.name} is not active.")
         self.main_container.handle_events()
 
     def update(self):
         if not self.active:
-            raise ValueError("StartingScene is not active.")
+            raise ValueError(f"{self.name} is not active.")
         self.main_container.update()
 
     def draw(self):
         if not self.active:
-            raise ValueError("StartingScene is not active.")
+            raise ValueError(f"{self.name} is not active.")
         main_container_surface = self.main_container.draw()
         main_container_rect = self.main_container.get_rect()
         self.screen.fill(self.debug_color)
