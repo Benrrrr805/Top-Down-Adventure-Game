@@ -1,12 +1,12 @@
 import pygame
 from game.core.event_queue import EventQueue
-from game.core.game_component import GameComponent
+from game.core.gc import GameComponent
 from game.scenes.startingScene import StartingScene
-from game.settings import SCREEN_WIDTH, SCREEN_HEIGHT, BLACK, BLUE
+from game.settings import SCREEN_WIDTH, SCREEN_HEIGHT, BLUE
 
 class Game(GameComponent):
     def __init__(self):
-
+        super().__init__("Main", True)
         self.debug = True
         self.frame_rate = None
         self.show_fps = False
@@ -31,9 +31,15 @@ class Game(GameComponent):
         self.top_level = True
         self.need_to_update = False
         self.name = "Game"
-        self.children = None
-        self.parent = None
         self.pygame_values_set = True
+
+        self.game_values = {
+            'pygame': self.pygame,
+            'screen': self.screen,
+            'display': self.display,
+            'debug': self.debug,
+            'debug_color': self.debug_color
+        }
 
     def closeWindow(self):
         self.running = False
@@ -68,7 +74,7 @@ class Game(GameComponent):
 
     def set_scene(self, scene: 'StartingScene'):
         self.link_child(scene)
-        scene.set_scene(self)
+        scene.set_scene(self.game_values)
         self.scene = scene
         self.enable()
 

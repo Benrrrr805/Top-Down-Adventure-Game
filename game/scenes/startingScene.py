@@ -1,8 +1,8 @@
-from game.core.game_component import GameComponent
+from game.core.visual_component import VisualComponent
 from game.entities.uiComponents.containers.main_container import main_container
 from game.entities.uiComponents.menus.main_menu import main_menu, new_game_button, load_game_button, settings_button, exit_button
 from game.entities.uiComponents.menus.settings_menu import settings_menu, sound_button, music_button, back_button, darkness_button, show_fps_button
-class StartingScene(GameComponent):
+class StartingScene(VisualComponent):
     """
     Example of a Scene that is also a GameComponent,
     so it can have children (UIComponents, etc.) and
@@ -17,12 +17,12 @@ class StartingScene(GameComponent):
         self.main_menu = main_menu
         self.graphics_enabled = False
 
-    def set_scene(self, game=None):
+    def set_scene(self, game_values):
         self.link_child(self.main_container)
         self.main_container.link_child(self.main_menu)
         self.main_menu.link_children([new_game_button, load_game_button, settings_button, exit_button])
-        self.set_game_values(game)
-        self.set_game_values_for_children(self.game)
+        self.set_game_values(game_values)
+        self.set_game_values_for_children(game_values)
             
     def handle_events(self):
         if not self.active:
