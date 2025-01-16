@@ -2,14 +2,23 @@ from typing import Optional
 class Node:
     def __init__(self, name: str = "Node",top_level: bool = False, children: list['Node']=None, parent: 'Node'=None):
         self.name: str = name
+        self.top_level: bool = top_level
+        self.attributes = {}
+
+        # If there are children, add them to this node and set self as their parent.
         if isinstance(children, list):
             self.children = children
+            for child in self.children:
+                child.add_parent(self)
         else:
             self.children: list[Node] = []
-        self.parent: Node = parent
-        self.top_level: bool = top_level
-        self.pygame_values_set=False
 
+        # If a parent is provided, set it and add self to parent's children.
+        if isinstance(parent, Node):
+            self.parent = parent
+            parent.add_child(self)
+        else:
+            self.parent: Node = parent
     # ------------------------------------------------------------------------
     #  Relationship Management
     # ------------------------------------------------------------------------
@@ -18,36 +27,28 @@ class Node:
         Add a child to this node's children list (and only that).
         Does NOT set child.parent; that is now the sole job of `add_parent`.
         """
-        print(f"Adding child {child.name} to parent {self.name}")
         self.children.append(child)
-        print(f"Child {child.name} added to parent {self.name}")
 
     def remove_child(self, child: 'Node') -> None:
         """
         Remove a child from this node's children list (and only that).
         Does NOT unset child.parent; that is now the sole job of `remove_parent`.
         """
-        print(f"Removing child {child.name} from parent {self.name}")
         self.children.remove(child)
-        print(f"Child {child.name} removed from parent {self.name}")
 
     def add_parent(self, parent: 'Node') -> None:
         """
         Sets this node's `parent` to the given `parent` (and only that).
         Does NOT automatically add self to parent's children. That is now the job of `add_child`.
         """
-        print(f"Adding parent '{parent.name}' to child '{self.name}'")
         self.parent: 'Node' = parent
-        print(f"Parent '{parent.name}' added to child '{self.name}'")
 
     def remove_parent(self) -> None:
         """
         Unsets this node's `parent`.
         Does NOT remove self from parent's children list. That is now the job of `remove_child`.
         """
-        print(f"Removing parent '{self.parent.name}' from child '{self.name}'")
         self.parent: Node = None
-        print(f"Parent removed from child '{self.name}'")
 
     def get_child(self, name: str) -> Optional['Node']:
         for c in self.children:
@@ -55,6 +56,9 @@ class Node:
                 return c
         return None
 
+    def get_parent(self) -> 'Node':
+        return self.parent
+    
     def has_child(self, child: 'Node') -> bool:
         """Checks if this node has a particular child (directly or recursively)."""
         if child in self.children:
@@ -64,10 +68,6 @@ class Node:
                 return True
         return False
 
-    def get_parent(self) -> 'Node':
-        if not self.parent:
-            raise ValueError(f"This node has no parent. - {self.name}")
-        return self.parent
 
     # ------------------------------------------------------------------------
     #  Linking Helpers (Optional)
@@ -102,9 +102,20 @@ class Node:
             parent.remove_child(child)
             child.remove_parent()
 
-    def set_values_in_self(self, values: dict):
-        for key, value in values.items():
-            self[key] = value
+    def link_parent(child: 'Node', parent: 'Node') -> None:
+        """
+        Example helper that links a child to a parent.
+        """
+        child.add_parent(parent)
+        parent.add_child(child)
+
+    def unlink_parent(child: 'Node') -> None:
+        """
+        Example helper that unlinks a child from a parent.
+        """
+
+        child.parent.remove_child(child)
+        child.remove_parent()
 
     # ------------------------------------------------------------------------
     #  Additional Relationship Queries
