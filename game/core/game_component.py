@@ -14,8 +14,6 @@ class GameComponent(Node):
     # ----------------------------------------------------------------------
     # Helper Function System (from original GameComponent)
     # ----------------------------------------------------------------------
-    def init_helper_functions(self) -> None:
-        self.helper_functions: dict = {}
 
     def add_helper_function(self, name: str, func: FunctionType, contexts: list[str] = None, enabled: bool = True) -> None:
         """
