@@ -4,7 +4,7 @@ from pygame.font import Font
 from pygame.rect import Rect
 from pygame import display
 from game.settings import BLACK, RED, BLUE
-from game.core.gc import GameComponent
+from game.core.game_component import GameComponent
 from typing import Optional
 import os
 

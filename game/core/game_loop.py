@@ -1,6 +1,6 @@
 import pygame
 from game.core.event_queue import EventQueue
-from game.core.gc import GameComponent
+from game.core.game_component import GameComponent
 from game.scenes.startingScene import StartingScene
 from game.settings import SCREEN_WIDTH, SCREEN_HEIGHT, BLUE
 
