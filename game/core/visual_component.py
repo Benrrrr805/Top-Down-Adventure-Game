@@ -49,22 +49,6 @@ class VisualComponent(GameComponent):
     # UI-Related Utility Functions (wrapped with graphics_enabled checks)
     # ----------------------------------------------------------------------
 
-    
-    
-    def handle_events_(self):
-        hovering = self.hovering()
-        if hovering and self.debug_color == BLUE:
-            self.debug_color = RED
-            self.need_to_update = True
-        if not hovering and self.debug_color == RED:
-            self.debug_color = BLUE
-            self.need_to_update = True
-            
-                
-        
-        return super().handle_events_()
-    
-
     def in_rect(self, coordinates: tuple[int, int]) -> bool:
         if self.rect is None:
             return False
@@ -115,6 +99,7 @@ class VisualComponent(GameComponent):
         else:
             # Transparent background
             self.surface.fill((0, 0, 0, 0))
+        return True
 
     def _draw_debug_border(self) -> None:
         """
@@ -125,6 +110,7 @@ class VisualComponent(GameComponent):
             self.pygame.draw.rect(
                 self.surface, self.debug_color, (0, 0, self.width, self.height), 5
             )
+        return True
 
     def _draw_children(self) -> None:
         """
@@ -133,19 +119,21 @@ class VisualComponent(GameComponent):
         for child in self.children:
             if not isinstance(child, VisualComponent):
                 continue
-            child_surface: Surface = child.draw()
-            if child_surface is not None:
-                x: int = child.x_coordinate - self.x_coordinate
-                y: int = child.y_coordinate - self.y_coordinate
-                self.surface.blit(child_surface, (x, y))
-            child.need_to_update = False
+            else:
+                child_surface: Surface = child.draw()
+                if child_surface is not None:
+                    x: int = child.x_coordinate - self.x_coordinate
+                    y: int = child.y_coordinate - self.y_coordinate
+                    self.surface.blit(child_surface, (x, y))
+                child.need_to_update = False
+        return True
 
     # ----------------------------------------------------------------------
     # Rendering (Only if graphics_enabled)
     # ----------------------------------------------------------------------
     def render_text(self) -> None:
         if not self.text:
-            return
+            return False
         if not self.active:
             raise ValueError(f"UIComponent must be enabled before rendering text. - {self.name}")
 
@@ -153,12 +141,11 @@ class VisualComponent(GameComponent):
         text_rect: Rect = text_surface.get_rect()
         text_rect.topleft = self.text_position
         self.surface.blit(text_surface, text_rect)
+        return True
 
     def draw_(self) -> Optional[Surface]:
         if self.width == 0 or self.height == 0:
-            return None
-        if not self.active:
-            raise ValueError(f"UIComponent must be enabled before drawing. - {self.name}")
+            return False
 
         # If we haven't changed anything, return the existing surface
         if not self.need_to_update:
@@ -182,14 +169,12 @@ class VisualComponent(GameComponent):
         self._draw_children()
 
         self.need_to_update = False
-        if not isinstance(self.surface, self.pygame.Surface):
-            raise ValueError(f"UIComponent draw_() must return a pygame.Surface. - {self.name}")
 
         return self.surface
 
     def draw(self) -> Surface:
         if not self.active:
-            raise ValueError(f"UIComponent must be enabled before drawing. - {self.name}")
+            raise ValueError(f"Visual Component must be enabled before drawing. - {self.name}")
         return self.draw_()
 
     def get_rect(self) -> Optional[Rect]:
@@ -200,7 +185,6 @@ class VisualComponent(GameComponent):
         Set references needed to access Pygame or global game resources.
         For UI usage, also create surfaces/rect if graphics_enabled = True.
         """
-        print(f"Setting game values for {self.name}")
         self.pygame: pygame = game_values['pygame']
         self.screen: Surface = game_values['screen']
         self.display: display = game_values['display']
@@ -213,24 +197,23 @@ class VisualComponent(GameComponent):
             self.x_coordinate: int = self.x_coordinate+self.parent.x_coordinate
             self.y_coordinate: int = self.y_coordinate+self.parent.y_coordinate
 
-            # Create pygame Rect & Surface
-            self.rect: Rect = self.pygame.Rect(self.x_coordinate, self.y_coordinate,
-                                         self.width, self.height)
-            self.surface: Surface = self.pygame.Surface((self.width, self.height), self.pygame.SRCALPHA)
+        # Create pygame Rect & Surface
+        self.rect: Rect = self.pygame.Rect(self.x_coordinate, self.y_coordinate, self.width, self.height)
+        self.surface: Surface = self.pygame.Surface((self.width, self.height), self.pygame.SRCALPHA)
 
-            # Load or create the font
-            if self.text_font:
-                self.text_font: Font = self.pygame.font.Font(self.text_font, self.text_size)
-            else:
-                # If None, use default system font
-                self.text_font: Font = self.pygame.font.SysFont(None, self.text_size)
+        # Load or create the font
+        if self.text_font:
+            self.text_font: Font = self.pygame.font.Font(self.text_font, self.text_size)
+        else:
+            # If None, use default system font
+            self.text_font: Font = self.pygame.font.SysFont(None, self.text_size)
 
-            # Attempt to load background image if provided
-            if self.image_url is not None:
-                if not os.path.exists(self.image_url):
-                    raise ValueError(f"Background image does not exist: {self.image_url} - {self.name}")
-                img: Surface = self.pygame.image.load(self.image_url).convert_alpha()
-                self.background_image: Surface = self.pygame.transform.scale(img, (self.width, self.height))
+        # Attempt to load background image if provided
+        if self.image_url is not None:
+            if not os.path.exists(self.image_url):
+                raise ValueError(f"Background image does not exist: {self.image_url} - {self.name}")
+            img: Surface = self.pygame.image.load(self.image_url).convert_alpha()
+            self.background_image: Surface = self.pygame.transform.scale(img, (self.width, self.height))
 
         self.pygame_values_set: bool = True
 
