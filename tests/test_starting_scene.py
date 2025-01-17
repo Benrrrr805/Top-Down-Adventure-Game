@@ -10,10 +10,10 @@ def game_values():
     game_values = g.game_values
     return game_values
 
-@pytest.fixture
-def game():
-    g = Game()
-    return g
+# @pytest.fixture
+# def game():
+#     g = Game()
+#     return g
 
 @pytest.fixture
 def mock_scene():

@@ -71,3 +71,14 @@ def test_game_draw(mock_game):
 
     mock_game.draw()
     scene.draw.assert_called_once()
+
+def test_set_scene(mock_game):
+    scene = MagicMock()
+    mock_game.link_child = MagicMock()
+    scene.set_scene = MagicMock()
+    mock_game.enable = MagicMock()
+
+    mock_game.set_scene(scene)
+    mock_game.link_child.assert_called_once()
+    scene.set_scene.assert_called_once()
+    mock_game.enable.assert_called_once()

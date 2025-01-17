@@ -77,6 +77,7 @@ class Game(GameComponent):
         scene.set_scene(self.game_values)
         self.scene = scene
         self.enable()
+        return True
 
     def run(self):
         self.set_scene(StartingScene("Starting Scene", False))

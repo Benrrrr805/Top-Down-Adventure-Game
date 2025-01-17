@@ -6,7 +6,7 @@ def game_component():
     return GameComponent(name="TestComponent", top_level=True)
 
 def dummy_helper_function(component, context, from_helper):
-    pass
+    return True
 
 def test_initialization(game_component):
     assert game_component.name == "TestComponent"
@@ -18,6 +18,9 @@ def test_initialization(game_component):
     assert game_component.pygame_values_set is False
     assert game_component.helper_functions == {}
     assert game_component.debug is False
+
+def test_dummy_helper_function():
+    assert dummy_helper_function(None, None, None) is True
 
 def test_add_helper_function(game_component):
     game_component.add_helper_function("dummy", dummy_helper_function)
