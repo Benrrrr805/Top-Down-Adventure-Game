@@ -185,6 +185,11 @@ class VisualComponent(GameComponent):
         Set references needed to access Pygame or global game resources.
         For UI usage, also create surfaces/rect if graphics_enabled = True.
         """
+        if self.pygame_values_set:
+            print(f"Game values already set for {self.name}. Skipping.")
+            return
+        else:
+            print(f"Setting game values for {self.name}.")
         self.game_values = game_values
         self.pygame: pygame = game_values['pygame']
         self.screen: Surface = game_values['screen']
@@ -203,7 +208,6 @@ class VisualComponent(GameComponent):
         self.surface: Surface = self.pygame.Surface((self.width, self.height), self.pygame.SRCALPHA)
 
         # Load or create the font
-        print(f"{self.name} - Text Font: {self.text_font}")
         if self.text_font and isinstance(self.text_font, str):
             self.text_font: Font = self.pygame.font.Font(self.text_font, self.text_size)
         else:
@@ -222,5 +226,22 @@ class VisualComponent(GameComponent):
     def set_game_values_for_children(self, game_values: 'dict') -> None:
         for child in self.children:
             if isinstance(child, VisualComponent):
-                child.set_game_values_for_children(game_values)
                 child.set_game_values(game_values)
+                child.set_game_values_for_children(game_values)
+
+    def reset_game_values(self):
+        self.pygame_values_set = False
+        self.pygame = None
+        self.screen = None
+        self.display = None
+        self.debug_color = None
+        self.rect = None
+        self.surface = None
+        self.background_image = None
+        self.text_font = None
+
+    def reset_game_values_for_children(self):
+        for child in self.children:
+            if isinstance(child, VisualComponent):
+                child.reset_game_values()
+                child.reset_game_values_for_children()

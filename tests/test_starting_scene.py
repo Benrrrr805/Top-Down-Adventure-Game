@@ -16,54 +16,62 @@ def game():
     return g
 
 @pytest.fixture
-def mock_inactive_scene():
+def mock_scene():
     scene = StartingScene("TestScene", top_level=True)
-    scene.link_child(main_container)
-    scene.disable()
-    return scene
-
-@pytest.fixture
-def mock_active_scene():
-    scene = StartingScene("TestScene", top_level=True)
-    scene.link_child(main_container)
-    scene.enable()
     return scene
 
 
-def test_handle_events_if_not_active(mock_inactive_scene: 'StartingScene'):
+
+def test_handle_events_if_not_active(mock_scene: 'StartingScene'):
+    mock_scene.link_child(main_container)
+    mock_scene.disable()
     with pytest.raises(ValueError) as exc:
-        mock_inactive_scene.handle_events()
+        mock_scene.handle_events()
     assert "TestScene is not active." in str(exc.value)
 
-def test_update_if_not_active(mock_inactive_scene: 'StartingScene'):
+def test_update_if_not_active(mock_scene: 'StartingScene'):
+    mock_scene.link_child(main_container)
+    mock_scene.disable()
     with pytest.raises(ValueError) as exc:
-        mock_inactive_scene.update()
+        mock_scene.update()
     assert "TestScene is not active." in str(exc.value)
 
-def test_draw_if_not_active(mock_inactive_scene: 'StartingScene'):
+def test_draw_if_not_active(mock_scene: 'StartingScene'):
+    mock_scene.link_child(main_container)
+    mock_scene.disable()
     with pytest.raises(ValueError) as exc:
-        mock_inactive_scene.draw()
+        mock_scene.draw()
     assert "TestScene is not active." in str(exc.value)
 
-def test_handle_events_if_active(mock_active_scene: 'StartingScene'):
-    mock_active_scene.handle_events()
+def test_handle_events_if_active(mock_scene: 'StartingScene'):
+    mock_scene.link_child(main_container)
+    mock_scene.enable()
+    mock_scene.handle_events()
 
-def test_update_if_active(mock_active_scene: 'StartingScene'):
-    mock_active_scene.update()
+def test_update_if_active(mock_scene: 'StartingScene'):
+    mock_scene.link_child(main_container)
+    mock_scene.enable()
+    mock_scene.update()
 
-def test_draw_if_active_but_no_game_values(mock_active_scene: 'StartingScene'):
+def test_draw_if_active_but_no_game_values(mock_scene: 'StartingScene'):
+    mock_scene.link_child(main_container)
+    mock_scene.enable()
     with pytest.raises(AttributeError) as exc:
-        mock_active_scene.draw()
+        mock_scene.draw()
     assert "'NoneType' object has no attribute 'fill'" in str(exc.value)
 
-def test_draw_if_active_with_game_values(mock_active_scene: 'StartingScene', game_values):
-    mock_active_scene.set_game_values(game_values)
-    mock_active_scene.set_game_values_for_children(game_values)
-    mock_active_scene.draw()
+def test_draw_if_active_with_game_values(mock_scene: 'StartingScene', game_values):
+    mock_scene.link_child(main_container)
+    mock_scene.enable()
+    mock_scene.set_game_values(game_values)
+    mock_scene.set_game_values_for_children(game_values)
+    mock_scene.draw()
+    mock_scene.reset_game_values()
+    mock_scene.reset_game_values_for_children()
 
-def test_set_scene(mock_active_scene: 'StartingScene', game_values):
-    mock_active_scene.set_scene(game_values)
-    assert mock_active_scene.game_values == game_values
-    assert mock_active_scene.main_container == main_container
-    assert mock_active_scene.main_menu == main_container.children[0]
-    assert mock_active_scene.main_menu.children == main_container.children[0].children
+def test_set_scene(mock_scene: 'StartingScene', game_values):
+    mock_scene.set_scene(game_values)
+    assert mock_scene.game_values == game_values
+    assert mock_scene.main_container == main_container
+    assert mock_scene.main_menu == main_container.children[0]
+    assert mock_scene.main_menu.children == main_container.children[0].children
