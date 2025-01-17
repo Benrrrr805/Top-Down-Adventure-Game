@@ -5,13 +5,14 @@ from game.core.game_loop import Game
 from unittest.mock import MagicMock
 
 @pytest.fixture
-def mock_game():
+def game_values():
     g = Game()
-    g.screen = MagicMock()
-    g.display = MagicMock()
-    g.clock = MagicMock()
-    g.text_font = MagicMock()
-    g.running = False
+    game_values = g.game_values
+    return game_values
+
+@pytest.fixture
+def game():
+    g = Game()
     return g
 
 @pytest.fixture
@@ -55,15 +56,14 @@ def test_draw_if_active_but_no_game_values(mock_active_scene: 'StartingScene'):
         mock_active_scene.draw()
     assert "'NoneType' object has no attribute 'fill'" in str(exc.value)
 
-def test_draw_if_active_with_game_values(mock_active_scene: 'StartingScene', mock_game):
-    mock_active_scene.set_game_values(mock_game)
-    mock_active_scene.set_game_values_for_children(mock_game)
+def test_draw_if_active_with_game_values(mock_active_scene: 'StartingScene', game_values):
+    mock_active_scene.set_game_values(game_values)
+    mock_active_scene.set_game_values_for_children(game_values)
     mock_active_scene.draw()
 
-def test_set_scene(mock_active_scene: 'StartingScene', mock_game):
-    mock_game.pygame = MagicMock()
-    mock_active_scene.set_scene(mock_game)
-    assert mock_active_scene.game == mock_game
+def test_set_scene(mock_active_scene: 'StartingScene', game_values):
+    mock_active_scene.set_scene(game_values)
+    assert mock_active_scene.game_values == game_values
     assert mock_active_scene.main_container == main_container
     assert mock_active_scene.main_menu == main_container.children[0]
     assert mock_active_scene.main_menu.children == main_container.children[0].children
