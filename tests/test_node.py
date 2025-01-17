@@ -1,5 +1,3 @@
-import pytest
-from typing import Optional
 from game.core.node import Node  # Assuming your Node class is in a file named node.py
 
 def test_node_initialization():
