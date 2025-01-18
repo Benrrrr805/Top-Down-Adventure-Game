@@ -4,7 +4,7 @@ class EventQueue:
         self.debug = debug
         self.max_events = max_events
 
-        self.event_queue = None
+        self.event_queue = []
         self.last_mouse_pos = None
 
         # Map raw pygame event types to handling methods
@@ -81,7 +81,7 @@ class EventQueue:
         Retrieve and remove the first event (FIFO) from the queue.
         Returns None if the queue is empty.
         """
-        if self.event_queue:
+        if self.event_queue and len(self.event_queue) > 0:
             return self.event_queue.pop(0)
         return None
 
@@ -121,6 +121,8 @@ class EventQueue:
                 else:
                     converted = self.event_mapping[event.type](event)
                     self.add_event(converted)
+            else:
+                print(f"Event type not handled: {event.type}")
 
         # Enforce max_events limit
         while len(self.event_queue) > self.max_events:

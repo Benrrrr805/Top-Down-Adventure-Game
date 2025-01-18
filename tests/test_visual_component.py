@@ -72,6 +72,7 @@ def test_set_game_values(vc_base, game_values):
     assert isinstance(vc_base.text_font, Font)
     assert isinstance(vc_base.rect, Rect)
     assert isinstance(vc_base.surface, Surface)
+    assert vc_base.set_game_values(game_values) is None
 
 
 def test_set_game_values_nonexistent_image(vc_base, game_values):

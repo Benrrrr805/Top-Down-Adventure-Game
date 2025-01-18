@@ -187,7 +187,7 @@ class VisualComponent(GameComponent):
         """
         if self.pygame_values_set:
             print(f"Game values already set for {self.name}. Skipping.")
-            return
+            return None
         else:
             print(f"Setting game values for {self.name}.")
         self.game_values = game_values
