@@ -1,7 +1,7 @@
 from game.core.visual_component import VisualComponent
-from game.validation.gc_validator import GCValidator
+from game.validation.game_component_validator import GameComponentValidator
 import pygame
-class VisualComponentValidator(GCValidator):
+class VisualComponentValidator(GameComponentValidator):
     """
     A validator for VisualComponent objects.
     """
@@ -55,7 +55,6 @@ class VisualComponentValidator(GCValidator):
     def full_validate(visual_component: 'VisualComponent') -> bool:
         VisualComponentValidator.validate_is_visual_component(visual_component)
         VisualComponentValidator.validate_base_values(visual_component)
-        GCValidator.full_validate(visual_component)
         return True
         
     def validate_is_visual_component(visual_component: 'VisualComponent') -> bool:
