@@ -11,7 +11,7 @@ class VisualComponentValidator(GameComponentValidator):
         Validate base GameComponent values, then optionally validate UI details.
         """
         if not isinstance(visual_component.pygame_values_set, bool):
-            raise ValueError(f"GameComponent: {VisualComponent.name} - Failed validation. pygame_values_set must be a boolean.")
+            raise ValueError(f"GameComponent: {visual_component.name} - Failed validation. pygame_values_set must be a boolean.")
 
         if visual_component.width is None or visual_component.height is None:
             raise ValueError(f"GameComponent must have a width and height. - {visual_component.name}")
