@@ -34,7 +34,7 @@ class GameComponentValidator(NodeValidator):
     def validate_is_game_component(game_component: 'GameComponent') -> bool:
         if not isinstance(game_component, GameComponent):
             raise ValueError(f'Expected game_component to be GameComponent, but instead got type {type(game_component)}')
-
+        return True
     @staticmethod
     def validate_is_enabled(game_component: 'GameComponent') -> bool:
         if not game_component.active:
