@@ -6,7 +6,7 @@ class NodeValidator:
     """
     @staticmethod
     def name_is_unknown(node: 'Node') -> bool:
-        return not isinstance(node.name, str)
+        return not node.name or not isinstance(node.name, str) or len(node.name) == 0
     
     @staticmethod
     def validate_base_values(node: 'Node') -> bool:
@@ -14,14 +14,7 @@ class NodeValidator:
         Validate base Node values, then optionally validate UI details.
         """
         if NodeValidator.name_is_unknown(node):
-            if NodeValidator.validate_is_top_level(node):
-                raise ValueError(f"Node: Unknown. Failed validation. Does not have a name. Node is top-level.")
-            elif NodeValidator.validate_has_parent(node):
-                NodeValidator.validate_base_values(node.parent)
-                raise ValueError(f"Node: Unknown. Failed validation. Does not have a name. Parent - {node.parent.name}")
-            else:
-                raise ValueError(f"Node: Unknown. Failed validation. Does not have a name. Parent - None")
-        
+            raise ValueError(f"Node: Unknown. Failed validation. name must be a non-empty string.")
         if not isinstance(node.top_level, bool):
             raise ValueError(f"Node: {node.name} - Failed validation. top_level must be a boolean.")
 
@@ -43,9 +36,11 @@ class NodeValidator:
     
     @staticmethod
     def top_level_validation(node: 'Node') -> bool:
-        NodeValidator.validate_is_top_level(node)
-        NodeValidator.validate_base_values(node)
-        NodeValidator.validate_children(node)
+        if NodeValidator.validate_is_top_level(node):
+            NodeValidator.validate_base_values(node)
+            NodeValidator.validate_children(node)
+        else:
+            raise ValueError(f"Node must be top-level to be validated as top-level. - {node.name}")
         return True
     
     @staticmethod
@@ -106,6 +101,7 @@ class NodeValidator:
             raise ValueError(f"Children must be a list. - {node.name}")
         
         for child in node.children:
+            NodeValidator.validate_is_node(child)
             NodeValidator.validate_base_values(child)
             NodeValidator.validate_has_parent(child)
             NodeValidator.validate_not_self(node, child)
@@ -113,10 +109,12 @@ class NodeValidator:
     @staticmethod
     def validate_has_parent(node: 'Node') -> bool:
         if NodeValidator.validate_is_top_level(node):
-            raise ValueError(f"{node.name} does not have parent, since it is a top-level Node.")
-        NodeValidator.validate_is_node(node.parent)
-        NodeValidator.validate_base_values(node.parent)
-        NodeValidator.validate_not_self(node, node.parent)
+            raise ValueError(f"{node.name} should not have parent, since it is a top-level Node.")
+        if isinstance(node.parent, Node):
+            NodeValidator.validate_base_values(node.parent)
+            NodeValidator.validate_not_self(node, node.parent)
+        else:
+            raise ValueError(f"{node.name} does not have a parent.")
         return True
     
     @staticmethod
