@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import MagicMock
 from game.core.game_loop import Game
 from game.core.event_queue import EventQueue
-
+# TODO remove mock
 @pytest.fixture
 def mock_game():
     g = Game()

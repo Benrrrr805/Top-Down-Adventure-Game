@@ -55,6 +55,7 @@ class VisualComponent(GameComponent):
     def to_dict(self):
         game_component_data = super().to_dict()
         visual_component_data = {
+            "need_to_update": self.need_to_update,
             "width": self.width,
             "height": self.height,
             "x_coordinate": self.x_coordinate,
