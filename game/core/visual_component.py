@@ -5,8 +5,10 @@ from pygame.rect import Rect
 from pygame import display
 from game.settings import BLACK, RED, BLUE
 from game.core.game_component import GameComponent
+from game.core.node import Node
 from typing import Optional
 import os
+import json
 
 
 class VisualComponent(GameComponent):
@@ -45,6 +47,31 @@ class VisualComponent(GameComponent):
         self.surface: Surface = None
         self.background_image: Surface = None
 
+
+    def __str__(self):
+        # Pretty-print the dictionary with 4-space indentation
+        return json.dumps(self.to_dict(), indent=4)
+
+    def to_dict(self):
+        game_component_data = super().to_dict()
+        visual_component_data = {
+            "width": self.width,
+            "height": self.height,
+            "x_coordinate": self.x_coordinate,
+            "y_coordinate": self.y_coordinate,
+            "image_url": self.image_url,
+            "background_color": self.background_color,
+            "text": self.text,
+            "text_font": self.text_font,
+            "text_size": self.text_size,
+            "text_color": self.text_color,
+            "text_position": self.text_position,
+            "rect": self.rect,
+            "surface": self.surface,
+            "background_image": self.background_image
+        }
+        game_component_data.update(visual_component_data)
+        return game_component_data
     # ----------------------------------------------------------------------
     # UI-Related Utility Functions (wrapped with graphics_enabled checks)
     # ----------------------------------------------------------------------

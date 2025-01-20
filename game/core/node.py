@@ -1,4 +1,5 @@
 from typing import Optional
+import json
 class Node:
     def __init__(self, name: str = "Node",top_level: bool = False, children: list['Node']=None, parent: 'Node'=None):
         self.name: str = name
@@ -19,6 +20,19 @@ class Node:
             parent.add_child(self)
         else:
             self.parent: Node = parent
+
+    def __str__(self):
+        # Pretty-print the dictionary with 4-space indentation
+        return json.dumps(self.to_dict(), indent=4)
+    
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "top_level": self.top_level,
+            "attributes": self.attributes,
+            "children": [c.to_dict() for c in self.children if isinstance(c, Node)],
+            "parent": self.parent.name if self.parent and isinstance(self.parent, Node) else None
+        }
     # ------------------------------------------------------------------------
     #  Relationship Management
     # ------------------------------------------------------------------------

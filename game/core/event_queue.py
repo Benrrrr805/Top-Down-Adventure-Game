@@ -1,3 +1,4 @@
+import json
 class EventQueue:
     def __init__(self, pygame, debug, max_events=1000):
         self.pygame = pygame
@@ -28,6 +29,17 @@ class EventQueue:
             "MOUSEMOTION",
             "MOUSEWHEEL",
         ]
+
+    def __str__(self):
+        # Pretty-print the dictionary with 4-space indentation
+        return json.dumps(self.to_dict(), indent=4)
+
+    def to_dict(self):
+        return {
+            "event_queue": self.event_queue,
+            "last_mouse_pos": self.last_mouse_pos,
+            "max_events": self.max_events,
+        }
 
     def init_queue(self):
         """

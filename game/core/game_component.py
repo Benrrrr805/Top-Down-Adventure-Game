@@ -1,6 +1,7 @@
 from types import FunctionType
 from game.core.event_queue import EventQueue
 from game.core.node import Node
+import json
 
 class GameComponent(Node):
     def __init__(self, name, top_level, children=None, parent=None):
@@ -11,6 +12,21 @@ class GameComponent(Node):
         self.helper_functions: dict = {}
         self.debug: bool = False
 
+    def __str__(self):
+        # Pretty-print the dictionary with 4-space indentation
+        return json.dumps(self.to_dict(), indent=4)
+
+    def to_dict(self):
+        node_data = super().to_dict()
+        game_component_data = {
+            "event_queue": self.event_queue.to_dict() if self.event_queue and isinstance(self.event_queue, EventQueue) else None,
+            "active": self.active,
+            "pygame_values_set": self.pygame_values_set,
+            "helper_functions": self.helper_functions,
+            "debug": self.debug
+        }
+        node_data.update(game_component_data)
+        return node_data
     # ----------------------------------------------------------------------
     # Helper Function System (from original GameComponent)
     # ----------------------------------------------------------------------
