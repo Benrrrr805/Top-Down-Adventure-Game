@@ -62,13 +62,13 @@ class VisualComponent(GameComponent):
             "image_url": self.image_url,
             "background_color": self.background_color,
             "text": self.text,
-            "text_font": self.text_font,
+            "text_font": type(self.text_font).__name__,
             "text_size": self.text_size,
             "text_color": self.text_color,
             "text_position": self.text_position,
-            "rect": self.rect,
-            "surface": self.surface,
-            "background_image": self.background_image
+            "rect": type(self.rect).__name__,
+            "surface": type(self.surface).__name__,
+            "background_image": type(self.background_image).__name__
         }
         game_component_data.update(visual_component_data)
         return game_component_data
