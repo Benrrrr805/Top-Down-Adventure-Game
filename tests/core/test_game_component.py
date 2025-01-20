@@ -1,4 +1,5 @@
 import pytest
+import json
 from game.core.game_component import GameComponent
 
 @pytest.fixture
@@ -18,6 +19,24 @@ def test_initialization(game_component):
     assert game_component.pygame_values_set is False
     assert game_component.helper_functions == {}
     assert game_component.debug is False
+
+def test_to_dict(game_component):
+    game_component.debug = True
+    d = game_component.to_dict()
+    assert d["name"] == "TestComponent"
+    assert d["top_level"] is True
+    assert d["active"] is False
+    assert d["debug"] is True
+    assert d["children"] == []
+    assert d["parent"] is None
+    assert d["event_queue"] is None
+    assert d["pygame_values_set"] is False
+    assert d["helper_functions"] == {}
+
+def test_str(game_component):
+    d = game_component.to_dict()
+    s = game_component.__str__()
+    assert s == json.dumps(d, indent=4)
 
 def test_dummy_helper_function():
     assert dummy_helper_function(None, None, None) is True

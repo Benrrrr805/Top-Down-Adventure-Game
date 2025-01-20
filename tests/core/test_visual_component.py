@@ -1,5 +1,5 @@
 import pytest
-
+import json
 from pygame import Rect, Surface
 from pygame.font import Font
 from game.core.game_loop import Game
@@ -42,6 +42,38 @@ def vc_base():
 # ------------------------------------------------------------------------------
 # Tests
 # ------------------------------------------------------------------------------
+
+def test_to_dict(vc_base):
+    """
+    Test to_dict returns a dictionary with the expected keys and values.
+    """
+    d = vc_base.to_dict()
+    assert d["name"] == "TestVC"
+    assert d["top_level"] is True
+    assert d["active"] is False
+    assert d["children"] == []
+    assert d["parent"] is None
+    assert d["event_queue"] is None
+    assert d["pygame_values_set"] is False
+    assert d["helper_functions"] == {}
+    assert d["debug"] is False
+    assert d["width"] == 100
+    assert d["height"] == 50
+    assert d["x_coordinate"] == 10
+    assert d["y_coordinate"] == 20
+    assert d["background_color"] == BLACK
+    assert d["text"] == "Hello"
+    assert d["text_size"] == 24
+    assert d["text_color"] == BLACK
+    assert d["text_position"] == (100 // 2, 50 // 2)
+
+def test_str(vc_base):
+    """
+    Test __str__ returns a string representation of the VisualComponent.
+    """
+    d = vc_base.to_dict()
+    s = vc_base.__str__()
+    assert s == json.dumps(d, indent=4)
 
 def test_init(vc_base):
     """

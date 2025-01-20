@@ -1,5 +1,5 @@
 from game.core.node import Node  # Assuming your Node class is in a file named node.py
-
+import json
 def test_node_initialization():
     # Set relationship through children=[child1_node]
     child1_node = Node(name="Child1Node", top_level=False)
@@ -31,6 +31,28 @@ def test_node_initialization():
 
     assert parent2_node.parent is None
     assert child2_node.parent == parent2_node
+
+def test_node_to_dict():
+    parent = Node(name="Parent", top_level=True)
+    child = Node(name="Child", top_level=False)
+    parent.link_child(child)
+
+    d = parent.to_dict()
+    assert d["name"] == "Parent"
+    assert d["top_level"] is True
+    assert d["attributes"] == {}
+    assert len(d["children"]) == 1
+    assert d["children"][0]["name"] == "Child"
+    assert d["parent"] is None
+
+def test_node_str():
+    parent = Node(name="Parent")
+    child = Node(name="Child")
+    parent.link_child(child)
+
+    d = parent.to_dict()
+    s = parent.__str__()
+    assert s == json.dumps(d, indent=4)
 
 
 

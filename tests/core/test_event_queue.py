@@ -1,5 +1,6 @@
 import pytest
 import pygame
+import json
 from unittest.mock import MagicMock
 
 from game.core.event_queue import EventQueue
@@ -9,6 +10,27 @@ def test_init_queue():
     eq.init_queue()
     assert isinstance(eq.event_queue, list)
     assert eq.event_queue == []
+
+def test_to_dict():
+    eq = EventQueue(pygame, debug=False)
+    eq.init_queue()
+    eq.event_queue = [{"type": "MOUSEBUTTONDOWN", "timestamp": 100}]
+    eq.last_mouse_pos = (100, 200)
+
+    d = eq.to_dict()
+    assert d["event_queue"] == eq.event_queue
+    assert d["last_mouse_pos"] == eq.last_mouse_pos
+    assert d["max_events"] == eq.max_events
+
+def test_str():
+    eq = EventQueue(pygame, debug=False)
+    eq.init_queue()
+    eq.event_queue = [{"type": "MOUSEBUTTONDOWN", "timestamp": 100}]
+    eq.last_mouse_pos = (100, 200)
+
+    d = eq.to_dict()
+    s = eq.__str__()
+    assert s == json.dumps(d, indent=4)
 
 def test_validate_queue_raises_when_none():
     eq = EventQueue(pygame, debug=False)
