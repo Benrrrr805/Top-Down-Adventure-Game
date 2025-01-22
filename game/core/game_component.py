@@ -13,7 +13,7 @@ class GameComponent(Node):
         self.game_values_set: bool = False
         self.helper_functions: dict = {}
         self.debug: bool = False
-        self.game_values_set: bool = False
+        self.need_to_update: bool = False
         
     # ------------------------------------------------------------------------
     #  Pretty Printing

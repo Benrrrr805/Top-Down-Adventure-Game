@@ -21,7 +21,6 @@ class VisualComponent(GameComponent):
         children=None, parent=None
     ):
         super().__init__(name, top_level, children, parent)
-        self.need_to_update: bool = False    
         self.pygame: pygame = None
         self.screen: Surface = None
         self.display: display = None
