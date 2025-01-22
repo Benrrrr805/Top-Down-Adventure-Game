@@ -47,16 +47,13 @@ class VisualComponent(GameComponent):
         visual_component_data = {
             "rect": type(self.rect).__name__,
             "surface": type(self.surface).__name__,
-
             "image_url": self.image_url,
             "background_color": self.background_color,
             "background_image": type(self.background_image).__name__,
-
             "width": self.width,
             "height": self.height,
             "x_coordinate": self.x_coordinate,
             "y_coordinate": self.y_coordinate,
-
             "text": self.text,
             "text_font": type(self.text_font).__name__,
             "text_size": self.text_size,
