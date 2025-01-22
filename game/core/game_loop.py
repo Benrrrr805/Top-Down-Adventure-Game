@@ -31,14 +31,15 @@ class Game(GameComponent):
         self.top_level = True
         self.need_to_update = False
         self.name = "Game"
-        self.pygame_values_set = True
+        self.game_values_set = True
 
         self.game_values = {
             'pygame': self.pygame,
             'screen': self.screen,
             'display': self.display,
             'debug': self.debug,
-            'debug_color': self.debug_color
+            'debug_color': self.debug_color,
+            'event_queue': self.event_queue,
         }
 
     def closeWindow(self):
