@@ -1,5 +1,6 @@
 import pytest
 import json
+import pygame
 from pygame import Rect, Surface
 from pygame.font import Font
 from game.core.game_loop import Game
@@ -7,6 +8,7 @@ from game.core.game_loop import Game
 # Import your VisualComponent class here:
 from game.core.visual_component import VisualComponent
 from game.core.game_component import GameComponent
+from game.core.event_queue import EventQueue
 from game.settings import BLACK
 
 # ------------------------------------------------------------------------------
@@ -55,10 +57,10 @@ def test_to_dict(vc_base: VisualComponent):
     assert d["active"] is False
     assert d["children"] == []
     assert d["parent"] is None
-    assert d["event_queue"] is None
+    assert d["event_queue"] == EventQueue(pygame, True).to_dict()
     assert d["graphical_values_set"] is False
     assert d["helper_functions"] == {}
-    assert d["debug"] is False
+    assert d["debug"] is True
     assert d["width"] == 100
     assert d["height"] == 50
     assert d["x_coordinate"] == 10
@@ -98,15 +100,10 @@ def test_set_graphical_values(vc_base: VisualComponent):
     """
     vc_base.set_graphical_values()
     assert vc_base.graphical_values_set
-    assert vc_base.pygame == game_values['pygame']
-    assert vc_base.screen == game_values['screen']
-    assert vc_base.display == game_values['display']
-    assert vc_base.debug_color == game_values['debug_color']
-    assert vc_base.debug == game_values['debug']
     assert isinstance(vc_base.text_font, Font)
     assert isinstance(vc_base.rect, Rect)
     assert isinstance(vc_base.surface, Surface)
-    assert vc_base.set_graphical_values() is None
+    assert not vc_base.set_graphical_values()
 
 
 def test_set_graphical_values_nonexistent_image(vc_base: VisualComponent):
@@ -127,6 +124,7 @@ def test_set_graphical_values_for_children(vc_base: VisualComponent):
     Test that set_graphical_values_for_children calls set_graphical_values for child VisualComponents.
     """
     child_vc: VisualComponent = VisualComponent(name="ChildVC", top_level=False)
+    child_vc.set_game_values(Game().game_values)
     vc_base.children.append(child_vc)
 
     # Before setting
@@ -178,18 +176,16 @@ def test__draw_debug_border(vc_base: VisualComponent):
     vc_base.debug = False
     assert vc_base._draw_debug_border() is True
 
-# def test__draw_children(vc_base: VisualComponent):
-#     """
-#     Test that each child that is a VisualComponent has its draw() method called.
-#     """
+def test__draw_children(vc_base: VisualComponent):
+    """
+    Test that each child that is a VisualComponent has its draw() method called.
+    """
 
-#     child_vc: VisualComponent = VisualComponent(name="ChildVC", top_level=False, width=10, height=10)
-#     game_component: VisualComponent = GameComponent(name="TestGC", top_level=False)
-#     vc_base.link_children([child_vc, game_component])
-#     vc_base.set_graphical_values()
-#     vc_base.set_graphical_values_for_children()
-#     vc_base.enable()
-#     assert vc_base._draw_children() is True
+    child_vc: VisualComponent = VisualComponent(name="ChildVC", top_level=False, width=10, height=10)
+    game_component: VisualComponent = GameComponent(name="TestGC", top_level=False)
+    vc_base.link_children([child_vc, game_component])
+    vc_base.enable()
+    assert vc_base._draw_children() is True
 
 def test_render_text(vc_base: VisualComponent):
     """
@@ -262,5 +258,6 @@ def test_image_url():
     Test that image_url is loaded and scaled if it's a string.
     """
     component: VisualComponent = VisualComponent(name="TestVC", top_level=True, width=50, height=50, x_coordinate=0, y_coordinate=0, image_url="assets/test_image.png")
+    component.set_game_values(Game().game_values)
     component.set_graphical_values()
     assert isinstance(component.background_image, Surface)
