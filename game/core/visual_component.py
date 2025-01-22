@@ -21,30 +21,26 @@ class VisualComponent(GameComponent):
         children=None, parent=None
     ):
         super().__init__(name, top_level, children, parent)
-        self.pygame: pygame = None
-        self.screen: Surface = None
-        self.display: display = None
-        self.debug_color: tuple[int, int, int] = None
-        
+
+        self.rect: Rect = None
+        self.surface: Surface = None
+
+        self.image_url: str = image_url
+        self.background_color: tuple[int, int, int] = background_color
+        self.background_image: Surface = None
+
         self.width: int = width
         self.height: int = height
         self.x_coordinate: int = x_coordinate
         self.y_coordinate: int = y_coordinate
-        self.image_url: str = image_url
-        self.background_color: tuple[int, int, int] = background_color
 
         self.text: str = text
         self.text_font: Font = text_font
         self.text_size: int = text_size
         self.text_color: tuple[int, int, int] = text_color
+        self.text_position: tuple[int, int] = text_position
 
-        self.text_position: tuple[int, int] = (
-            text_position if text_position else (width // 2, height // 2)
-        )
-
-        self.rect: Rect = None
-        self.surface: Surface = None
-        self.background_image: Surface = None
+        self.debug_color: tuple[int, int, int] = None
         self.graphical_values_set: bool = False
 
 
@@ -55,21 +51,25 @@ class VisualComponent(GameComponent):
     def to_dict(self):
         game_component_data = super().to_dict()
         visual_component_data = {
-            "need_to_update": self.need_to_update,
+            "rect": type(self.rect).__name__,
+            "surface": type(self.surface).__name__,
+
+            "image_url": self.image_url,
+            "background_color": self.background_color,
+            "background_image": type(self.background_image).__name__,
+
             "width": self.width,
             "height": self.height,
             "x_coordinate": self.x_coordinate,
             "y_coordinate": self.y_coordinate,
-            "image_url": self.image_url,
-            "background_color": self.background_color,
+
             "text": self.text,
             "text_font": type(self.text_font).__name__,
             "text_size": self.text_size,
             "text_color": self.text_color,
             "text_position": self.text_position,
-            "rect": type(self.rect).__name__,
-            "surface": type(self.surface).__name__,
-            "background_image": type(self.background_image).__name__,
+
+            "debug_color": self.debug_color,
             "graphical_values_set": self.graphical_values_set
         }
         game_component_data.update(visual_component_data)
