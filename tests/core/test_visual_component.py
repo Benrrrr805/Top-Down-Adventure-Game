@@ -54,7 +54,7 @@ def test_to_dict(vc_base):
     assert d["children"] == []
     assert d["parent"] is None
     assert d["event_queue"] is None
-    assert d["pygame_values_set"] is False
+    assert d["graphical_values_set"] is False
     assert d["helper_functions"] == {}
     assert d["debug"] is False
     assert d["width"] == 100
@@ -94,8 +94,8 @@ def test_set_game_values(vc_base, game_values):
     """
     Test setting the game values and ensure surfaces, rect, etc. get created
     """
-    vc_base.set_game_values(game_values)
-    assert vc_base.pygame_values_set
+    vc_base.set_graphical_values(game_values)
+    assert vc_base.graphical_values_set
     assert vc_base.pygame == game_values['pygame']
     assert vc_base.screen == game_values['screen']
     assert vc_base.display == game_values['display']
@@ -104,7 +104,7 @@ def test_set_game_values(vc_base, game_values):
     assert isinstance(vc_base.text_font, Font)
     assert isinstance(vc_base.rect, Rect)
     assert isinstance(vc_base.surface, Surface)
-    assert vc_base.set_game_values(game_values) is None
+    assert vc_base.set_graphical_values(game_values) is None
 
 
 def test_set_game_values_nonexistent_image(vc_base, game_values):
@@ -128,10 +128,10 @@ def test_set_game_values_for_children(vc_base, game_values):
     vc_base.children.append(child_vc)
 
     # Before setting
-    assert not child_vc.pygame_values_set
+    assert not child_vc.graphical_values_set
 
     vc_base.set_game_values_for_children(game_values)
-    assert child_vc.pygame_values_set
+    assert child_vc.graphical_values_set
 
 def test_in_rect(vc_base):
     """
