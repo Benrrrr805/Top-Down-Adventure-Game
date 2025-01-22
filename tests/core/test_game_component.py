@@ -16,7 +16,7 @@ def test_initialization(game_component):
     assert game_component.parent is None
     assert game_component.event_queue is None
     assert game_component.active is False
-    assert game_component.pygame_values_set is False
+    assert game_component.game_values_set is False
     assert game_component.helper_functions == {}
     assert game_component.debug is False
 
@@ -30,7 +30,7 @@ def test_to_dict(game_component):
     assert d["children"] == []
     assert d["parent"] is None
     assert d["event_queue"] is None
-    assert d["pygame_values_set"] is False
+    assert d["game_values_set"] is False
     assert d["helper_functions"] == {}
 
 def test_str(game_component):
