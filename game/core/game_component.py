@@ -8,10 +8,14 @@ from pygame import Surface, display
 class GameComponent(Node):
     def __init__(self, name, top_level, children=None, parent=None):
         super().__init__(name, top_level, children, parent)
+        self.pygame: pygame = None
+        self.screen: Surface = None
+        self.display: display = None
         self.event_queue: EventQueue = None
+        self.helper_functions: dict = {}
+        self.game_values: dict = {}
         self.active: bool = False
         self.game_values_set: bool = False
-        self.helper_functions: dict = {}
         self.debug: bool = False
         self.need_to_update: bool = False
         
@@ -25,12 +29,15 @@ class GameComponent(Node):
     def to_dict(self):
         node_data = super().to_dict()
         game_component_data = {
+            "pygame": type(self.pygame).__name__,
+            "screen": type(self.screen).__name__,
+            "display": type(self.display).__name__,
             "event_queue": self.event_queue.to_dict() if self.event_queue and isinstance(self.event_queue, EventQueue) else None,
-            "active": self.active,
-            "pygame_values_set": self.game_values_set,
             "helper_functions": self.helper_functions,
+            "active": self.active,
+            "game_values_set": self.game_values_set,
+            "need_to_update": self.need_to_update,
             "debug": self.debug,
-            "game_values_set": self.game_values_set
         }
         node_data.update(game_component_data)
         return node_data
