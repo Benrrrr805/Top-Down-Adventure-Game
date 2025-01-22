@@ -16,12 +16,10 @@ class StartingScene(VisualComponent):
         self.main_container = main_container
         self.main_menu = main_menu
 
-    def set_scene(self, game_values):
+    def set_scene(self):
         self.link_child(self.main_container)
         self.main_container.link_child(self.main_menu)
         self.main_menu.link_children([new_game_button, load_game_button, settings_button, exit_button])
-        self.set_game_values(game_values)
-        self.set_game_values_for_children(game_values)
             
     def handle_events(self):
         if not self.active:

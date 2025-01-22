@@ -75,7 +75,7 @@ class Game(GameComponent):
 
     def set_scene(self, scene: 'StartingScene'):
         self.link_child(scene)
-        scene.set_scene(self.game_values)
+        scene.set_scene()
         self.scene = scene
         self.enable()
         return True
