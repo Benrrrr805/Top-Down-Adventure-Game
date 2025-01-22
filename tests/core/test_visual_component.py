@@ -37,6 +37,8 @@ def vc_base() -> VisualComponent:
         text_color=BLACK,
         text_position=(100 // 2, 50 // 2)
     )
+    game_values = Game().game_values
+    vc.set_game_values(game_values)
     return vc
 
 # ------------------------------------------------------------------------------
@@ -90,11 +92,11 @@ def test_init(vc_base: VisualComponent):
     assert vc_base.text_position == (100 // 2, 50 // 2)
 
 
-def test_set_game_values(vc_base: VisualComponent, game_values: dict):
+def test_set_graphical_values(vc_base: VisualComponent):
     """
     Test setting the game values and ensure surfaces, rect, etc. get created
     """
-    vc_base.set_graphical_values(game_values)
+    vc_base.set_graphical_values()
     assert vc_base.graphical_values_set
     assert vc_base.pygame == game_values['pygame']
     assert vc_base.screen == game_values['screen']
@@ -104,10 +106,10 @@ def test_set_game_values(vc_base: VisualComponent, game_values: dict):
     assert isinstance(vc_base.text_font, Font)
     assert isinstance(vc_base.rect, Rect)
     assert isinstance(vc_base.surface, Surface)
-    assert vc_base.set_graphical_values(game_values) is None
+    assert vc_base.set_graphical_values() is None
 
 
-def test_set_game_values_nonexistent_image(vc_base: VisualComponent, game_values: dict):
+def test_set_graphical_values_nonexistent_image(vc_base: VisualComponent):
     """
     Test that an exception is raised if the image_url doesn't exist.
     """
@@ -116,13 +118,13 @@ def test_set_game_values_nonexistent_image(vc_base: VisualComponent, game_values
     vc_base.image_url = "nonexistent_file.png"
 
     with pytest.raises(ValueError) as exc_info:
-        vc_base.set_game_values(game_values)
+        vc_base.set_graphical_values()
     assert "Background image does not exist" in str(exc_info.value)
 
 
-def test_set_game_values_for_children(vc_base: VisualComponent, game_values: dict):
+def test_set_graphical_values_for_children(vc_base: VisualComponent):
     """
-    Test that set_game_values_for_children calls set_game_values for child VisualComponents.
+    Test that set_graphical_values_for_children calls set_graphical_values for child VisualComponents.
     """
     child_vc: VisualComponent = VisualComponent(name="ChildVC", top_level=False)
     vc_base.children.append(child_vc)
@@ -130,7 +132,7 @@ def test_set_game_values_for_children(vc_base: VisualComponent, game_values: dic
     # Before setting
     assert not child_vc.graphical_values_set
 
-    vc_base.set_game_values_for_children(game_values)
+    vc_base.set_graphical_values_for_children()
     assert child_vc.graphical_values_set
 
 def test_in_rect(vc_base: VisualComponent):
@@ -144,14 +146,14 @@ def test_in_rect(vc_base: VisualComponent):
     assert vc_base.in_rect((10, 20)) is True
     assert vc_base.in_rect((0, 0)) is False
 
-def test__draw_background(vc_base: VisualComponent, game_values: dict):
+def test__draw_background(vc_base: VisualComponent):
     """
     Test internal method _draw_background covers the branch of having a background color,
     having a background image, or neither.
     """
     vc_base.active = True
     vc_base.image_url = "assets/test_image.png"
-    vc_base.set_game_values(game_values)
+    vc_base.set_graphical_values()
 
     # 1) background_image is not None
     assert vc_base._draw_background() is True
@@ -164,11 +166,11 @@ def test__draw_background(vc_base: VisualComponent, game_values: dict):
     vc_base.background_color = None
     assert vc_base._draw_background() is True
 
-def test__draw_debug_border(vc_base: VisualComponent, game_values: dict):
+def test__draw_debug_border(vc_base: VisualComponent):
     """
     Test internal method _draw_debug_border is called only if debug is True and color is set.
     """
-    vc_base.set_game_values(game_values)
+    vc_base.set_graphical_values()
 
     vc_base.active = True
     assert vc_base._draw_debug_border() is True
@@ -189,38 +191,38 @@ def test__draw_debug_border(vc_base: VisualComponent, game_values: dict):
 #     vc_base.enable()
 #     assert vc_base._draw_children() is True
 
-def test_render_text(vc_base: VisualComponent, game_values: dict):
+def test_render_text(vc_base: VisualComponent):
     """
     Test rendering text with a given font, text, etc.
     """
     vc_base.active = True
     vc_base.text = "Hello World"
-    vc_base.set_game_values(game_values)
+    vc_base.set_graphical_values()
 
     assert vc_base.render_text() is True
 
-def test_render_text_no_text(vc_base: VisualComponent, game_values: dict):
+def test_render_text_no_text(vc_base: VisualComponent):
     """
     Test render_text returns immediately if text is None or empty.
     """
     vc_base.active = True
     vc_base.text = None
-    vc_base.set_game_values(game_values)
+    vc_base.set_graphical_values()
     assert vc_base.render_text() is False
 
-def test_render_text_not_active(vc_base: VisualComponent, game_values: dict):
+def test_render_text_not_active(vc_base: VisualComponent):
     """
     Test render_text raises if the component is not active.
     """
     vc_base.text = "Hello World"
     vc_base.active = False
-    vc_base.set_game_values(game_values)
+    vc_base.set_graphical_values()
 
     with pytest.raises(ValueError) as exc_info:
         vc_base.render_text()
     assert "UIComponent must be enabled" in str(exc_info.value)
 
-def test_draw(vc_base: VisualComponent, game_values: dict):
+def test_draw(vc_base: VisualComponent):
     """
     Test draw() calls draw_() if active, otherwise raises.
     """
@@ -230,7 +232,7 @@ def test_draw(vc_base: VisualComponent, game_values: dict):
     assert "Visual Component must be enabled" in str(exc_info.value)
     vc_base.need_to_update = False
     vc_base.active = True
-    vc_base.set_game_values(game_values)
+    vc_base.set_graphical_values()
     assert isinstance(vc_base.draw(), Surface)
     vc_base.width = 0
     vc_base.height = 0
@@ -243,22 +245,22 @@ def test_get_rect(vc_base: VisualComponent):
     vc_base.rect = Rect(10, 20, 30, 40)
     assert vc_base.get_rect() == vc_base.rect
 
-def test_text_font(vc_base: VisualComponent, game_values: dict):
+def test_text_font(vc_base: VisualComponent):
     """
     Test that text_font is set to a Font object if it's a string.
     """
     game = Game()
     
     vc_base.text_font = "assets/fonts/ARIAL.TTF"
-    vc_base.set_game_values(game.game_values)
+    vc_base.set_graphical_values()
     print(vc_base.text_font)
     print(game_values)
     assert isinstance(vc_base.text_font, Font)
 
-def test_image_url(game_values: dict):
+def test_image_url():
     """
     Test that image_url is loaded and scaled if it's a string.
     """
     component: VisualComponent = VisualComponent(name="TestVC", top_level=True, width=50, height=50, x_coordinate=0, y_coordinate=0, image_url="assets/test_image.png")
-    component.set_game_values(game_values)
+    component.set_graphical_values()
     assert isinstance(component.background_image, Surface)
