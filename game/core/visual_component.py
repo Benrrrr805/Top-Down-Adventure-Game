@@ -21,28 +21,22 @@ class VisualComponent(GameComponent):
         children=None, parent=None
     ):
         super().__init__(name, top_level, children, parent)
-
         self.rect: Rect = None
         self.surface: Surface = None
-
         self.image_url: str = image_url
         self.background_color: tuple[int, int, int] = background_color
         self.background_image: Surface = None
-
         self.width: int = width
         self.height: int = height
         self.x_coordinate: int = x_coordinate
         self.y_coordinate: int = y_coordinate
-
         self.text: str = text
         self.text_font: Font = text_font
         self.text_size: int = text_size
         self.text_color: tuple[int, int, int] = text_color
         self.text_position: tuple[int, int] = text_position
-
         self.debug_color: tuple[int, int, int] = None
         self.graphical_values_set: bool = False
-
 
     def __str__(self):
         # Pretty-print the dictionary with 4-space indentation
