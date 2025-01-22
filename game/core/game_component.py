@@ -17,6 +17,7 @@ class GameComponent(Node):
         self.active: bool = False
         self.game_values_set: bool = False
         self.debug: bool = False
+        self.debug_color: tuple[int, int, int] = None
         self.need_to_update: bool = False
         
     # ------------------------------------------------------------------------
@@ -38,6 +39,7 @@ class GameComponent(Node):
             "game_values_set": self.game_values_set,
             "need_to_update": self.need_to_update,
             "debug": self.debug,
+            "debug_color": self.debug_color,
         }
         node_data.update(game_component_data)
         return node_data

@@ -35,7 +35,6 @@ class VisualComponent(GameComponent):
         self.text_size: int = text_size
         self.text_color: tuple[int, int, int] = text_color
         self.text_position: tuple[int, int] = text_position
-        self.debug_color: tuple[int, int, int] = None
         self.graphical_values_set: bool = False
 
     def __str__(self):
@@ -60,7 +59,6 @@ class VisualComponent(GameComponent):
             "text_color": self.text_color,
             "text_position": self.text_position,
 
-            "debug_color": self.debug_color,
             "graphical_values_set": self.graphical_values_set
         }
         game_component_data.update(visual_component_data)
