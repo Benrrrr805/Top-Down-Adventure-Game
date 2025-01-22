@@ -46,6 +46,7 @@ class VisualComponent(GameComponent):
         self.rect: Rect = None
         self.surface: Surface = None
         self.background_image: Surface = None
+        self.graphical_values_set: bool = False
 
 
     def __str__(self):
@@ -69,7 +70,8 @@ class VisualComponent(GameComponent):
             "text_position": self.text_position,
             "rect": type(self.rect).__name__,
             "surface": type(self.surface).__name__,
-            "background_image": type(self.background_image).__name__
+            "background_image": type(self.background_image).__name__,
+            "graphical_values_set": self.graphical_values_set
         }
         game_component_data.update(visual_component_data)
         return game_component_data
@@ -208,23 +210,18 @@ class VisualComponent(GameComponent):
     def get_rect(self) -> Optional[Rect]:
         return self.rect
     
-    def set_game_values(self, game_values: 'dict') -> None:
+    def set_graphical_values(self) -> None | bool:
         """
-        Set references needed to access Pygame or global game resources.
-        For UI usage, also create surfaces/rect if graphics_enabled = True.
+        Sets the graphical values for this visual component.
+        The game_values must already be set.
         """
-        if self.pygame_values_set:
-            print(f"Game values already set for {self.name}. Skipping.")
-            return None
+        if not self.game_values_set:
+            raise ValueError("In order to set graphical values, the game values must already be set.")
+        if self.graphical_values_set:
+            print(f"graphical values already set for {self.name}. Skipping.")
+            return False
         else:
-            print(f"Setting game values for {self.name}.")
-        self.game_values = game_values
-        self.pygame: pygame = game_values['pygame']
-        self.screen: Surface = game_values['screen']
-        self.display: display = game_values['display']
-        self.debug: bool = game_values['debug']
-        self.debug_color: tuple[int, int, int] = game_values['debug_color']
-        self.game_values = game_values
+            print(f"Setting graphical values for {self.name}.")
 
         if self.parent and isinstance(self.parent, VisualComponent):
             # Offset coordinates by parent's coordinates
@@ -249,27 +246,26 @@ class VisualComponent(GameComponent):
             img: Surface = self.pygame.image.load(self.image_url).convert_alpha()
             self.background_image: Surface = self.pygame.transform.scale(img, (self.width, self.height))
 
-        self.pygame_values_set: bool = True
+        self.graphical_values_set: bool = True
 
-    def set_game_values_for_children(self, game_values: 'dict') -> None:
+    def set_graphical_values_for_children(self) -> None:
         for child in self.children:
             if isinstance(child, VisualComponent):
-                child.set_game_values(game_values)
-                child.set_game_values_for_children(game_values)
+                child.set_graphical_values()
+                child.set_graphical_values_for_children()
 
-    def reset_game_values(self):
-        self.pygame_values_set = False
-        self.pygame = None
-        self.screen = None
-        self.display = None
+    def reset_graphical_values(self):
         self.debug_color = None
         self.rect = None
         self.surface = None
         self.background_image = None
         self.text_font = None
+        self.x_coordinate = 0
+        self.y_coordinate = 0
+        self.graphical_values_set = False
 
-    def reset_game_values_for_children(self):
+    def reset_graphical_values_for_children(self):
         for child in self.children:
             if isinstance(child, VisualComponent):
-                child.reset_game_values()
-                child.reset_game_values_for_children()
+                child.reset_graphical_values()
+                child.reset_graphical_values_for_children()

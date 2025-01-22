@@ -2,18 +2,24 @@ from types import FunctionType
 from game.core.event_queue import EventQueue
 from game.core.node import Node
 import json
+import pygame
+from pygame import Surface, display
 
 class GameComponent(Node):
     def __init__(self, name, top_level, children=None, parent=None):
         super().__init__(name, top_level, children, parent)
         self.event_queue: EventQueue = None
         self.active: bool = False
-        self.pygame_values_set: bool = False
+        self.game_values_set: bool = False
         self.helper_functions: dict = {}
         self.debug: bool = False
+        self.game_values_set: bool = False
+        
+    # ------------------------------------------------------------------------
+    #  Pretty Printing
+    # ------------------------------------------------------------------------
 
     def __str__(self):
-        # Pretty-print the dictionary with 4-space indentation
         return json.dumps(self.to_dict(), indent=4)
 
     def to_dict(self):
@@ -21,12 +27,61 @@ class GameComponent(Node):
         game_component_data = {
             "event_queue": self.event_queue.to_dict() if self.event_queue and isinstance(self.event_queue, EventQueue) else None,
             "active": self.active,
-            "pygame_values_set": self.pygame_values_set,
+            "pygame_values_set": self.game_values_set,
             "helper_functions": self.helper_functions,
-            "debug": self.debug
+            "debug": self.debug,
+            "game_values_set": self.game_values_set
         }
         node_data.update(game_component_data)
         return node_data
+    
+    # ------------------------------------------------------------------------
+    # Set Game Values
+    # ------------------------------------------------------------------------
+
+    def set_game_values(self, game_values):
+        if self.game_values_set:
+            print(f"Game values already set for {self.name}. Skipping.")
+            return False
+        else:
+            print(f"Setting game values for {self.name}.")
+
+        self.game_values = game_values
+        self.event_queue = game_values['event_queue']
+        self.pygame: pygame = game_values['pygame']
+        self.screen: Surface = game_values['screen']
+        self.display: display = game_values['display']
+        self.debug: bool = game_values['debug']
+        self.debug_color: tuple[int, int, int] = (255, 0, 0)
+        self.game_values_set = True
+        return True
+    
+    def set_game_values_for_children(self):
+        for child in self.children:
+            if isinstance(child, GameComponent):
+                child.set_game_values(self.game_values)
+                child.set_game_values_for_children()
+    
+    # ------------------------------------------------------------------------
+    # Reset Game Values
+    # ------------------------------------------------------------------------
+
+    def reset_game_values(self):
+        self.event_queue = None
+        self.pygame = None
+        self.screen = None
+        self.display = None
+        self.debug = False
+        self.debug_color = None
+        self.game_values = None
+        self.game_values_set = False
+
+    def reset_game_values_for_children(self):
+        for child in self.children:
+            if isinstance(child, GameComponent):
+                child.reset_game_values()
+                child.reset_game_values_for_children()
+
     # ----------------------------------------------------------------------
     # Helper Function System (from original GameComponent)
     # ----------------------------------------------------------------------
