@@ -254,6 +254,17 @@ class VisualComponent(GameComponent):
                 child.set_graphical_values()
                 child.set_graphical_values_for_children()
 
+    def link_child(self, child):
+        super().link_child(child)
+        self.set_graphical_values()
+        if isinstance(child, VisualComponent):
+            child.set_graphical_values()
+            child.set_graphical_values_for_children()
+
+    def link_children(parent, children):
+        for child in children:
+            parent.link_child(child)
+
     def reset_graphical_values(self):
         self.debug_color = None
         self.rect = None

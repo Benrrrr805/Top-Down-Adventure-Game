@@ -82,6 +82,20 @@ class GameComponent(Node):
                 child.reset_game_values()
                 child.reset_game_values_for_children()
 
+    # ------------------------------------------------------------------------
+    # Linking Children
+    # ------------------------------------------------------------------------
+    
+    def link_child(self, child):
+        super().link_child(child)
+        if self.game_values_set and isinstance(child, GameComponent):
+            child.set_game_values(self.game_values)
+            child.set_game_values_for_children()
+
+    def link_children(parent, children):
+        for child in children:
+            parent.link_child(child)
+
     # ----------------------------------------------------------------------
     # Helper Function System (from original GameComponent)
     # ----------------------------------------------------------------------
