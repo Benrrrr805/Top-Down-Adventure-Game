@@ -1,21 +1,59 @@
 import pytest
 import pygame
+
 from game.core.game_component import GameComponent
 from game.core.event_queue import EventQueue
 from game.validation.game_component_validator import GameComponentValidator
 
+@pytest.fixture(scope="module", autouse=True)
+def pygame_setup_teardown():
+    """
+    Initializes pygame once per module and quits after tests to
+    avoid hanging or leftover pygame resources.
+    """
+    pygame.init()
+    yield
+    pygame.quit()
+
 @pytest.fixture
 def valid_game_component():
     """
-    Return a valid GameComponent with all attributes set to valid, expected types.
+    Creates and returns a GameComponent instance with all attributes
+    set to valid values, suitable for passing all validators.
+    Adjust as needed if your GameComponent has a specific constructor.
     """
-    component = GameComponent(name="test_component", top_level=None)
-    component.need_to_update = True
-    component.event_queue = EventQueue(pygame, False)
-    component.active = True
-    component.helper_functions = {}
-    component.debug = False
-    return component
+    gc = GameComponent()
+    gc.name = "TestComponent"
+
+    # Core attributes
+    gc.pygame = pygame
+    gc.screen = pygame.Surface((100, 100))
+    gc.display = pygame.display
+    gc.event_queue = EventQueue()
+
+    # Helper functions
+    gc.helper_functions = {
+        "example_function": lambda x: x
+    }
+
+    # game_values dictionary
+    gc.game_values = {
+        'pygame': pygame,
+        'screen': pygame.Surface((50, 50)),
+        'display': pygame.display,
+        'event_queue': EventQueue(),
+        'debug': True,
+        'debug_color': (255, 255, 255)
+    }
+
+    # Various booleans and debug color
+    gc.debug_color = (0, 0, 0)
+    gc.active = True
+    gc.game_values_set = True
+    gc.debug = True
+    gc.need_to_update = False
+
+    return gc
 
 def test_validate_is_game_component(valid_game_component):
     """
