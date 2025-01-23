@@ -199,6 +199,6 @@ def test_validate_is_disabled(valid_game_component: GameComponent):
 
 def test_validate_is_disabled_failure(valid_game_component: GameComponent):
     """Test validate_is_disabled when component is active."""
-    valid_game_component.active = False
-    with pytest.raises(AttributeError):
+    valid_game_component.active = True
+    with pytest.raises(ValueError):
         GameComponentValidator.validate_is_disabled(valid_game_component)
