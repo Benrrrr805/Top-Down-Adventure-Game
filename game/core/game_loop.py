@@ -71,7 +71,7 @@ class Game(GameComponent):
         if self.active:
             self.scene.draw()
 
-            self.run_helper_functions("draw")
+        self.run_helper_functions("draw")
 
     def set_scene(self, scene: 'StartingScene'):
         self.link_child(scene)
@@ -88,7 +88,7 @@ class Game(GameComponent):
             self.draw()
             ticks = self.clock.tick(1000)
             self.frame_rate = self.clock.get_fps()
-            if self.show_fps and self.frame_rate:
+            if self.show_fps:
                 print(f'frame_rate: {self.frame_rate}  -  milliseconds since last call: {ticks}')
 
         self.pygame.quit()
