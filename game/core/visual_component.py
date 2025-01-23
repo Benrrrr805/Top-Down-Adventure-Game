@@ -68,40 +68,42 @@ class VisualComponent(GameComponent):
     # ----------------------------------------------------------------------
 
     def in_rect(self, coordinates: tuple[int, int]) -> bool:
+        if not self.graphical_values_set or not self.game_values_set:
+            raise ValueError(f"Graphical and game values must be set before checking for rect. - {self.name}")
         if self.rect is None:
             return False
         return self.rect.collidepoint(coordinates)
 
-    def hovering(self) -> bool:
-        """
-        Return True if the mouse is over this component's rect.
-        """
-        if not self.active:
-            raise ValueError(f"UIComponent must be enabled before checking for hover. - {self.name}")
-        mouse_pos: tuple[int, int] = self.pygame.mouse.get_pos()
-        return self.in_rect(mouse_pos)
+    # def hovering(self) -> bool:
+    #     """
+    #     Return True if the mouse is over this component's rect.
+    #     """
+    #     if not self.active:
+    #         raise ValueError(f"UIComponent must be enabled before checking for hover. - {self.name}")
+    #     mouse_pos: tuple[int, int] = self.pygame.mouse.get_pos()
+    #     return self.in_rect(mouse_pos)
 
-    def clicked(self) -> bool:
-        """
-        Return True if the mouse button is down *within* this component
-        and no child component is also hovered.
-        """
-        if not self.active:
-            raise ValueError(f"UIComponent must be enabled before checking for click. - {self.name}")
-        if not self.hovering():
-            return False
+    # def clicked(self) -> bool:
+    #     """
+    #     Return True if the mouse button is down *within* this component
+    #     and no child component is also hovered.
+    #     """
+    #     if not self.active:
+    #         raise ValueError(f"UIComponent must be enabled before checking for click. - {self.name}")
+    #     if not self.hovering():
+    #         return False
 
-        # If any child is also hovered, consider that the click belongs to the child
-        for child in self.children:
-            if isinstance(child, VisualComponent) and child.hovering():
-                return False
+    #     # If any child is also hovered, consider that the click belongs to the child
+    #     for child in self.children:
+    #         if isinstance(child, VisualComponent) and child.hovering():
+    #             return False
 
-        if self.hovering() and self.event_queue and self.event_queue.has_event('MOUSEBUTTONDOWN'):
-            print(f"Clicked on UIComponent: {self.name}")
-            self.event_queue.remove_event('MOUSEBUTTONDOWN')
-            return True
+    #     if self.hovering() and self.event_queue and self.event_queue.has_event('MOUSEBUTTONDOWN'):
+    #         print(f"Clicked on UIComponent: {self.name}")
+    #         self.event_queue.remove_event('MOUSEBUTTONDOWN')
+    #         return True
 
-        return False
+    #     return False
     
     # ----------------------------------------------------------------------
     # Rendering Helpers
@@ -110,6 +112,8 @@ class VisualComponent(GameComponent):
         """
         Draws the component's background (image or color).
         """
+        if not self.graphical_values_set or not self.game_values_set:
+            raise ValueError("Graphical and game values must be set before drawing background.")
         if self.background_image is not None:
             self.surface.blit(self.background_image, (0, 0))
         elif self.background_color is not None:
@@ -124,6 +128,8 @@ class VisualComponent(GameComponent):
         Draws a debug border if debug mode is active.
         """
         print(f"Debug: {self.debug}, Debug Color: {self.debug_color}")
+        if not self.graphical_values_set or not self.game_values_set:
+            raise ValueError("Graphical and game values must be set before drawing debug border.")
         if self.debug and self.debug_color:
             self.pygame.draw.rect(
                 self.surface, self.debug_color, (0, 0, self.width, self.height), 5
@@ -134,6 +140,8 @@ class VisualComponent(GameComponent):
         """
         Draws all child components onto this surface.
         """
+        if not self.graphical_values_set or not self.game_values_set:
+            raise ValueError("Graphical and game values must be set before drawing children.")
         for child in self.children:
             if not isinstance(child, VisualComponent):
                 continue
@@ -154,7 +162,8 @@ class VisualComponent(GameComponent):
             return False
         if not self.active:
             raise ValueError(f"UIComponent must be enabled before rendering text. - {self.name}")
-
+        if not self.graphical_values_set or not self.game_values_set:
+            raise ValueError(f"Graphical values and game values must be set before rendering text. - {self.name}")
         text_surface: Surface = self.text_font.render(self.text, True, self.text_color)
         text_rect: Rect = text_surface.get_rect()
         text_rect.topleft = self.text_position
@@ -162,6 +171,8 @@ class VisualComponent(GameComponent):
         return True
 
     def draw_(self) -> Optional[Surface]:
+        if not self.graphical_values_set or not self.game_values_set:
+            raise ValueError(f"Graphical and game values must be set before drawing. - {self.name}")
         if self.width == 0 or self.height == 0:
             return False
 
