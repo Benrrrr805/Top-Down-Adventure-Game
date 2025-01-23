@@ -9,26 +9,52 @@ class GameComponentValidator(NodeValidator):
     """
 
     @staticmethod
+    def validate_pygame_(pygame_) -> bool:
+        return pygame_ is not None and pygame_ is pygame
+    
+    @staticmethod
+    def validate_screen_(screen: pygame.Surface) -> bool:
+        return screen is not None and isinstance(screen, pygame.Surface)
+    
+    @staticmethod
+    def validate_display_(display: pygame.Surface) -> bool:
+        return display is not None and display is pygame.display
+    
+    @staticmethod
+    def validate_event_queue_(event_queue: EventQueue) -> bool:
+        return event_queue is not None and isinstance(event_queue, EventQueue)
+    
+    @staticmethod
+    def validate_debug_color_(debug_color: tuple) -> bool:
+        return isinstance(debug_color, tuple) and len(debug_color) in (3, 4)
+    
+    @staticmethod
+    def validate_debug_(debug: bool) -> bool:
+        return isinstance(debug, bool)
+    
+    
+    
+    @staticmethod
     def validate_pygame(game_component: 'GameComponent') -> bool:
-        if game_component.pygame is None or not game_component.pygame is pygame:
+        if not GameComponentValidator.validate_pygame_(game_component.pygame):
             raise ValueError(f"GameComponent must have a pygame instance. - {game_component.name}")
         return True
     
     @staticmethod
     def validate_screen(game_component: 'GameComponent') -> bool:
-        if game_component.screen is None or not isinstance(game_component.screen, pygame.Surface):
+        if not GameComponentValidator.validate_screen_(game_component.screen):
             raise ValueError(f"GameComponent must have a screen. - {game_component.name}")
         return True
     
     @staticmethod
     def validate_display(game_component: 'GameComponent') -> bool:
-        if game_component.display is None or not game_component.display is pygame.display:
+        if not GameComponentValidator.validate_display_(game_component.display):
             raise ValueError(f"GameComponent must have a display. - {game_component.name}")
         return True
     
     @staticmethod
     def validate_event_queue(game_component: 'GameComponent') -> bool:
-        if game_component.event_queue is None or not game_component.event_queue is EventQueue:
+        if not GameComponentValidator.validate_event_queue_(game_component.event_queue):
             raise ValueError(f"GameComponent must have an event_queue. - {game_component.name}")
         return True
     
@@ -45,27 +71,23 @@ class GameComponentValidator(NodeValidator):
     def validate_game_values(game_component: 'GameComponent') -> bool:
         if not isinstance(game_component.game_values, dict):
             raise ValueError(f"GameComponent: {game_component.name} - Failed validation. game_values must be a dictionary.")
-        if not isinstance(game_component.game_values['pygame'], pygame):
+        if not GameComponentValidator.validate_pygame_(game_component.game_values['pygame']):
             raise ValueError(f"GameComponent: {game_component.name} - Failed validation. game_values['pygame'] must be a pygame instance.")
-        if not isinstance(game_component.game_values['screen'], pygame.Surface):
+        if not GameComponentValidator.validate_screen_(game_component.game_values['screen']):
             raise ValueError(f"GameComponent: {game_component.name} - Failed validation. game_values['screen'] must be a pygame.Surface.")
-        if not game_component.game_values['display'] is pygame.display:
+        if not GameComponentValidator.validate_display_(game_component.game_values['display']):
             raise ValueError(f"GameComponent: {game_component.name} - Failed validation. game_values['display'] must be pygame.display.")
-        if not game_component.game_values['event_queue'] is EventQueue:
+        if not GameComponentValidator.validate_event_queue_(game_component.game_values['event_queue']):
             raise ValueError(f"GameComponent: {game_component.name} - Failed validation. game_values['event_queue'] must be EventQueue.")
         if not isinstance(game_component.game_values['debug'], bool):
             raise ValueError(f"GameComponent: {game_component.name} - Failed validation. game_values['debug'] must be a boolean.")
-        if not isinstance(game_component.game_values['debug_color'], tuple):
-            raise ValueError(f"GameComponent: {game_component.name} - Failed validation. game_values['debug_color'] must be a tuple.")
-        if len(game_component.game_values['debug_color']) not in (3, 4):
+        if not GameComponentValidator.validate_debug_color_(game_component.game_values['debug_color']):
             raise ValueError(f"GameComponent: {game_component.name} - Failed validation. game_values['debug_color'] must be an RGB or RGBA tuple.")
         return True
     
     @staticmethod
     def validate_debug_color(game_component: 'GameComponent') -> bool:
-        if not isinstance(game_component.debug_color, tuple):
-            raise ValueError(f"GameComponent: {game_component.name} - Failed validation. debug_color must be a tuple.")
-        if len(game_component.debug_color) not in (3, 4):
+        if not GameComponentValidator.validate_debug_color_(game_component.debug_color):
             raise ValueError(f"GameComponent: {game_component.name} - Failed validation. debug_color must be an RGB or RGBA tuple.")
         return True
     
