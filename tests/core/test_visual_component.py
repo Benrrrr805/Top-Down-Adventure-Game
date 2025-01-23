@@ -139,14 +139,18 @@ def test_set_graphical_values_for_children(vc_base: VisualComponent):
 
 def test_in_rect(vc_base: VisualComponent):
     """
-    Test in_rect returns False if rect is None or if point is outside, True if inside.
+    Test in_rect returns if point is outside, True if inside. Throws Error if values not set.
     """
-    assert vc_base.in_rect((0, 0)) is False
-
+    vc_base.set_graphical_values()
     vc_base.rect = Rect(10, 20, 100, 50)
 
     assert vc_base.in_rect((10, 20)) is True
     assert vc_base.in_rect((0, 0)) is False
+
+    vc_base.reset_graphical_values()
+    with pytest.raises(ValueError) as exc_info:
+        vc_base.in_rect((0, 0))
+    assert "Graphical and game values must be set" in str(exc_info.value)
 
 def test__draw_background(vc_base: VisualComponent):
     """
@@ -168,6 +172,11 @@ def test__draw_background(vc_base: VisualComponent):
     vc_base.background_color = None
     assert vc_base._draw_background() is True
 
+    vc_base.reset_graphical_values()
+    with pytest.raises(ValueError) as exc_info:
+        vc_base._draw_background()
+    assert "Graphical and game values must be set" in str(exc_info.value)
+
 def test__draw_debug_border(vc_base: VisualComponent):
     """
     Test internal method _draw_debug_border is called only if debug is True and color is set.
@@ -180,6 +189,11 @@ def test__draw_debug_border(vc_base: VisualComponent):
     vc_base.debug = False
     assert vc_base._draw_debug_border() is True
 
+    vc_base.reset_graphical_values()
+    with pytest.raises(ValueError) as exc_info:
+        vc_base._draw_debug_border()
+    assert "Graphical and game values must be set" in str(exc_info.value)
+
 def test__draw_children(vc_base: VisualComponent):
     """
     Test that each child that is a VisualComponent has its draw() method called.
@@ -191,6 +205,17 @@ def test__draw_children(vc_base: VisualComponent):
     vc_base.enable()
     assert vc_base._draw_children() is True
 
+    vc_base.reset_graphical_values()
+    with pytest.raises(ValueError) as exc_info:
+        vc_base._draw_children()
+    assert "Graphical and game values must be set" in str(exc_info.value)
+    vc_base.set_graphical_values()
+
+    vc_base.reset_game_values_for_children()
+    with pytest.raises(ValueError) as exc_info:
+        vc_base._draw_children()
+    assert "Graphical and game values must be set before drawing children" in str(exc_info.value)
+
 def test_render_text(vc_base: VisualComponent):
     """
     Test rendering text with a given font, text, etc.
@@ -200,6 +225,12 @@ def test_render_text(vc_base: VisualComponent):
     vc_base.set_graphical_values()
 
     assert vc_base.render_text() is True
+
+    vc_base.reset_graphical_values()
+    with pytest.raises(ValueError) as exc_info:
+        vc_base.render_text()
+    assert "Graphical and game values must be set" in str(exc_info.value)
+
 
 def test_render_text_no_text(vc_base: VisualComponent):
     """
@@ -237,6 +268,11 @@ def test_draw(vc_base: VisualComponent):
     vc_base.width = 0
     vc_base.height = 0
     assert vc_base.draw() is False
+
+    vc_base.reset_graphical_values()
+    with pytest.raises(ValueError) as exc_info:
+        vc_base.draw()
+    assert "Graphical and game values must be set" in str(exc_info.value)
 
 def test_get_rect(vc_base: VisualComponent):
     """
