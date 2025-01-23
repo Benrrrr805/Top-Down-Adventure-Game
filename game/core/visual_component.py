@@ -70,8 +70,6 @@ class VisualComponent(GameComponent):
     def in_rect(self, coordinates: tuple[int, int]) -> bool:
         if not self.graphical_values_set or not self.game_values_set:
             raise ValueError(f"Graphical and game values must be set before checking for rect. - {self.name}")
-        if self.rect is None:
-            return False
         return self.rect.collidepoint(coordinates)
 
     # def hovering(self) -> bool:
@@ -146,6 +144,8 @@ class VisualComponent(GameComponent):
             if not isinstance(child, VisualComponent):
                 continue
             else:
+                if not child.graphical_values_set or not child.game_values_set:
+                    raise ValueError(f"Graphical and game values must be set before drawing children. - {child.name}")
                 child_surface: Surface = child.draw()
                 if child_surface is not None:
                     x: int = child.x_coordinate - self.x_coordinate
@@ -163,7 +163,7 @@ class VisualComponent(GameComponent):
         if not self.active:
             raise ValueError(f"UIComponent must be enabled before rendering text. - {self.name}")
         if not self.graphical_values_set or not self.game_values_set:
-            raise ValueError(f"Graphical values and game values must be set before rendering text. - {self.name}")
+            raise ValueError(f"Graphical and game values must be set before rendering text. - {self.name}")
         text_surface: Surface = self.text_font.render(self.text, True, self.text_color)
         text_rect: Rect = text_surface.get_rect()
         text_rect.topleft = self.text_position
