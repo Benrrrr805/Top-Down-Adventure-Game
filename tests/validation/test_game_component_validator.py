@@ -28,7 +28,7 @@ def valid_game_component():
     gc.pygame = pygame
     gc.screen = pygame.Surface((100, 100))
     gc.display = pygame.display
-    gc.event_queue = EventQueue(pygame, False)
+    gc.event_queue = EventQueue(pygame, True)
 
     # Helper functions
     gc.helper_functions = {
@@ -40,7 +40,7 @@ def valid_game_component():
         'pygame': pygame,
         'screen': pygame.Surface((50, 50)),
         'display': pygame.display,
-        'event_queue': EventQueue(pygame, False),
+        'event_queue': EventQueue(pygame, True),
         'debug': True,
         'debug_color': (255, 255, 255)
     }
@@ -113,8 +113,7 @@ def test_validate_helper_functions(valid_game_component: GameComponent):
     assert GameComponentValidator.validate_helper_functions(valid_game_component)
 
 def test_validate_helper_functions_failure(valid_game_component: GameComponent):
-    """Test validate_helper_functions raises ValueError for non-callable items."""
-    valid_game_component.helper_functions = {"broken_func": 123}
+    valid_game_component.helper_functions = {"not_callable": 123}
     with pytest.raises(ValueError):
         GameComponentValidator.validate_helper_functions(valid_game_component)
 
@@ -122,9 +121,8 @@ def test_validate_game_values(valid_game_component: GameComponent):
     """Test validate_game_values with valid data."""
     assert GameComponentValidator.validate_game_values(valid_game_component)
 
-def test_validate_game_values_failure_missing_key(valid_game_component: GameComponent):
-    """Test validate_game_values raises ValueError if a required key is missing."""
-    del valid_game_component.game_values['debug']  # remove required key
+def test_validate_game_values_failure_not_dict(valid_game_component: GameComponent):
+    valid_game_component.game_values = "Not a dict"
     with pytest.raises(ValueError):
         GameComponentValidator.validate_game_values(valid_game_component)
 
@@ -132,9 +130,8 @@ def test_validate_debug_color(valid_game_component: GameComponent):
     """Test validate_debug_color with valid data."""
     assert GameComponentValidator.validate_debug_color(valid_game_component)
 
-def test_validate_debug_color_failure_length(valid_game_component: GameComponent):
-    """Test validate_debug_color raises ValueError for invalid color tuple length."""
-    valid_game_component.debug_color = (255, 255)  # invalid length
+def test_validate_debug_color_failure(valid_game_component: GameComponent):
+    valid_game_component.debug_color = (0, 0)  # Invalid length
     with pytest.raises(ValueError):
         GameComponentValidator.validate_debug_color(valid_game_component)
 
@@ -143,8 +140,7 @@ def test_validate_active(valid_game_component: GameComponent):
     assert GameComponentValidator.validate_active(valid_game_component)
 
 def test_validate_active_failure(valid_game_component: GameComponent):
-    """Test validate_active raises ValueError when active is not boolean."""
-    valid_game_component.active = "not a bool"
+    valid_game_component.active = "Not a bool"
     with pytest.raises(ValueError):
         GameComponentValidator.validate_active(valid_game_component)
 
@@ -153,8 +149,7 @@ def test_validate_game_values_set(valid_game_component: GameComponent):
     assert GameComponentValidator.validate_game_values_set(valid_game_component)
 
 def test_validate_game_values_set_failure(valid_game_component: GameComponent):
-    """Test validate_game_values_set raises ValueError when not boolean."""
-    valid_game_component.game_values_set = "not a bool"
+    valid_game_component.game_values_set = None
     with pytest.raises(ValueError):
         GameComponentValidator.validate_game_values_set(valid_game_component)
 
@@ -163,8 +158,7 @@ def test_validate_debug(valid_game_component: GameComponent):
     assert GameComponentValidator.validate_debug(valid_game_component)
 
 def test_validate_debug_failure(valid_game_component: GameComponent):
-    """Test validate_debug raises ValueError when debug is not boolean."""
-    valid_game_component.debug = "not a bool"
+    valid_game_component.debug = "Not a bool"
     with pytest.raises(ValueError):
         GameComponentValidator.validate_debug(valid_game_component)
 
@@ -173,10 +167,12 @@ def test_validate_need_to_update(valid_game_component: GameComponent):
     assert GameComponentValidator.validate_need_to_update(valid_game_component)
 
 def test_validate_need_to_update_failure(valid_game_component: GameComponent):
-    """Test validate_need_to_update raises ValueError when need_to_update is not boolean."""
-    valid_game_component.need_to_update = "not a bool"
+    valid_game_component.need_to_update = "Not a bool"
     with pytest.raises(ValueError):
         GameComponentValidator.validate_need_to_update(valid_game_component)
+
+def test_validate_base_values(valid_game_component: GameComponent):
+    assert GameComponentValidator.validate_base_values(valid_game_component)
 
 def test_full_validate(valid_game_component: GameComponent):
     """Test the full_validate method with a valid GameComponent."""
@@ -193,12 +189,9 @@ def test_validate_is_enabled_failure(valid_game_component: GameComponent):
         GameComponentValidator.validate_is_enabled(valid_game_component)
 
 def test_validate_is_disabled(valid_game_component: GameComponent):
-    """Test validate_is_disabled when component is not active."""
-    valid_game_component.active = False
-    GameComponentValidator.validate_is_disabled(valid_game_component)
-
-def test_validate_is_disabled_failure(valid_game_component: GameComponent):
-    """Test validate_is_disabled when component is active."""
-    valid_game_component.active = True
     with pytest.raises(ValueError):
         GameComponentValidator.validate_is_disabled(valid_game_component)
+
+def test_validate_is_disabled_pass(valid_game_component: GameComponent):
+    valid_game_component.active = False
+    GameComponentValidator.validate_is_disabled(valid_game_component)
