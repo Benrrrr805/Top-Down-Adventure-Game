@@ -15,11 +15,6 @@ from game.settings import BLACK
 # Pytest Fixtures
 # ------------------------------------------------------------------------------
 
-@pytest.fixture
-def game_values() -> dict:
-    
-    game = Game()
-    return game.game_values
 
 @pytest.fixture
 def vc_base() -> VisualComponent:
@@ -245,12 +240,8 @@ def test_text_font(vc_base: VisualComponent):
     """
     Test that text_font is set to a Font object if it's a string.
     """
-    game = Game()
-    
     vc_base.text_font = "assets/fonts/ARIAL.TTF"
     vc_base.set_graphical_values()
-    print(vc_base.text_font)
-    print(game_values)
     assert isinstance(vc_base.text_font, Font)
 
 def test_image_url():

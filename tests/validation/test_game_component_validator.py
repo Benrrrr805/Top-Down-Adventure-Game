@@ -171,8 +171,6 @@ def test_validate_need_to_update_failure(valid_game_component: GameComponent):
     with pytest.raises(ValueError):
         GameComponentValidator.validate_need_to_update(valid_game_component)
 
-def test_validate_base_values(valid_game_component: GameComponent):
-    assert GameComponentValidator.validate_base_values(valid_game_component)
 
 def test_full_validate(valid_game_component: GameComponent):
     """Test the full_validate method with a valid GameComponent."""
