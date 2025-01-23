@@ -100,6 +100,15 @@ def test_set_graphical_values(vc_base: VisualComponent):
     assert isinstance(vc_base.surface, Surface)
     assert not vc_base.set_graphical_values()
 
+def test_set_graphical_values_no_game_values(vc_base: VisualComponent):
+    """
+    Test that an exception is raised if game_values is None.
+    """
+    vc_base.reset_game_values()
+    with pytest.raises(ValueError) as exc_info:
+        vc_base.set_graphical_values()
+    assert "game values must already be set" in str(exc_info.value)
+
 
 def test_set_graphical_values_nonexistent_image(vc_base: VisualComponent):
     """
@@ -252,3 +261,29 @@ def test_image_url():
     component.set_game_values(Game().game_values)
     component.set_graphical_values()
     assert isinstance(component.background_image, Surface)
+
+def test_reset_graphical_values(vc_base: VisualComponent):
+    """
+    Test that reset_graphical_values sets graphical_values_set to False and resets the graphical values.
+    """
+    vc_base.set_graphical_values()
+    vc_base.reset_graphical_values()
+    assert not vc_base.graphical_values_set
+    assert vc_base.text_font is None
+    assert vc_base.rect is None
+    assert vc_base.surface is None
+
+def test_reset_graphical_values_for_children(vc_base: VisualComponent):
+    """
+    Test that reset_graphical_values_for_children calls reset_graphical_values for child VisualComponents.
+    """
+    child_vc: VisualComponent = VisualComponent(name="ChildVC", top_level=False)
+    child_vc.set_game_values(Game().game_values)
+    vc_base.children.append(child_vc)
+
+    # Before resetting
+    assert not child_vc.graphical_values_set
+
+    vc_base.set_graphical_values_for_children()
+    vc_base.reset_graphical_values_for_children()
+    assert not child_vc.graphical_values_set

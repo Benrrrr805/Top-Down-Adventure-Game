@@ -184,3 +184,15 @@ def test_link_children(game_component: GameComponent):
     game_component.link_children([child1, child2])
     assert child1.parent == game_component
     assert child2.parent == game_component
+
+def test_reset_game_values(game_component: GameComponent):
+    game_component.game_values_set = True
+    game_component.reset_game_values()
+    assert game_component.game_values_set is False
+
+def test_reset_game_values_for_children(game_component: GameComponent):
+    game_component.game_values_set = True
+    child = GameComponent(name="ChildComponent", top_level=False, parent=game_component)
+    game_component.children.append(child)
+    game_component.reset_game_values_for_children()
+    assert child.game_values_set is False
