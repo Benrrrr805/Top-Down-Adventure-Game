@@ -179,3 +179,27 @@ def test_validate_need_to_update_failure(valid_game_component):
     with pytest.raises(ValueError):
         GameComponentValidator.validate_need_to_update(valid_game_component)
 
+def test_full_validate(valid_game_component):
+    """Test the full_validate method with a valid GameComponent."""
+    assert GameComponentValidator.full_validate(valid_game_component)
+
+def test_validate_is_enabled(valid_game_component):
+    """Test validate_is_enabled when component is active."""
+    assert GameComponentValidator.validate_is_enabled(valid_game_component)
+
+def test_validate_is_enabled_failure(valid_game_component):
+    """Test validate_is_enabled raises when component is inactive."""
+    valid_game_component.active = False
+    with pytest.raises(ValueError):
+        GameComponentValidator.validate_is_enabled(valid_game_component)
+
+def test_validate_is_disabled(valid_game_component):
+    """Test validate_is_disabled when component is not active."""
+    valid_game_component.active = False
+    GameComponentValidator.validate_is_disabled(valid_game_component)
+
+def test_validate_is_disabled_failure(valid_game_component):
+    """Test validate_is_disabled when component is active."""
+    valid_game_component.active = False
+    with pytest.raises(AttributeError):
+        GameComponentValidator.validate_is_disabled(valid_game_component)
