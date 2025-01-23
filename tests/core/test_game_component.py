@@ -172,3 +172,15 @@ def test_disable_children(game_component: GameComponent):
     game_component.children.append(child)
     game_component.disable_children()
     assert child.active is False
+
+def test_link_child(game_component: GameComponent):
+    child = GameComponent(name="ChildComponent", top_level=False, parent=game_component)
+    game_component.link_child(child)
+    assert child.parent == game_component
+
+def test_link_children(game_component: GameComponent):
+    child1 = GameComponent(name="ChildComponent1", top_level=False, parent=game_component)
+    child2 = GameComponent(name="ChildComponent2", top_level=False, parent=game_component)
+    game_component.link_children([child1, child2])
+    assert child1.parent == game_component
+    assert child2.parent == game_component

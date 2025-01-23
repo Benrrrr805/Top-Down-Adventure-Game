@@ -116,6 +116,9 @@ def test_validate_helper_functions_failure(valid_game_component: GameComponent):
     valid_game_component.helper_functions = {"not_callable": 123}
     with pytest.raises(ValueError):
         GameComponentValidator.validate_helper_functions(valid_game_component)
+    valid_game_component.helper_functions = "Not a dict"
+    with pytest.raises(ValueError):
+        GameComponentValidator.validate_helper_functions(valid_game_component)
 
 def test_validate_game_values(valid_game_component: GameComponent):
     """Test validate_game_values with valid data."""
@@ -125,6 +128,33 @@ def test_validate_game_values_failure_not_dict(valid_game_component: GameCompone
     valid_game_component.game_values = "Not a dict"
     with pytest.raises(ValueError):
         GameComponentValidator.validate_game_values(valid_game_component)
+
+def test_validate_game_values_failure_missing_keys(valid_game_component: GameComponent):
+    valid_game_component.game_values['pygame'] = None
+    with pytest.raises(ValueError):
+        GameComponentValidator.validate_game_values(valid_game_component)
+    valid_game_component.game_values['pygame'] = pygame
+    valid_game_component.game_values['screen'] = None
+    with pytest.raises(ValueError):
+        GameComponentValidator.validate_game_values(valid_game_component)
+    valid_game_component.game_values['screen'] = pygame.Surface((50, 50))
+    valid_game_component.game_values['display'] = None
+    with pytest.raises(ValueError):
+        GameComponentValidator.validate_game_values(valid_game_component)
+    valid_game_component.game_values['display'] = pygame.display
+    valid_game_component.game_values['event_queue'] = None
+    with pytest.raises(ValueError):
+        GameComponentValidator.validate_game_values(valid_game_component)
+    valid_game_component.game_values['event_queue'] = EventQueue(pygame, True)
+    valid_game_component.game_values['debug'] = None
+    with pytest.raises(ValueError):
+        GameComponentValidator.validate_game_values(valid_game_component)
+    valid_game_component.game_values['debug'] = True
+    valid_game_component.game_values['debug_color'] = None
+    with pytest.raises(ValueError):
+        GameComponentValidator.validate_game_values(valid_game_component)
+    valid_game_component.game_values['debug_color'] = (255, 255, 255)
+    assert GameComponentValidator.validate_game_values(valid_game_component)
 
 def test_validate_debug_color(valid_game_component: GameComponent):
     """Test validate_debug_color with valid data."""
