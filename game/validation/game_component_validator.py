@@ -69,19 +69,19 @@ class GameComponentValidator(NodeValidator):
     
     @staticmethod
     def validate_game_values(game_component: 'GameComponent') -> bool:
-        if not isinstance(game_component.game_values, dict):
+        if game_component.game_values is None or not isinstance(game_component.game_values, dict):
             raise ValueError(f"GameComponent: {game_component.name} - Failed validation. game_values must be a dictionary.")
-        if not GameComponentValidator.validate_pygame_(game_component.game_values['pygame']):
+        if 'pygame' not in game_component.game_values or not GameComponentValidator.validate_pygame_(game_component.game_values['pygame']):
             raise ValueError(f"GameComponent: {game_component.name} - Failed validation. game_values['pygame'] must be a pygame instance.")
-        if not GameComponentValidator.validate_screen_(game_component.game_values['screen']):
+        if  'screen' not in game_component.game_values or not GameComponentValidator.validate_screen_(game_component.game_values['screen']):
             raise ValueError(f"GameComponent: {game_component.name} - Failed validation. game_values['screen'] must be a pygame.Surface.")
-        if not GameComponentValidator.validate_display_(game_component.game_values['display']):
+        if 'display' not in game_component.game_values or not GameComponentValidator.validate_display_(game_component.game_values['display']):
             raise ValueError(f"GameComponent: {game_component.name} - Failed validation. game_values['display'] must be pygame.display.")
-        if not GameComponentValidator.validate_event_queue_(game_component.game_values['event_queue']):
+        if 'event_queue' not in game_component.game_values or not GameComponentValidator.validate_event_queue_(game_component.game_values['event_queue']):
             raise ValueError(f"GameComponent: {game_component.name} - Failed validation. game_values['event_queue'] must be EventQueue.")
-        if not isinstance(game_component.game_values['debug'], bool):
+        if 'debug' not in game_component.game_values or not isinstance(game_component.game_values['debug'], bool):
             raise ValueError(f"GameComponent: {game_component.name} - Failed validation. game_values['debug'] must be a boolean.")
-        if not GameComponentValidator.validate_debug_color_(game_component.game_values['debug_color']):
+        if 'debug_color' not in game_component.game_values or not GameComponentValidator.validate_debug_color_(game_component.game_values['debug_color']):
             raise ValueError(f"GameComponent: {game_component.name} - Failed validation. game_values['debug_color'] must be an RGB or RGBA tuple.")
         return True
     
