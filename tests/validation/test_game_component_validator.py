@@ -22,14 +22,13 @@ def valid_game_component():
     set to valid values, suitable for passing all validators.
     Adjust as needed if your GameComponent has a specific constructor.
     """
-    gc = GameComponent()
-    gc.name = "TestComponent"
+    gc = GameComponent("TestComponent", False)
 
     # Core attributes
     gc.pygame = pygame
     gc.screen = pygame.Surface((100, 100))
     gc.display = pygame.display
-    gc.event_queue = EventQueue()
+    gc.event_queue = EventQueue(pygame, False)
 
     # Helper functions
     gc.helper_functions = {
@@ -41,7 +40,7 @@ def valid_game_component():
         'pygame': pygame,
         'screen': pygame.Surface((50, 50)),
         'display': pygame.display,
-        'event_queue': EventQueue(),
+        'event_queue': EventQueue(pygame, False),
         'debug': True,
         'debug_color': (255, 255, 255)
     }
