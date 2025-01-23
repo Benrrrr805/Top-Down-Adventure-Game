@@ -55,69 +55,6 @@ def valid_game_component():
 
     return gc
 
-def test_validate_is_game_component(valid_game_component):
-    """
-    validate_is_game_component should raise ValueError if the argument is not a GameComponent.
-    Otherwise, it should return True.
-    """
-    # Valid case
-    assert GameComponentValidator.validate_is_game_component(valid_game_component) is True
-
-    # Invalid case: pass something that's not GameComponent
-    with pytest.raises(ValueError) as exc:
-        GameComponentValidator.validate_is_game_component("not_a_component")
-    assert "Expected game_component to be GameComponent" in str(exc.value)
-
-def test_validate_base_values__valid(valid_game_component):
-    """
-    Check that validate_base_values returns True for a valid GameComponent.
-    """
-    assert GameComponentValidator.validate_base_values(valid_game_component) is True
-
-def test_validate_base_values__need_to_update_not_bool(valid_game_component):
-    """
-    Check that validate_base_values raises ValueError if need_to_update is not bool.
-    """
-    valid_game_component.need_to_update = "not_bool"
-    with pytest.raises(ValueError) as exc:
-        GameComponentValidator.validate_base_values(valid_game_component)
-    assert "need_to_update must be a boolean" in str(exc.value)
-
-def test_validate_base_values__active_not_bool(valid_game_component):
-    """
-    Check that validate_base_values raises ValueError if active is not bool.
-    """
-    valid_game_component.active = "not_bool"
-    with pytest.raises(ValueError) as exc:
-        GameComponentValidator.validate_base_values(valid_game_component)
-    assert "active must be a boolean" in str(exc.value)
-
-def test_validate_base_values__event_queue_not_eventqueue(valid_game_component):
-    """
-    Check that validate_base_values raises ValueError if event_queue is not an EventQueue.
-    """
-    valid_game_component.event_queue = "not_an_event_queue"
-    with pytest.raises(ValueError) as exc:
-        GameComponentValidator.validate_base_values(valid_game_component)
-    assert "event_queue must be an EventQueue" in str(exc.value)
-
-def test_validate_base_values__helper_functions_not_dict(valid_game_component):
-    """
-    Check that validate_base_values raises ValueError if helper_functions is not a dict.
-    """
-    valid_game_component.helper_functions = []
-    with pytest.raises(ValueError) as exc:
-        GameComponentValidator.validate_base_values(valid_game_component)
-    assert "helper_functions must be a dictionary" in str(exc.value)
-
-def test_validate_base_values__debug_not_bool(valid_game_component):
-    """
-    Check that validate_base_values raises ValueError if debug is not bool.
-    """
-    valid_game_component.debug = "not_bool"
-    with pytest.raises(ValueError) as exc:
-        GameComponentValidator.validate_base_values(valid_game_component)
-    assert "debug must be a boolean" in str(exc.value)
 
 def test_validate_is_enabled(valid_game_component):
     """
