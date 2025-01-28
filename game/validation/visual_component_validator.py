@@ -21,6 +21,8 @@ class VisualComponentValidator(GameComponentValidator):
     
     @staticmethod
     def validate_image_url(visual_component: 'VisualComponent') -> bool:
+        if not visual_component.image_url:
+            return False
         if visual_component.image_url is not None and not isinstance(visual_component.image_url, str):
             raise ValueError(f"Image URL must be a string. - {visual_component.name}")
         if not os.path.exists(visual_component.image_url):
@@ -29,6 +31,8 @@ class VisualComponentValidator(GameComponentValidator):
     
     @staticmethod
     def validate_background_color(visual_component: 'VisualComponent') -> bool:
+        if not visual_component.background_color:
+            return False
         if visual_component.background_color is not None and not isinstance(visual_component.background_color, tuple):
             raise ValueError(f"Background color must be a tuple. - {visual_component.name}")
         if len(visual_component.background_color) not in (3, 4):
@@ -37,6 +41,8 @@ class VisualComponentValidator(GameComponentValidator):
 
     @staticmethod
     def validate_background_image(visual_component: 'VisualComponent') -> bool:
+        if not visual_component.background_image:
+            return False
         if visual_component.background_image is not None and not isinstance(visual_component.background_image, pygame.Surface):
             raise ValueError(f"Background image must be a pygame.Surface. - {visual_component.name}")
         return True
@@ -62,7 +68,7 @@ class VisualComponentValidator(GameComponentValidator):
         if visual_component.x_coordinate is None:
             raise ValueError(f"GameComponent must have x and y coordinates. - {visual_component.name}")
         if not isinstance(visual_component.x_coordinate, int):
-            raise ValueError(f"X coordinate must be an integer. - {visual_component.name}")
+            raise ValueError(f"{type(visual_component.x_coordinate)}X coordinate must be an integer. - {visual_component.name}")
         return True
     
     @staticmethod
@@ -93,6 +99,8 @@ class VisualComponentValidator(GameComponentValidator):
     
     @staticmethod
     def validate_text_color(visual_component: 'VisualComponent') -> bool:
+        if not visual_component.text_color:
+            return False
         if visual_component.text_color is not None and not isinstance(visual_component.text_color, tuple):
             raise ValueError(f"Text color must be a tuple. - {visual_component.name}")
         if len(visual_component.text_color) not in (3, 4):
@@ -101,6 +109,8 @@ class VisualComponentValidator(GameComponentValidator):
     
     @staticmethod
     def validate_text_position(visual_component: 'VisualComponent') -> bool:
+        if not visual_component.text_position:
+            return False
         if visual_component.text_position is not None and not isinstance(visual_component.text_position, tuple):
             raise ValueError(f"Text position must be a tuple. - {visual_component.name}")
         if len(visual_component.text_position) != 2:
