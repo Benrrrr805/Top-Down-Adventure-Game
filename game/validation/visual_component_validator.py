@@ -21,7 +21,7 @@ class VisualComponentValidator(GameComponentValidator):
     
     @staticmethod
     def validate_image_url(visual_component: 'VisualComponent') -> bool:
-        if not isinstance(visual_component.image_url, str):
+        if visual_component.image_url is not None and not isinstance(visual_component.image_url, str):
             raise ValueError(f"Image URL must be a string. - {visual_component.name}")
         if not os.path.exists(visual_component.image_url):
             raise ValueError(f"Image URL does not exist. - {visual_component.name}")
