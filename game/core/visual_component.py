@@ -71,38 +71,7 @@ class VisualComponent(GameComponent):
         if not self.graphical_values_set or not self.game_values_set:
             raise ValueError(f"Graphical and game values must be set before checking for rect. - {self.name}")
         return self.rect.collidepoint(coordinates)
-
-    # def hovering(self) -> bool:
-    #     """
-    #     Return True if the mouse is over this component's rect.
-    #     """
-    #     if not self.active:
-    #         raise ValueError(f"UIComponent must be enabled before checking for hover. - {self.name}")
-    #     mouse_pos: tuple[int, int] = self.pygame.mouse.get_pos()
-    #     return self.in_rect(mouse_pos)
-
-    # def clicked(self) -> bool:
-    #     """
-    #     Return True if the mouse button is down *within* this component
-    #     and no child component is also hovered.
-    #     """
-    #     if not self.active:
-    #         raise ValueError(f"UIComponent must be enabled before checking for click. - {self.name}")
-    #     if not self.hovering():
-    #         return False
-
-    #     # If any child is also hovered, consider that the click belongs to the child
-    #     for child in self.children:
-    #         if isinstance(child, VisualComponent) and child.hovering():
-    #             return False
-
-    #     if self.hovering() and self.event_queue and self.event_queue.has_event('MOUSEBUTTONDOWN'):
-    #         print(f"Clicked on UIComponent: {self.name}")
-    #         self.event_queue.remove_event('MOUSEBUTTONDOWN')
-    #         return True
-
-    #     return False
-    
+        
     # ----------------------------------------------------------------------
     # Rendering Helpers
     # ----------------------------------------------------------------------
