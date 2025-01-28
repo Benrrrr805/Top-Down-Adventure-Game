@@ -18,9 +18,9 @@ class ValidationDecorators:
                 valid = False
                 if isinstance(node, Node):
                     valid = NodeValidator.validate_base_values(node)
-                elif isinstance(node, GameComponent):
+                if isinstance(node, GameComponent):
                     valid = GameComponentValidator.validate_base_values(node)
-                elif isinstance(node, VisualComponent):
+                if isinstance(node, VisualComponent):
                     valid = VisualComponentValidator.validate_base_values(node)
 
                 if not valid:
@@ -48,9 +48,9 @@ class ValidationDecorators:
                 valid = False
                 if isinstance(node, Node):
                     valid = NodeValidator.full_validate(node)
-                elif isinstance(node, GameComponent):
+                if isinstance(node, GameComponent):
                     valid = GameComponentValidator.full_validate(node)
-                elif isinstance(node, VisualComponent):
+                if isinstance(node, VisualComponent):
                     valid = VisualComponentValidator.full_validate(node)
 
                 if not valid:
