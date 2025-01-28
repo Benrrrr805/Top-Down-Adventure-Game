@@ -128,6 +128,32 @@ def test_has_child():
     assert parent.has_child(grandchild) is True
     assert parent.has_child(Node(name="OtherNode")) is False
 
+def test_get_node():
+    parent = Node(name="Parent")
+    child = Node(name="Child")
+    grandchild = Node(name="Grandchild")
+    other = Node(name="Other")
+    parent.link_child(child)
+    child.link_child(grandchild)
+
+    result = parent.get_node("Grandchild")
+    assert result == grandchild
+
+    result = child.get_node("Parent")
+    assert result == parent
+
+    result = grandchild.get_node("Parent")
+    assert result == parent
+
+    result = grandchild.get_node("Child")
+    assert result == child
+
+    result = grandchild.get_node("Other")
+    assert result is other
+
+    result = parent.get_node("NonExistent")
+    assert result is None
+
 def test_get_siblings():
     parent = Node(name="Parent")
     child1 = Node(name="Child1")

@@ -1,10 +1,12 @@
 from typing import Optional
 import json
 class Node:
+    instances = {}
     def __init__(self, name: str = "Node",top_level: bool = False, children: list['Node']=None, parent: 'Node'=None):
         self.name: str = name
         self.top_level: bool = top_level
         self.attributes = {}
+        Node.instances[name] = self
 
         # If there are children, add them to this node and set self as their parent.
         if isinstance(children, list):
@@ -63,6 +65,11 @@ class Node:
         Does NOT remove self from parent's children list. That is now the job of `remove_child`.
         """
         self.parent: Node = None
+
+    def get_node(self, name: str) -> Optional['Node']:
+        if name in Node.instances:
+            return Node.instances[name]
+        return None
 
     def get_child(self, name: str) -> Optional['Node']:
         for c in self.children:
