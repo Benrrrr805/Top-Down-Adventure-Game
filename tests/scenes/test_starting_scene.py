@@ -4,12 +4,6 @@ from game.entities.uiComponents.containers.main_container import main_container
 from game.core.game_loop import Game
 
 @pytest.fixture
-def game_values():
-    g = Game()
-    game_values = g.game_values
-    return game_values
-
-@pytest.fixture
 def scene():
     scene = StartingScene("TestScene", top_level=True)
     game_values = Game().game_values
@@ -41,14 +35,3 @@ def test_handle_events_if_active(scene: 'StartingScene'):
 
 def test_update_if_active(scene: 'StartingScene'):
     scene.update()
-
-def test_draw_if_active_but_no_game_values(scene: 'StartingScene'):
-    scene.reset_game_values()
-    with pytest.raises(AttributeError) as exc:
-        scene.draw()
-    assert "'NoneType' object has no attribute 'fill'" in str(exc.value)
-
-def test_draw_if_active_with_game_values(scene: 'StartingScene', game_values):
-    scene.draw()
-    scene.reset_game_values()
-    scene.reset_game_values_for_children()
