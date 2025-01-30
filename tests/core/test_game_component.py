@@ -23,11 +23,6 @@ def valid_game_component():
     Adjust as needed if your GameComponent has a specific constructor.
     """
     gc = GameComponent("TestComponent", False)
-
-    # Core attributes
-    gc.pygame = pygame
-    gc.screen = pygame.Surface((100, 100))
-    gc.display = pygame.display
     gc.event_queue = EventQueue(pygame, True)
 
     # Helper functions
@@ -35,21 +30,7 @@ def valid_game_component():
         "example_function": lambda x: x
     }
 
-    # game_values dictionary
-    gc.game_values = {
-        'pygame': pygame,
-        'screen': pygame.Surface((50, 50)),
-        'display': pygame.display,
-        'event_queue': EventQueue(pygame, True),
-        'debug': True,
-        'debug_color': (255, 255, 255)
-    }
-
-    # Various booleans and debug color
-    gc.debug_color = (0, 0, 0)
     gc.active = True
-    gc.game_values_set = True
-    gc.debug = True
     gc.need_to_update = False
 
     return gc
