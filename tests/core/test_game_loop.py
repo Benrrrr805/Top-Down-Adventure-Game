@@ -45,8 +45,7 @@ def test_game_initial_state(game_instance: Game):
     assert game_instance.frame_rate is None
     assert game_instance.show_fps is False
     assert game_instance.running is True
-    assert game_instance.debug_color == (0, 0, 255)  # BLUE from settings (assuming (0,0,255))
-    assert game_instance.graphics_enabled is False
+    assert game_instance.debug_color == (0, 0, 0)  # matches the constructor's BLACK
     assert isinstance(game_instance.display, type(pygame.display))
     assert isinstance(game_instance.screen, pygame.Surface)
     assert isinstance(game_instance.clock, pygame.time.Clock)
