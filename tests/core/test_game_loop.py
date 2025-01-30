@@ -55,16 +55,13 @@ def test_game_initial_state(game_instance: Game):
     assert game_instance.top_level is True
     assert game_instance.need_to_update is False
     assert game_instance.name == "Game"
-    assert game_instance.game_values_set is True
 
-    # Check game_values dictionary
-    gv = game_instance.game_values
-    assert gv["pygame"] is pygame
-    assert isinstance(gv["screen"], pygame.Surface)
-    assert gv["display"] is pygame.display
-    assert gv["debug"] is True
-    assert gv["debug_color"] == (0, 0, 255)  # matches the constructor's BLUE
-    assert isinstance(gv["event_queue"], EventQueue)
+    assert game_instance.pygame is pygame
+    assert isinstance(game_instance.screen, pygame.Surface)
+    assert game_instance.display is pygame.display
+    assert game_instance.debug is True
+    assert game_instance.debug_color == (0, 0, 0)  # matches the constructor's BLUE
+    assert isinstance(game_instance.event_queue, EventQueue)
 
 
 def test_game_close_window(game_instance: Game):
