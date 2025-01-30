@@ -9,17 +9,21 @@ class GameComponent(Node):
     game_values = GameValuesManager()
     def __init__(self, name, top_level, children=None, parent=None):
         super().__init__(name, top_level, children, parent)
-        self.pygame: pygame = None
-        self.screen: Surface = None
-        self.display: display = None
         self.event_queue: EventQueue = None
         self.helper_functions: dict = {}
-        self.game_values: dict = {}
         self.active: bool = False
-        self.game_values_set: bool = False
-        self.debug: bool = False
-        self.debug_color: tuple[int, int, int] = None
         self.need_to_update: bool = False
+        self.pygame = GameComponent.game_values.pygame
+        self.screen = GameComponent.game_values.screen
+        self.display = GameComponent.game_values.display
+        self.debug_color = GameComponent.game_values.debug_color
+        self.debug = GameComponent.game_values.debug
+        self.screen_width = GameComponent.game_values.screen_width
+        self.screen_height = GameComponent.game_values.screen_height
+        self.fps = GameComponent.game_values.fps
+        self.frame_rate = GameComponent.game_values.frame_rate
+        self.clock = GameComponent.game_values.clock
+        self.show_fps = GameComponent.game_values.show_fps
         
     # ------------------------------------------------------------------------
     #  Pretty Printing
