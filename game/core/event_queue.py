@@ -41,12 +41,6 @@ class EventQueue:
             "max_events": self.max_events,
         }
 
-    def init_queue(self):
-        """
-        Initialize the internal event queue (list).
-        """
-        self.event_queue = []
-
     def validate_queue(self, recursive=False):
         """
         Validate that the queue is a list and optionally validate each event.

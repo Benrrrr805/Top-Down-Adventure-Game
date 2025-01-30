@@ -7,13 +7,11 @@ from game.core.event_queue import EventQueue
 
 def test_init_queue():
     eq = EventQueue(pygame, debug=True)
-    eq.init_queue()
     assert isinstance(eq.event_queue, list)
     assert eq.event_queue == []
 
 def test_to_dict():
     eq = EventQueue(pygame, debug=False)
-    eq.init_queue()
     eq.event_queue = [{"type": "MOUSEBUTTONDOWN", "timestamp": 100}]
     eq.last_mouse_pos = (100, 200)
 
@@ -24,7 +22,6 @@ def test_to_dict():
 
 def test_str():
     eq = EventQueue(pygame, debug=False)
-    eq.init_queue()
     eq.event_queue = [{"type": "MOUSEBUTTONDOWN", "timestamp": 100}]
     eq.last_mouse_pos = (100, 200)
 
@@ -89,7 +86,6 @@ def test_validate_event_success():
 
 def test_add_event_success():
     eq = EventQueue(pygame, debug=False)
-    eq.init_queue()
 
     event = {
         "type": "MOUSEBUTTONDOWN",
@@ -101,18 +97,15 @@ def test_add_event_success():
 
 def test_add_event_invalid_type_raises():
     eq = EventQueue(pygame, debug=False)
-    eq.init_queue()
     with pytest.raises(ValueError, match="Event is not a dictionary"):
         eq.add_event("NOT A VALID EVENT")
 
 def test_get_last_event_empty_queue():
     eq = EventQueue(pygame, debug=False)
-    eq.init_queue()
     assert eq.get_last_event() is None
 
 def test_get_last_event_success():
     eq = EventQueue(pygame, debug=False)
-    eq.init_queue()
 
     event = {
         "type": "MOUSEBUTTONDOWN",
@@ -124,12 +117,10 @@ def test_get_last_event_success():
 
 def test_has_event_empty_queue():
     eq = EventQueue(pygame, debug=False)
-    eq.init_queue()
     assert eq.has_event("KEYDOWN") is False
 
 def test_has_event():
     eq = EventQueue(pygame, debug=False)
-    eq.init_queue()
     sample_event = {"type": "KEYDOWN", "timestamp": 200, "key": 32}
     eq.add_event(sample_event)
 
@@ -140,12 +131,10 @@ def test_has_event():
 
 def test_has_invalid_event():
     eq = EventQueue(pygame, debug=False)
-    eq.init_queue()
     assert eq.has_event("INVALID_EVENT") is False
 
 def test_remove_event():
     eq = EventQueue(pygame, debug=False)
-    eq.init_queue()
 
     e1 = {"type": "KEYDOWN", "timestamp": 1}
     e2 = {"type": "QUIT", "timestamp": 2}
@@ -175,7 +164,6 @@ def test_handle_events():
     pygame.display.init()
 
     eq = EventQueue(pygame, debug=True)
-    eq.init_queue()
     eq.handle_events()
 
     down = pygame.event.Event(pygame.MOUSEBUTTONDOWN, {"button": 1, "pos": (100, 200)})
@@ -207,7 +195,6 @@ def test_handle_mouse_motion_event():
     motion = pygame.event.Event(pygame.MOUSEMOTION, {"pos": (100, 200)})
 
     eq.handle_events()
-    eq.init_queue()
 
     pygame.event.post(motion)
     eq.handle_events()
@@ -217,7 +204,6 @@ def test_handle_mouse_motion_event():
 
 def test_max_events_truncation():
     eq = EventQueue(pygame, debug=False, max_events=2)
-    eq.init_queue()
 
     e1 = {"type": "KEYDOWN", "timestamp": 1}
     e2 = {"type": "KEYUP", "timestamp": 2}
@@ -233,7 +219,6 @@ def test_max_events_truncation():
 
 def test_base_event():
     eq = EventQueue(pygame, debug=False)
-    eq.init_queue()
 
     extras = {
         "key": 32,
@@ -248,7 +233,6 @@ def test_base_event():
 
 def test_mouse_button_down_event():
     eq = EventQueue(pygame, debug=False)
-    eq.init_queue()
 
     mock_event = MagicMock()
     mock_event.button = 1
@@ -262,7 +246,6 @@ def test_mouse_button_down_event():
 
 def test_mouse_button_up_event():
     eq = EventQueue(pygame, debug=False)
-    eq.init_queue()
 
     mock_event = MagicMock()
     mock_event.button = 1
@@ -276,7 +259,6 @@ def test_mouse_button_up_event():
 
 def test_key_down_event():
     eq = EventQueue(pygame, debug=False)
-    eq.init_queue()
 
     mock_event = MagicMock()
     mock_event.key = 32
@@ -292,7 +274,6 @@ def test_key_down_event():
 
 def test_key_up_event():
     eq = EventQueue(pygame, debug=False)
-    eq.init_queue()
 
     mock_event = MagicMock()
     mock_event.key = 32
@@ -306,7 +287,6 @@ def test_key_up_event():
 
 def test_quit_event():
     eq = EventQueue(pygame, debug=False)
-    eq.init_queue()
 
     mock_event = MagicMock()
     event = eq.QUIT(mock_event)
@@ -315,7 +295,6 @@ def test_quit_event():
 
 def test_mouse_motion_event():
     eq = EventQueue(pygame, debug=False)
-    eq.init_queue()
 
     mock_event = MagicMock()
     mock_event.pos = (100, 200)
@@ -331,7 +310,6 @@ def test_mouse_motion_event():
 
 def test_mouse_wheel_event():
     eq = EventQueue(pygame, debug=False)
-    eq.init_queue()
 
     mock_event = MagicMock()
     mock_event.flipped = 1
