@@ -3,9 +3,10 @@ from game.core.event_queue import EventQueue
 from game.core.node import Node
 import json
 import pygame
-from pygame import Surface, display
+from game.core.game_values_manager import GameValuesManager
 
 class GameComponent(Node):
+    game_values = GameValuesManager()
     def __init__(self, name, top_level, children=None, parent=None):
         super().__init__(name, top_level, children, parent)
         self.pygame: pygame = None
