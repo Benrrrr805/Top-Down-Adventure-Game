@@ -6,9 +6,8 @@ from game.settings import SCREEN_WIDTH, SCREEN_HEIGHT, BLUE
 
 class Game(GameComponent):
     def __init__(self):
-        super().__init__("Main", True)
+        super().__init__("Game", True)
         self.event_queue = EventQueue(self.pygame, self.debug)
-        self.event_queue.init_queue()
         self.running = True
 
     def closeWindow(self):
