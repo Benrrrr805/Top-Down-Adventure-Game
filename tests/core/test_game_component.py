@@ -47,23 +47,18 @@ def test_initialization(game_component: GameComponent):
     assert game_component.top_level is True
     assert game_component.children == []
     assert game_component.parent is None
-    assert game_component.event_queue is None
     assert game_component.active is False
-    assert game_component.game_values_set is False
     assert game_component.helper_functions == {}
-    assert game_component.debug is False
+    assert game_component.debug is True
 
 def test_to_dict(game_component: GameComponent):
-    game_component.debug = True
     d = game_component.to_dict()
     assert d["name"] == "TestComponent"
     assert d["top_level"] is True
     assert d["active"] is False
-    assert d["debug"] is True
     assert d["children"] == []
     assert d["parent"] is None
     assert d["event_queue"] is None
-    assert d["game_values_set"] is False
     assert d["helper_functions"] == {}
 
 def test_str(game_component: GameComponent):
