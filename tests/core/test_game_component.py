@@ -213,19 +213,6 @@ def test_link_children(game_component: GameComponent):
     assert child1.parent == game_component
     assert child2.parent == game_component
 
-def test_reset_game_values(game_component: GameComponent):
-    game_component.game_values_set = True
-    game_component.reset_game_values()
-    assert game_component.game_values_set is False
-
-def test_reset_game_values_for_children(game_component: GameComponent):
-    game_component.game_values_set = True
-    child = GameComponent(name="ChildComponent", top_level=False, parent=game_component)
-    game_component.children.append(child)
-    game_component.reset_game_values_for_children()
-    assert child.game_values_set is False
-
-
 def test_validate_is_game_component(valid_game_component: GameComponent):
     """Test that validate_is_game_component succeeds with a real GameComponent."""
     assert GameComponent.validate_is_game_component(valid_game_component)
@@ -292,41 +279,7 @@ def test_validate_helper_functions_failure(valid_game_component: GameComponent):
     with pytest.raises(ValueError):
         GameComponent.validate_helper_functions(valid_game_component)
 
-def test_validate_game_values(valid_game_component: GameComponent):
-    """Test validate_game_values with valid data."""
-    assert GameComponent.validate_game_values(valid_game_component)
 
-def test_validate_game_values_failure_not_dict(valid_game_component: GameComponent):
-    valid_game_component.game_values = "Not a dict"
-    with pytest.raises(ValueError):
-        GameComponent.validate_game_values(valid_game_component)
-
-def test_validate_game_values_failure_missing_keys(valid_game_component: GameComponent):
-    valid_game_component.game_values['pygame'] = None
-    with pytest.raises(ValueError):
-        GameComponent.validate_game_values(valid_game_component)
-    valid_game_component.game_values['pygame'] = pygame
-    valid_game_component.game_values['screen'] = None
-    with pytest.raises(ValueError):
-        GameComponent.validate_game_values(valid_game_component)
-    valid_game_component.game_values['screen'] = pygame.Surface((50, 50))
-    valid_game_component.game_values['display'] = None
-    with pytest.raises(ValueError):
-        GameComponent.validate_game_values(valid_game_component)
-    valid_game_component.game_values['display'] = pygame.display
-    valid_game_component.game_values['event_queue'] = None
-    with pytest.raises(ValueError):
-        GameComponent.validate_game_values(valid_game_component)
-    valid_game_component.game_values['event_queue'] = EventQueue(pygame, True)
-    valid_game_component.game_values['debug'] = None
-    with pytest.raises(ValueError):
-        GameComponent.validate_game_values(valid_game_component)
-    valid_game_component.game_values['debug'] = True
-    valid_game_component.game_values['debug_color'] = None
-    with pytest.raises(ValueError):
-        GameComponent.validate_game_values(valid_game_component)
-    valid_game_component.game_values['debug_color'] = (255, 255, 255)
-    assert GameComponent.validate_game_values(valid_game_component)
 
 def test_validate_debug_color(valid_game_component: GameComponent):
     """Test validate_debug_color with valid data."""
@@ -346,15 +299,6 @@ def test_validate_active_failure(valid_game_component: GameComponent):
     with pytest.raises(ValueError):
         GameComponent.validate_active(valid_game_component)
 
-def test_validate_game_values_set(valid_game_component: GameComponent):
-    """Test validate_game_values_set with valid data."""
-    assert GameComponent.validate_game_values_set(valid_game_component)
-
-def test_validate_game_values_set_failure(valid_game_component: GameComponent):
-    valid_game_component.game_values_set = None
-    with pytest.raises(ValueError):
-        GameComponent.validate_game_values_set(valid_game_component)
-
 def test_validate_debug(valid_game_component: GameComponent):
     """Test validate_debug with valid data."""
     assert GameComponent.validate_debug(valid_game_component)
@@ -372,7 +316,6 @@ def test_validate_need_to_update_failure(valid_game_component: GameComponent):
     valid_game_component.need_to_update = "Not a bool"
     with pytest.raises(ValueError):
         GameComponent.validate_need_to_update(valid_game_component)
-
 
 def test_full_validate(valid_game_component: GameComponent):
     """Test the full_validate method with a valid GameComponent."""
