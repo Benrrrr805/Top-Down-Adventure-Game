@@ -7,40 +7,9 @@ from game.settings import SCREEN_WIDTH, SCREEN_HEIGHT, BLUE
 class Game(GameComponent):
     def __init__(self):
         super().__init__("Main", True)
-        self.debug = True
-        self.frame_rate = None
-        self.show_fps = False
-        self.running = True
-        self.debug_color = BLUE
-        self.graphics_enabled = False
-
-        pygame.init()
-        pygame.font.init()
-
-        self.pygame = pygame
-        self.display = pygame.display
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        self.pygame.display.set_caption("Top-Down Adventure Game")
-        self.clock = self.pygame.time.Clock()
-
         self.event_queue = EventQueue(self.pygame, self.debug)
         self.event_queue.init_queue()
-
-        self.active = False
-        self.helper_functions = {}
-        self.top_level = True
-        self.need_to_update = False
-        self.name = "Game"
-        self.game_values_set = True
-
-        self.game_values = {
-            'pygame': self.pygame,
-            'screen': self.screen,
-            'display': self.display,
-            'debug': self.debug,
-            'debug_color': self.debug_color,
-            'event_queue': self.event_queue,
-        }
+        self.running = True
 
     def closeWindow(self):
         self.running = False
