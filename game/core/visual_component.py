@@ -79,8 +79,6 @@ class VisualComponent(GameComponent):
             "text_size": self.text_size,
             "text_color": self.text_color,
             "text_position": self.text_position,
-
-            "graphical_values_set": self.graphical_values_set
         }
         game_component_data.update(visual_component_data)
         return game_component_data
@@ -89,8 +87,6 @@ class VisualComponent(GameComponent):
     # ----------------------------------------------------------------------
 
     def in_rect(self, coordinates: tuple[int, int]) -> bool:
-        if not self.graphical_values_set or not self.game_values_set:
-            raise ValueError(f"Graphical and game values must be set before checking for rect. - {self.name}")
         return self.rect.collidepoint(coordinates)
         
     # ----------------------------------------------------------------------
@@ -100,8 +96,6 @@ class VisualComponent(GameComponent):
         """
         Draws the component's background (image or color).
         """
-        if not self.graphical_values_set or not self.game_values_set:
-            raise ValueError("Graphical and game values must be set before drawing background.")
         if self.background_image is not None:
             self.surface.blit(self.background_image, (0, 0))
         elif self.background_color is not None:
@@ -116,8 +110,6 @@ class VisualComponent(GameComponent):
         Draws a debug border if debug mode is active.
         """
         print(f"Debug: {self.debug}, Debug Color: {self.debug_color}")
-        if not self.graphical_values_set or not self.game_values_set:
-            raise ValueError("Graphical and game values must be set before drawing debug border.")
         if self.debug and self.debug_color:
             self.pygame.draw.rect(
                 self.surface, self.debug_color, (0, 0, self.width, self.height), 5
@@ -128,14 +120,10 @@ class VisualComponent(GameComponent):
         """
         Draws all child components onto this surface.
         """
-        if not self.graphical_values_set or not self.game_values_set:
-            raise ValueError("Graphical and game values must be set before drawing children.")
         for child in self.children:
             if not isinstance(child, VisualComponent):
                 continue
             else:
-                if not child.graphical_values_set or not child.game_values_set:
-                    raise ValueError(f"Graphical and game values must be set before drawing children. - {child.name}")
                 child_surface: Surface = child.draw()
                 if child_surface is not None:
                     x: int = child.x_coordinate - self.x_coordinate
@@ -152,8 +140,6 @@ class VisualComponent(GameComponent):
             return False
         if not self.active:
             raise ValueError(f"UIComponent must be enabled before rendering text. - {self.name}")
-        if not self.graphical_values_set or not self.game_values_set:
-            raise ValueError(f"Graphical and game values must be set before rendering text. - {self.name}")
         text_surface: Surface = self.text_font.render(self.text, True, self.text_color)
         text_rect: Rect = text_surface.get_rect()
         text_rect.topleft = self.text_position
@@ -161,8 +147,6 @@ class VisualComponent(GameComponent):
         return True
 
     def draw_(self) -> Optional[Surface]:
-        if not self.graphical_values_set or not self.game_values_set:
-            raise ValueError(f"Graphical and game values must be set before drawing. - {self.name}")
         if self.width == 0 or self.height == 0:
             return False
 
@@ -313,12 +297,6 @@ class VisualComponent(GameComponent):
         if len(visual_component.text_position) != 2:
             raise ValueError(f"Text position must be an (x, y) tuple. - {visual_component.name}")
         return True
-    
-    @staticmethod
-    def validate_graphical_values_set(visual_component: 'VisualComponent') -> bool:
-        if not isinstance(visual_component.graphical_values_set, bool):
-            raise ValueError(f"GameComponent: {visual_component.name} - Failed validation. pygame_values_set must be a boolean.")
-        return True
 
     @staticmethod
     def validate_base_values(visual_component: 'VisualComponent') -> bool:
@@ -336,7 +314,6 @@ class VisualComponent(GameComponent):
         VisualComponent.validate_text_size(visual_component)
         VisualComponent.validate_text_color(visual_component)
         VisualComponent.validate_text_position(visual_component)
-        VisualComponent.validate_graphical_values_set(visual_component)
         return True        
     
     @staticmethod
