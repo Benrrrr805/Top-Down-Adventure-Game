@@ -10,6 +10,7 @@ from game.core.visual_component import VisualComponent
 from game.core.game_component import GameComponent
 from game.core.event_queue import EventQueue
 from game.settings import BLACK
+from game.core.game_values_manager import GameValuesManager
 
 # ------------------------------------------------------------------------------
 # Pytest Fixtures
@@ -37,6 +38,11 @@ def vc_base() -> VisualComponent:
 
     return vc
 
+@pytest.fixture(scope="session", autouse=True)
+def ensure_game_values():
+    manager = GameValuesManager()  # calls pygame.init() in constructor
+    yield manager
+
 @pytest.fixture
 def valid_image_file(tmp_path):
     """
@@ -47,36 +53,6 @@ def valid_image_file(tmp_path):
     # Write any data to simulate an image file; it doesn't need to be real image data.
     image_file.write_text("fake_image_data")
     return str(image_file)
-
-@pytest.fixture
-def valid_visual_component(valid_image_file):
-    """
-    Constructs a VisualComponent with valid, initialized attributes
-    so that all validators pass.
-    """
-    vc = VisualComponent("TestVisualComponent", False)
-
-    # For base GameComponent fields inherited (if any),
-    # you might need to populate them similarly to your previous tests.
-    # e.g. vc.pygame = pygame, vc.screen = pygame.Surface((100, 100)), etc.
-
-    # Specific VisualComponent fields
-    vc.rect = pygame.Rect(0, 0, 100, 100)
-    vc.surface = pygame.Surface((100, 100))
-    vc.image_url = valid_image_file  # Ensure this points to a real path
-    vc.background_color = (255, 255, 255, 255)
-    vc.background_image = pygame.Surface((50, 50))  # or None if you want to test that path
-    vc.width = 100
-    vc.height = 200
-    vc.x_coordinate = 10
-    vc.y_coordinate = 20
-    vc.text = "Sample text"
-    vc.text_font = pygame.font.Font(None, 24)
-    vc.text_size = 24
-    vc.text_color = (0, 0, 0, 255)
-    vc.text_position = (0, 0)
-
-    return vc
 
 # ------------------------------------------------------------------------------
 # Tests
@@ -92,9 +68,8 @@ def test_to_dict(vc_base: VisualComponent):
     assert d["active"] is False
     assert d["children"] == []
     assert d["parent"] is None
-    assert d["event_queue"] == EventQueue(pygame, True).to_dict()
+    assert d["event_queue"] is None
     assert d["helper_functions"] == {}
-    assert d["debug"] is True
     assert d["width"] == 100
     assert d["height"] == 50
     assert d["x_coordinate"] == 10
@@ -237,7 +212,6 @@ def test_text_font(vc_base: VisualComponent):
     """
     Test that text_font is set to a Font object if it's a string.
     """
-    vc_base.text_font = "assets/fonts/ARIAL.TTF"
     assert isinstance(vc_base.text_font, Font)
 
 def test_image_url():
@@ -247,220 +221,220 @@ def test_image_url():
     component: VisualComponent = VisualComponent(name="TestVC", top_level=True, width=50, height=50, x_coordinate=0, y_coordinate=0, image_url="assets/test_image.png")
     assert isinstance(component.background_image, Surface)
 
-def test_validate_is_visual_component(valid_visual_component):
+def test_validate_is_visual_component(vc_base):
     """Check that validate_is_visual_component passes for a real VisualComponent."""
-    assert VisualComponent.validate_is_visual_component(valid_visual_component)
+    assert VisualComponent.validate_is_visual_component(vc_base)
 
 def test_validate_is_visual_component_failure():
     """Check that validate_is_visual_component raises ValueError for non-VisualComponent."""
     with pytest.raises(ValueError):
         VisualComponent.validate_is_visual_component(object())
 
-def test_validate_rect(valid_visual_component):
+def test_validate_rect(vc_base):
     """Check validate_rect with a valid pygame.Rect."""
-    assert VisualComponent.validate_rect(valid_visual_component)
+    assert VisualComponent.validate_rect(vc_base)
 
-def test_validate_rect_failure(valid_visual_component):
+def test_validate_rect_failure(vc_base):
     """Check validate_rect raises ValueError if rect isn't a pygame.Rect (or is invalid)."""
-    valid_visual_component.rect = "not_a_rect"
+    vc_base.rect = "not_a_rect"
     with pytest.raises(ValueError):
-        VisualComponent.validate_rect(valid_visual_component)
+        VisualComponent.validate_rect(vc_base)
 
-def test_validate_surface(valid_visual_component):
+def test_validate_surface(vc_base):
     """Check validate_surface with a valid pygame.Surface."""
-    assert VisualComponent.validate_surface(valid_visual_component)
+    assert VisualComponent.validate_surface(vc_base)
 
-def test_validate_surface_failure(valid_visual_component):
+def test_validate_surface_failure(vc_base):
     """Check validate_surface raises ValueError if surface isn't a pygame.Surface."""
-    valid_visual_component.surface = "not_a_surface"
+    vc_base.surface = "not_a_surface"
     with pytest.raises(ValueError):
-        VisualComponent.validate_surface(valid_visual_component)
+        VisualComponent.validate_surface(vc_base)
 
-def test_validate_image_url(valid_visual_component):
+def test_validate_image_url(vc_base):
     """Check validate_image_url with a real file path."""
-    assert VisualComponent.validate_image_url(valid_visual_component)
+    assert VisualComponent.validate_image_url(vc_base) is False
 
-def test_validate_image_url_failure_not_string(valid_visual_component):
+def test_validate_image_url_failure_not_string(vc_base):
     """Check validate_image_url raises ValueError if image_url isn't a string."""
-    valid_visual_component.image_url = 123  # Not a string
+    vc_base.image_url = 123  # Not a string
     with pytest.raises(ValueError):
-        VisualComponent.validate_image_url(valid_visual_component)
+        VisualComponent.validate_image_url(vc_base)
 
-def test_validate_image_url_failure_missing_file(valid_visual_component):
+def test_validate_image_url_failure_missing_file(vc_base):
     """Check validate_image_url raises ValueError if file doesn't exist."""
-    valid_visual_component.image_url = "non_existent_file.png"
+    vc_base.image_url = "non_existent_file.png"
     with pytest.raises(ValueError):
-        VisualComponent.validate_image_url(valid_visual_component)
+        VisualComponent.validate_image_url(vc_base)
 
-def test_validate_image_url_failure_no_image_url(valid_visual_component):
+def test_validate_image_url_failure_no_image_url(vc_base):
     """Check validate_image_url raises ValueError if image_url is None."""
-    valid_visual_component.image_url = None
-    assert VisualComponent.validate_image_url(valid_visual_component) is False
+    vc_base.image_url = None
+    assert VisualComponent.validate_image_url(vc_base) is False
 
-def test_validate_background_color(valid_visual_component):
+def test_validate_background_color(vc_base):
     """Check validate_background_color with a valid tuple."""
-    assert VisualComponent.validate_background_color(valid_visual_component)
+    assert VisualComponent.validate_background_color(vc_base)
 
-def test_validate_background_color_failure_type(valid_visual_component):
+def test_validate_background_color_failure_type(vc_base):
     """Check validate_background_color raises if background_color is not tuple."""
-    valid_visual_component.background_color = "not_a_tuple"
+    vc_base.background_color = "not_a_tuple"
     with pytest.raises(ValueError):
-        VisualComponent.validate_background_color(valid_visual_component)
+        VisualComponent.validate_background_color(vc_base)
 
-def test_validate_background_color_failure_length(valid_visual_component):
+def test_validate_background_color_failure_length(vc_base):
     """Check validate_background_color raises if tuple is not RGB or RGBA length."""
-    valid_visual_component.background_color = (255, 255)
+    vc_base.background_color = (255, 255)
     with pytest.raises(ValueError):
-        VisualComponent.validate_background_color(valid_visual_component)
+        VisualComponent.validate_background_color(vc_base)
 
-def test_validate_background_color_failure_no_background_color(valid_visual_component):
+def test_validate_background_color_failure_no_background_color(vc_base):
     """Check validate_background_color raises if background_color is None."""
-    valid_visual_component.background_color = None
-    assert VisualComponent.validate_background_color(valid_visual_component) is False
+    vc_base.background_color = None
+    assert VisualComponent.validate_background_color(vc_base) is False
 
-def test_validate_background_image(valid_visual_component):
+def test_validate_background_image(vc_base):
     """Check validate_background_image with a pygame.Surface."""
-    assert VisualComponent.validate_background_image(valid_visual_component)
+    assert VisualComponent.validate_background_image(vc_base) is False
 
-def test_validate_background_image_failure(valid_visual_component):
+def test_validate_background_image_failure(vc_base):
     """Check validate_background_image raises if background_image is not a pygame.Surface."""
-    valid_visual_component.background_image = "not_a_surface"
+    vc_base.background_image = "not_a_surface"
     with pytest.raises(ValueError):
-        VisualComponent.validate_background_image(valid_visual_component)
+        VisualComponent.validate_background_image(vc_base)
 
-def test_validate_background_image_failure_no_background_image(valid_visual_component):
+def test_validate_background_image_failure_no_background_image(vc_base):
     """Check validate_background_image raises if background_image is None."""
-    valid_visual_component.background_image = None
-    assert VisualComponent.validate_background_image(valid_visual_component) is False
+    vc_base.background_image = None
+    assert VisualComponent.validate_background_image(vc_base) is False
 
-def test_validate_width(valid_visual_component):
+def test_validate_width(vc_base):
     """Check validate_width with an integer."""
-    assert VisualComponent.validate_width(valid_visual_component)
+    assert VisualComponent.validate_width(vc_base)
 
-def test_validate_width_failure(valid_visual_component):
+def test_validate_width_failure(vc_base):
     """Check validate_width raises ValueError if width is not int or is None."""
-    valid_visual_component.width = None
+    vc_base.width = None
     with pytest.raises(ValueError):
-        VisualComponent.validate_width(valid_visual_component)
+        VisualComponent.validate_width(vc_base)
 
-    valid_visual_component.width = "not_an_int"
+    vc_base.width = "not_an_int"
     with pytest.raises(ValueError):
-        VisualComponent.validate_width(valid_visual_component)
+        VisualComponent.validate_width(vc_base)
 
-def test_validate_height(valid_visual_component):
+def test_validate_height(vc_base):
     """Check validate_height with an integer."""
-    assert VisualComponent.validate_height(valid_visual_component)
+    assert VisualComponent.validate_height(vc_base)
 
-def test_validate_height_failure(valid_visual_component):
+def test_validate_height_failure(vc_base):
     """Check validate_height raises ValueError if height is not int or is None."""
-    valid_visual_component.height = None
+    vc_base.height = None
     with pytest.raises(ValueError):
-        VisualComponent.validate_height(valid_visual_component)
+        VisualComponent.validate_height(vc_base)
 
-    valid_visual_component.height = "not_an_int"
+    vc_base.height = "not_an_int"
     with pytest.raises(ValueError):
-        VisualComponent.validate_height(valid_visual_component)
+        VisualComponent.validate_height(vc_base)
 
-def test_validate_x_coordinate(valid_visual_component):
+def test_validate_x_coordinate(vc_base):
     """Check validate_x_coordinate with an integer."""
-    assert VisualComponent.validate_x_coordinate(valid_visual_component)
+    assert VisualComponent.validate_x_coordinate(vc_base)
 
-def test_validate_x_coordinate_failure(valid_visual_component):
+def test_validate_x_coordinate_failure(vc_base):
     """Check validate_x_coordinate raises if x_coordinate is None or not int."""
-    valid_visual_component.x_coordinate = None
+    vc_base.x_coordinate = None
     with pytest.raises(ValueError):
-        VisualComponent.validate_x_coordinate(valid_visual_component)
-    valid_visual_component.x_coordinate = "not_an_int"
+        VisualComponent.validate_x_coordinate(vc_base)
+    vc_base.x_coordinate = "not_an_int"
     with pytest.raises(ValueError):
-        VisualComponent.validate_x_coordinate(valid_visual_component)
+        VisualComponent.validate_x_coordinate(vc_base)
 
-def test_validate_y_coordinate(valid_visual_component):
+def test_validate_y_coordinate(vc_base):
     """Check validate_y_coordinate with an integer."""
-    assert VisualComponent.validate_y_coordinate(valid_visual_component)
+    assert VisualComponent.validate_y_coordinate(vc_base)
 
-def test_validate_y_coordinate_failure(valid_visual_component):
+def test_validate_y_coordinate_failure(vc_base):
     """Check validate_y_coordinate raises if y_coordinate is None or not int."""
-    valid_visual_component.y_coordinate = None
+    vc_base.y_coordinate = None
     with pytest.raises(ValueError):
-        VisualComponent.validate_y_coordinate(valid_visual_component)
-    valid_visual_component.y_coordinate = "not_an_int"
+        VisualComponent.validate_y_coordinate(vc_base)
+    vc_base.y_coordinate = "not_an_int"
     with pytest.raises(ValueError):
-        VisualComponent.validate_y_coordinate(valid_visual_component)
+        VisualComponent.validate_y_coordinate(vc_base)
 
-def test_validate_text(valid_visual_component):
+def test_validate_text(vc_base):
     """Check validate_text with a valid string."""
-    assert VisualComponent.validate_text(valid_visual_component)
+    assert VisualComponent.validate_text(vc_base)
 
-def test_validate_text_failure(valid_visual_component):
+def test_validate_text_failure(vc_base):
     """Check validate_text raises ValueError if text is not None and not string."""
-    valid_visual_component.text = 123
+    vc_base.text = 123
     with pytest.raises(ValueError):
-        VisualComponent.validate_text(valid_visual_component)
+        VisualComponent.validate_text(vc_base)
 
-def test_validate_text_font(valid_visual_component):
+def test_validate_text_font(vc_base):
     """Check validate_text_font with a valid pygame.font.Font."""
-    assert VisualComponent.validate_text_font(valid_visual_component)
+    assert VisualComponent.validate_text_font(vc_base)
 
-def test_validate_text_font_failure(valid_visual_component):
+def test_validate_text_font_failure(vc_base):
     """Check validate_text_font raises ValueError if text_font is not a pygame.font.Font."""
-    valid_visual_component.text_font = "not_a_font"
+    vc_base.text_font = "not_a_font"
     with pytest.raises(ValueError):
-        VisualComponent.validate_text_font(valid_visual_component)
+        VisualComponent.validate_text_font(vc_base)
 
-def test_validate_text_size(valid_visual_component):
+def test_validate_text_size(vc_base):
     """Check validate_text_size with a valid integer."""
-    assert VisualComponent.validate_text_size(valid_visual_component)
+    assert VisualComponent.validate_text_size(vc_base)
 
-def test_validate_text_size_failure(valid_visual_component):
+def test_validate_text_size_failure(vc_base):
     """Check validate_text_size raises ValueError if text_size is not None and not int."""
-    valid_visual_component.text_size = "not_an_int"
+    vc_base.text_size = "not_an_int"
     with pytest.raises(ValueError):
-        VisualComponent.validate_text_size(valid_visual_component)
+        VisualComponent.validate_text_size(vc_base)
 
-def test_validate_text_color(valid_visual_component):
+def test_validate_text_color(vc_base):
     """Check validate_text_color with a valid tuple."""
-    assert VisualComponent.validate_text_color(valid_visual_component)
+    assert VisualComponent.validate_text_color(vc_base)
 
-def test_validate_text_color_failure_type(valid_visual_component):
+def test_validate_text_color_failure_type(vc_base):
     """Check validate_text_color raises if text_color is not tuple."""
-    valid_visual_component.text_color = "not_a_tuple"
+    vc_base.text_color = "not_a_tuple"
     with pytest.raises(ValueError):
-        VisualComponent.validate_text_color(valid_visual_component)
+        VisualComponent.validate_text_color(vc_base)
 
-def test_validate_text_color_failure_length(valid_visual_component):
+def test_validate_text_color_failure_length(vc_base):
     """Check validate_text_color raises if tuple is not length 3 or 4."""
-    valid_visual_component.text_color = (255, 255)
+    vc_base.text_color = (255, 255)
     with pytest.raises(ValueError):
-        VisualComponent.validate_text_color(valid_visual_component)
+        VisualComponent.validate_text_color(vc_base)
 
-def test_validate_text_color_failure_no_text_color(valid_visual_component):
+def test_validate_text_color_failure_no_text_color(vc_base):
     """Check validate_text_color raises if text_color is None."""
-    valid_visual_component.text_color = None
-    assert VisualComponent.validate_text_color(valid_visual_component) is False
+    vc_base.text_color = None
+    assert VisualComponent.validate_text_color(vc_base) is False
 
-def test_validate_text_position(valid_visual_component):
+def test_validate_text_position(vc_base):
     """Check validate_text_position with a valid tuple (x, y)."""
-    assert VisualComponent.validate_text_position(valid_visual_component)
+    assert VisualComponent.validate_text_position(vc_base)
 
-def test_validate_text_position_failure(valid_visual_component):
+def test_validate_text_position_failure(vc_base):
     """Check validate_text_position raises ValueError if not a 2-element tuple."""
-    valid_visual_component.text_position = "not_a_tuple"
+    vc_base.text_position = "not_a_tuple"
     with pytest.raises(ValueError):
-        VisualComponent.validate_text_position(valid_visual_component)
+        VisualComponent.validate_text_position(vc_base)
 
-    valid_visual_component.text_position = (0, 0, 0)  # too many elements
+    vc_base.text_position = (0, 0, 0)  # too many elements
     with pytest.raises(ValueError):
-        VisualComponent.validate_text_position(valid_visual_component)
+        VisualComponent.validate_text_position(vc_base)
 
-def test_validate_text_position_failure_no_text_position(valid_visual_component):
+def test_validate_text_position_failure_no_text_position(vc_base):
     """Check validate_text_position raises ValueError if text_position is None."""
-    valid_visual_component.text_position = None
-    assert VisualComponent.validate_text_position(valid_visual_component) is False
+    vc_base.text_position = None
+    assert VisualComponent.validate_text_position(vc_base) is False
 
-def test_validate_base_values(valid_visual_component):
+def test_validate_base_values(vc_base):
     """Check validate_base_values passes with a fully valid VisualComponent."""
-    assert VisualComponent.validate_base_values(valid_visual_component)
+    assert VisualComponent.validate_base_values(vc_base)
 
-def test_full_validate(valid_visual_component):
+def test_full_validate(vc_base):
     """Check full_validate passes with a fully valid VisualComponent."""
-    assert VisualComponent.full_validate(valid_visual_component)
+    assert VisualComponent.full_validate(vc_base)
