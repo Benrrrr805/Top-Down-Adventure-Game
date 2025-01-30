@@ -35,16 +35,10 @@ class GameComponent(Node):
     def to_dict(self):
         node_data = super().to_dict()
         game_component_data = {
-            "pygame": type(self.pygame).__name__,
-            "screen": type(self.screen).__name__,
-            "display": type(self.display).__name__,
             "event_queue": self.event_queue.to_dict() if self.event_queue and isinstance(self.event_queue, EventQueue) else None,
             "helper_functions": self.helper_functions,
             "active": self.active,
-            "game_values_set": self.game_values_set,
             "need_to_update": self.need_to_update,
-            "debug": self.debug,
-            "debug_color": self.debug_color,
         }
         node_data.update(game_component_data)
         return node_data
