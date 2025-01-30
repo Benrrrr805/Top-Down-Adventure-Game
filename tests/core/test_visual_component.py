@@ -34,8 +34,7 @@ def vc_base() -> VisualComponent:
         text_color=BLACK,
         text_position=(100 // 2, 50 // 2)
     )
-    game_values = Game().game_values
-    vc.set_game_values(game_values)
+
     return vc
 
 @pytest.fixture
@@ -76,7 +75,6 @@ def valid_visual_component(valid_image_file):
     vc.text_size = 24
     vc.text_color = (0, 0, 0, 255)
     vc.text_position = (0, 0)
-    vc.graphical_values_set = True
 
     return vc
 
@@ -95,7 +93,6 @@ def test_to_dict(vc_base: VisualComponent):
     assert d["children"] == []
     assert d["parent"] is None
     assert d["event_queue"] == EventQueue(pygame, True).to_dict()
-    assert d["graphical_values_set"] is False
     assert d["helper_functions"] == {}
     assert d["debug"] is True
     assert d["width"] == 100
@@ -131,68 +128,18 @@ def test_init(vc_base: VisualComponent):
     assert vc_base.text_position == (100 // 2, 50 // 2)
 
 
-def test_set_graphical_values(vc_base: VisualComponent):
-    """
-    Test setting the game values and ensure surfaces, rect, etc. get created
-    """
-    vc_base.set_graphical_values()
-    assert vc_base.graphical_values_set
-    assert isinstance(vc_base.text_font, Font)
-    assert isinstance(vc_base.rect, Rect)
-    assert isinstance(vc_base.surface, Surface)
-    assert not vc_base.set_graphical_values()
-
-def test_set_graphical_values_no_game_values(vc_base: VisualComponent):
-    """
-    Test that an exception is raised if game_values is None.
-    """
-    vc_base.reset_game_values()
-    with pytest.raises(ValueError) as exc_info:
-        vc_base.set_graphical_values()
-    assert "game values must already be set" in str(exc_info.value)
 
 
-def test_set_graphical_values_nonexistent_image(vc_base: VisualComponent):
-    """
-    Test that an exception is raised if the image_url doesn't exist.
-    """
-    parent_vc: VisualComponent = VisualComponent(name="ParentVC", top_level=True)
-    vc_base.parent = parent_vc
-    vc_base.image_url = "nonexistent_file.png"
-
-    with pytest.raises(ValueError) as exc_info:
-        vc_base.set_graphical_values()
-    assert "Background image does not exist" in str(exc_info.value)
-
-
-def test_set_graphical_values_for_children(vc_base: VisualComponent):
-    """
-    Test that set_graphical_values_for_children calls set_graphical_values for child VisualComponents.
-    """
-    child_vc: VisualComponent = VisualComponent(name="ChildVC", top_level=False)
-    child_vc.set_game_values(Game().game_values)
-    vc_base.children.append(child_vc)
-
-    # Before setting
-    assert not child_vc.graphical_values_set
-
-    vc_base.set_graphical_values_for_children()
-    assert child_vc.graphical_values_set
 
 def test_in_rect(vc_base: VisualComponent):
     """
-    Test in_rect returns if point is outside, True if inside. Throws Error if values not set.
+    Test in_rect returns if point is outside, True if inside.
     """
-    vc_base.set_graphical_values()
     vc_base.rect = Rect(10, 20, 100, 50)
 
     assert vc_base.in_rect((10, 20)) is True
     assert vc_base.in_rect((0, 0)) is False
 
-    vc_base.reset_graphical_values()
-    with pytest.raises(ValueError) as exc_info:
-        vc_base.in_rect((0, 0))
-    assert "Graphical and game values must be set" in str(exc_info.value)
 
 def test__draw_background(vc_base: VisualComponent):
     """
@@ -201,7 +148,6 @@ def test__draw_background(vc_base: VisualComponent):
     """
     vc_base.active = True
     vc_base.image_url = "assets/test_image.png"
-    vc_base.set_graphical_values()
 
     # 1) background_image is not None
     assert vc_base._draw_background() is True
@@ -214,27 +160,16 @@ def test__draw_background(vc_base: VisualComponent):
     vc_base.background_color = None
     assert vc_base._draw_background() is True
 
-    vc_base.reset_graphical_values()
-    with pytest.raises(ValueError) as exc_info:
-        vc_base._draw_background()
-    assert "Graphical and game values must be set" in str(exc_info.value)
-
 def test__draw_debug_border(vc_base: VisualComponent):
     """
     Test internal method _draw_debug_border is called only if debug is True and color is set.
     """
-    vc_base.set_graphical_values()
 
     vc_base.active = True
     assert vc_base._draw_debug_border() is True
 
     vc_base.debug = False
     assert vc_base._draw_debug_border() is True
-
-    vc_base.reset_graphical_values()
-    with pytest.raises(ValueError) as exc_info:
-        vc_base._draw_debug_border()
-    assert "Graphical and game values must be set" in str(exc_info.value)
 
 def test__draw_children(vc_base: VisualComponent):
     """
@@ -247,31 +182,14 @@ def test__draw_children(vc_base: VisualComponent):
     vc_base.enable()
     assert vc_base._draw_children() is True
 
-    vc_base.reset_graphical_values()
-    with pytest.raises(ValueError) as exc_info:
-        vc_base._draw_children()
-    assert "Graphical and game values must be set" in str(exc_info.value)
-    vc_base.set_graphical_values()
-
-    vc_base.reset_game_values_for_children()
-    with pytest.raises(ValueError) as exc_info:
-        vc_base._draw_children()
-    assert "Graphical and game values must be set before drawing children" in str(exc_info.value)
-
 def test_render_text(vc_base: VisualComponent):
     """
     Test rendering text with a given font, text, etc.
     """
     vc_base.active = True
     vc_base.text = "Hello World"
-    vc_base.set_graphical_values()
 
     assert vc_base.render_text() is True
-
-    vc_base.reset_graphical_values()
-    with pytest.raises(ValueError) as exc_info:
-        vc_base.render_text()
-    assert "Graphical and game values must be set" in str(exc_info.value)
 
 
 def test_render_text_no_text(vc_base: VisualComponent):
@@ -280,7 +198,6 @@ def test_render_text_no_text(vc_base: VisualComponent):
     """
     vc_base.active = True
     vc_base.text = None
-    vc_base.set_graphical_values()
     assert vc_base.render_text() is False
 
 def test_render_text_not_active(vc_base: VisualComponent):
@@ -289,7 +206,6 @@ def test_render_text_not_active(vc_base: VisualComponent):
     """
     vc_base.text = "Hello World"
     vc_base.active = False
-    vc_base.set_graphical_values()
 
     with pytest.raises(ValueError) as exc_info:
         vc_base.render_text()
@@ -305,16 +221,10 @@ def test_draw(vc_base: VisualComponent):
     assert "Visual Component must be enabled" in str(exc_info.value)
     vc_base.need_to_update = False
     vc_base.active = True
-    vc_base.set_graphical_values()
     assert isinstance(vc_base.draw(), Surface)
     vc_base.width = 0
     vc_base.height = 0
     assert vc_base.draw() is False
-
-    vc_base.reset_graphical_values()
-    with pytest.raises(ValueError) as exc_info:
-        vc_base.draw()
-    assert "Graphical and game values must be set" in str(exc_info.value)
 
 def test_get_rect(vc_base: VisualComponent):
     """
@@ -328,7 +238,6 @@ def test_text_font(vc_base: VisualComponent):
     Test that text_font is set to a Font object if it's a string.
     """
     vc_base.text_font = "assets/fonts/ARIAL.TTF"
-    vc_base.set_graphical_values()
     assert isinstance(vc_base.text_font, Font)
 
 def test_image_url():
@@ -336,36 +245,7 @@ def test_image_url():
     Test that image_url is loaded and scaled if it's a string.
     """
     component: VisualComponent = VisualComponent(name="TestVC", top_level=True, width=50, height=50, x_coordinate=0, y_coordinate=0, image_url="assets/test_image.png")
-    component.set_game_values(Game().game_values)
-    component.set_graphical_values()
     assert isinstance(component.background_image, Surface)
-
-def test_reset_graphical_values(vc_base: VisualComponent):
-    """
-    Test that reset_graphical_values sets graphical_values_set to False and resets the graphical values.
-    """
-    vc_base.set_graphical_values()
-    vc_base.reset_graphical_values()
-    assert not vc_base.graphical_values_set
-    assert vc_base.text_font is None
-    assert vc_base.rect is None
-    assert vc_base.surface is None
-
-def test_reset_graphical_values_for_children(vc_base: VisualComponent):
-    """
-    Test that reset_graphical_values_for_children calls reset_graphical_values for child VisualComponents.
-    """
-    child_vc: VisualComponent = VisualComponent(name="ChildVC", top_level=False)
-    child_vc.set_game_values(Game().game_values)
-    vc_base.children.append(child_vc)
-
-    # Before resetting
-    assert not child_vc.graphical_values_set
-
-    vc_base.set_graphical_values_for_children()
-    vc_base.reset_graphical_values_for_children()
-    assert not child_vc.graphical_values_set
-
 
 def test_validate_is_visual_component(valid_visual_component):
     """Check that validate_is_visual_component passes for a real VisualComponent."""
@@ -576,16 +456,6 @@ def test_validate_text_position_failure_no_text_position(valid_visual_component)
     """Check validate_text_position raises ValueError if text_position is None."""
     valid_visual_component.text_position = None
     assert VisualComponent.validate_text_position(valid_visual_component) is False
-
-def test_validate_graphical_values_set(valid_visual_component):
-    """Check validate_graphical_values_set with a boolean."""
-    assert VisualComponent.validate_graphical_values_set(valid_visual_component)
-
-def test_validate_graphical_values_set_failure(valid_visual_component):
-    """Check validate_graphical_values_set raises ValueError if not boolean."""
-    valid_visual_component.graphical_values_set = "not_bool"
-    with pytest.raises(ValueError):
-        VisualComponent.validate_graphical_values_set(valid_visual_component)
 
 def test_validate_base_values(valid_visual_component):
     """Check validate_base_values passes with a fully valid VisualComponent."""
