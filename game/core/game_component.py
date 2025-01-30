@@ -42,67 +42,6 @@ class GameComponent(Node):
         }
         node_data.update(game_component_data)
         return node_data
-    
-    # ------------------------------------------------------------------------
-    # Set Game Values
-    # ------------------------------------------------------------------------
-
-    def set_game_values(self, game_values):
-        if self.game_values_set:
-            print(f"Game values already set for {self.name}. Skipping.")
-            return False
-        else:
-            print(f"Setting game values for {self.name}.")
-
-        self.game_values = game_values
-        self.event_queue = game_values['event_queue']
-        self.pygame: pygame = game_values['pygame']
-        self.screen: Surface = game_values['screen']
-        self.display: display = game_values['display']
-        self.debug: bool = game_values['debug']
-        self.debug_color: tuple[int, int, int] = (255, 0, 0)
-        self.game_values_set = True
-        return True
-    
-    def set_game_values_for_children(self):
-        for child in self.children:
-            if isinstance(child, GameComponent):
-                child.set_game_values(self.game_values)
-                child.set_game_values_for_children()
-    
-    # ------------------------------------------------------------------------
-    # Reset Game Values
-    # ------------------------------------------------------------------------
-
-    def reset_game_values(self):
-        self.event_queue = None
-        self.pygame = None
-        self.screen = None
-        self.display = None
-        self.debug = False
-        self.debug_color = None
-        self.game_values = None
-        self.game_values_set = False
-
-    def reset_game_values_for_children(self):
-        for child in self.children:
-            if isinstance(child, GameComponent):
-                child.reset_game_values()
-                child.reset_game_values_for_children()
-
-    # ------------------------------------------------------------------------
-    # Linking Children
-    # ------------------------------------------------------------------------
-    
-    def link_child(self, child):
-        super().link_child(child)
-        if self.game_values_set and isinstance(child, GameComponent):
-            child.set_game_values(self.game_values)
-            child.set_game_values_for_children()
-
-    def link_children(parent, children):
-        for child in children:
-            parent.link_child(child)
 
     # ----------------------------------------------------------------------
     # Helper Function System (from original GameComponent)
@@ -308,62 +247,6 @@ class GameComponent(Node):
         return True
 
     @staticmethod
-    def validate_game_values(game_component: 'GameComponent') -> bool:
-        """
-        Ensures game_values is a dict with all expected keys and correct object types.
-        """
-        gv = game_component.game_values
-        if not isinstance(gv, dict):
-            raise ValueError(
-                f"GameComponent: {game_component.name} - Failed validation. "
-                f"game_values must be a dictionary."
-            )
-
-        # 'pygame' check
-        if 'pygame' not in gv or not GameComponent._is_valid_pygame_instance(gv['pygame']):
-            raise ValueError(
-                f"GameComponent: {game_component.name} - Failed validation. "
-                f"game_values['pygame'] must be a pygame instance."
-            )
-
-        # 'screen' check
-        if 'screen' not in gv or not GameComponent._is_valid_screen(gv['screen']):
-            raise ValueError(
-                f"GameComponent: {game_component.name} - Failed validation. "
-                f"game_values['screen'] must be a pygame.Surface."
-            )
-
-        # 'display' check
-        if 'display' not in gv or not GameComponent._is_valid_display(gv['display']):
-            raise ValueError(
-                f"GameComponent: {game_component.name} - Failed validation. "
-                f"game_values['display'] must be pygame.display."
-            )
-
-        # 'event_queue' check
-        if 'event_queue' not in gv or not GameComponent._is_valid_event_queue(gv['event_queue']):
-            raise ValueError(
-                f"GameComponent: {game_component.name} - Failed validation. "
-                f"game_values['event_queue'] must be EventQueue."
-            )
-
-        # 'debug' check
-        if 'debug' not in gv or not GameComponent._is_valid_debug(gv['debug']):
-            raise ValueError(
-                f"GameComponent: {game_component.name} - Failed validation. "
-                f"game_values['debug'] must be a boolean."
-            )
-
-        # 'debug_color' check
-        if 'debug_color' not in gv or not GameComponent._is_valid_debug_color(gv['debug_color']):
-            raise ValueError(
-                f"GameComponent: {game_component.name} - Failed validation. "
-                f"game_values['debug_color'] must be an RGB or RGBA tuple."
-            )
-
-        return True
-
-    @staticmethod
     def validate_debug_color(game_component: 'GameComponent') -> bool:
         if not GameComponent._is_valid_debug_color(game_component.debug_color):
             raise ValueError(
@@ -381,14 +264,6 @@ class GameComponent(Node):
             )
         return True
 
-    @staticmethod
-    def validate_game_values_set(game_component: 'GameComponent') -> bool:
-        if not isinstance(game_component.game_values_set, bool):
-            raise ValueError(
-                f"GameComponent: {game_component.name} - Failed validation. "
-                f"game_values_set must be a boolean."
-            )
-        return True
 
     @staticmethod
     def validate_debug(game_component: 'GameComponent') -> bool:
@@ -439,10 +314,8 @@ class GameComponent(Node):
         GameComponent.validate_display(game_component)
         GameComponent.validate_event_queue(game_component)
         GameComponent.validate_helper_functions(game_component)
-        GameComponent.validate_game_values(game_component)
         GameComponent.validate_debug_color(game_component)
         GameComponent.validate_active(game_component)
-        GameComponent.validate_game_values_set(game_component)
         GameComponent.validate_debug(game_component)
         GameComponent.validate_need_to_update(game_component)
         return True
