@@ -21,21 +21,42 @@ class VisualComponent(GameComponent):
         children=None, parent=None
     ):
         super().__init__(name, top_level, children, parent)
-        self.rect: Rect = None
-        self.surface: Surface = None
         self.image_url: str = image_url
         self.background_color: tuple[int, int, int] = background_color
-        self.background_image: Surface = None
         self.width: int = width
         self.height: int = height
-        self.x_coordinate: int = x_coordinate
-        self.y_coordinate: int = y_coordinate
+
+        if self.parent and isinstance(self.parent, VisualComponent):
+            # Offset coordinates by parent's coordinates
+            self.x_coordinate: int = x_coordinate+self.parent.x_coordinate
+            self.y_coordinate: int = y_coordinate+self.parent.y_coordinate
+        else:
+            self.x_coordinate: int = x_coordinate
+            self.y_coordinate: int = y_coordinate
         self.text: str = text
-        self.text_font: Font = text_font
-        self.text_size: int = text_size
+        self.text_size = text_size
         self.text_color: tuple[int, int, int] = text_color
         self.text_position: tuple[int, int] = text_position
-        self.graphical_values_set: bool = False
+
+        # Create pygame Rect & Surface
+        self.rect: Rect = self.pygame.Rect(x_coordinate, y_coordinate, width, height)
+        self.surface: Surface = self.pygame.Surface((width, height), self.pygame.SRCALPHA)
+
+        # Load or create the font
+        if text_font and isinstance(text_font, str):
+            self.text_font: Font = self.pygame.font.Font(text_font, text_size)
+        else:
+            # If None, use default system font
+            self.text_font: Font = self.pygame.font.SysFont(None, text_size)
+
+        # Attempt to load background image if provided
+        if image_url is not None:
+            if not os.path.exists(image_url):
+                raise ValueError(f"Background image does not exist: {image_url} - {self.name}")
+            img: Surface = self.pygame.image.load(image_url).convert_alpha()
+            self.background_image: Surface = self.pygame.transform.scale(img, (width, height))
+        else:
+            self.background_image: Surface = None
 
     def __str__(self):
         # Pretty-print the dictionary with 4-space indentation
