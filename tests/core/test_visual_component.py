@@ -412,6 +412,11 @@ def test_validate_image_url_failure_missing_file(valid_visual_component):
     with pytest.raises(ValueError):
         VisualComponent.validate_image_url(valid_visual_component)
 
+def test_validate_image_url_failure_no_image_url(valid_visual_component):
+    """Check validate_image_url raises ValueError if image_url is None."""
+    valid_visual_component.image_url = None
+    assert VisualComponent.validate_image_url(valid_visual_component) is False
+
 def test_validate_background_color(valid_visual_component):
     """Check validate_background_color with a valid tuple."""
     assert VisualComponent.validate_background_color(valid_visual_component)
@@ -428,6 +433,11 @@ def test_validate_background_color_failure_length(valid_visual_component):
     with pytest.raises(ValueError):
         VisualComponent.validate_background_color(valid_visual_component)
 
+def test_validate_background_color_failure_no_background_color(valid_visual_component):
+    """Check validate_background_color raises if background_color is None."""
+    valid_visual_component.background_color = None
+    assert VisualComponent.validate_background_color(valid_visual_component) is False
+
 def test_validate_background_image(valid_visual_component):
     """Check validate_background_image with a pygame.Surface."""
     assert VisualComponent.validate_background_image(valid_visual_component)
@@ -437,6 +447,11 @@ def test_validate_background_image_failure(valid_visual_component):
     valid_visual_component.background_image = "not_a_surface"
     with pytest.raises(ValueError):
         VisualComponent.validate_background_image(valid_visual_component)
+
+def test_validate_background_image_failure_no_background_image(valid_visual_component):
+    """Check validate_background_image raises if background_image is None."""
+    valid_visual_component.background_image = None
+    assert VisualComponent.validate_background_image(valid_visual_component) is False
 
 def test_validate_width(valid_visual_component):
     """Check validate_width with an integer."""
@@ -538,6 +553,11 @@ def test_validate_text_color_failure_length(valid_visual_component):
     with pytest.raises(ValueError):
         VisualComponent.validate_text_color(valid_visual_component)
 
+def test_validate_text_color_failure_no_text_color(valid_visual_component):
+    """Check validate_text_color raises if text_color is None."""
+    valid_visual_component.text_color = None
+    assert VisualComponent.validate_text_color(valid_visual_component) is False
+
 def test_validate_text_position(valid_visual_component):
     """Check validate_text_position with a valid tuple (x, y)."""
     assert VisualComponent.validate_text_position(valid_visual_component)
@@ -551,6 +571,11 @@ def test_validate_text_position_failure(valid_visual_component):
     valid_visual_component.text_position = (0, 0, 0)  # too many elements
     with pytest.raises(ValueError):
         VisualComponent.validate_text_position(valid_visual_component)
+
+def test_validate_text_position_failure_no_text_position(valid_visual_component):
+    """Check validate_text_position raises ValueError if text_position is None."""
+    valid_visual_component.text_position = None
+    assert VisualComponent.validate_text_position(valid_visual_component) is False
 
 def test_validate_graphical_values_set(valid_visual_component):
     """Check validate_graphical_values_set with a boolean."""
