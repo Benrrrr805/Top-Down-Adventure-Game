@@ -6,8 +6,6 @@ from game.core.game_loop import Game
 @pytest.fixture
 def scene():
     scene = StartingScene("TestScene", top_level=True)
-    game_values = Game().game_values
-    scene.set_game_values(game_values)
     scene.set_scene()
     scene.enable()
     return scene
