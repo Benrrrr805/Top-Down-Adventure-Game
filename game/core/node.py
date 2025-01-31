@@ -10,18 +10,14 @@ class Node:
         self.attributes = {}
         Node.instances[name] = self
 
+        self.children: list[Node] = []
         # If there are children, add them to this node and set self as their parent.
         if isinstance(children, list):
-            self.children = children
-            for child in self.children:
-                child._add_parent(self)
-        else:
-            self.children: list[Node] = []
+            self.link_children(children)
 
         # If a parent is provided, set it and add self to parent's children.
         if isinstance(parent, Node):
-            self.parent = parent
-            parent._add_child(self)
+            self.link_parent(parent)
         else:
             self.parent: Node = parent
 
