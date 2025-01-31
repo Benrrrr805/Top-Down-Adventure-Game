@@ -55,6 +55,11 @@ def test_validate_image_url(vc_base):
     """Check validate_image_url with a real file path."""
     assert VisualComponentValidation.validate_image_url(vc_base) is False
 
+def test_validate_image_url_success(vc_base):
+    """Check validate_image_url with a real file path."""
+    vc_base.image_url = "assets/test_image.png"
+    assert VisualComponentValidation.validate_image_url(vc_base)
+
 def test_validate_image_url_failure_not_string(vc_base):
     """Check validate_image_url raises ValueError if image_url isn't a string."""
     vc_base.image_url = 123  # Not a string
@@ -97,6 +102,22 @@ def test_validate_background_image(vc_base):
     """Check validate_background_image with a pygame.Surface."""
     assert VisualComponentValidation.validate_background_image(vc_base) is False
 
+def test_validate_background_image_success():
+    """Check validate_background_image with a pygame.Surface."""
+    vc = VisualComponent(
+        name="TestVC",
+        top_level=True,
+        width=100,
+        height=50,
+        x_coordinate=10,
+        y_coordinate=20,
+        text="Hello",
+        text_size=24,
+        text_color=(0, 0, 0),
+        text_position=(100 // 2, 50 // 2),
+        image_url="assets/test_image.png"
+    )
+    assert VisualComponentValidation.validate_background_image(vc)
 def test_validate_background_image_failure(vc_base):
     """Check validate_background_image raises if background_image is not a pygame.Surface."""
     vc_base.background_image = "not_a_surface"
