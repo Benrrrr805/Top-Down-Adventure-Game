@@ -158,7 +158,7 @@ def test_set_scene_enables_game(game_instance: Game):
     assert scene.active is True
 
 
-# @pytest.mark.skip(reason="Infinite loop. Only run if you specifically want to test the main loop.")
+@pytest.mark.skip(reason="Infinite loop. Only run if you specifically want to test the main loop.")
 def test_run_method(game_instance: Game):
     """
     If you wanted to test `game_instance.run()` in an automated scenario,

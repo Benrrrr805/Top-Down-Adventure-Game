@@ -88,7 +88,8 @@ class NodeValidation:
         """
         Validates that the given object is a Node.
         """
-        if not type(node).__name__ == 'Node':
+        from game.core.node import Node
+        if not isinstance(node, Node):
             raise ValueError(f'Expected: Node. Recieved: {type(node).__name__}')
         return True
     

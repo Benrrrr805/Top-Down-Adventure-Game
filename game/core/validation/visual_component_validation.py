@@ -149,6 +149,7 @@ class VisualComponentValidation:
         """
         Validates that the given object is a VisualComponent.
         """
-        if not type(visual_component).__name__ == 'VisualComponent':
+        from game.core.visual_component import VisualComponent
+        if not isinstance(visual_component, VisualComponent):
             raise ValueError(f'Expected: VisualComponent. Recieved: {type(visual_component).__name__}')
         return True

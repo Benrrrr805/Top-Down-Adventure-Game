@@ -113,7 +113,8 @@ class GameComponentValidation:
 
     @staticmethod
     def validate_is_game_component(game_component: 'GameComponent') -> bool:
-        if not type(game_component).__name__ == 'GameComponent':
+        from game.core.game_component import GameComponent
+        if not isinstance(game_component, GameComponent):
             raise ValueError(
                 f"Expected game_component to be GameComponent, "
                 f"but instead got type {type(game_component)}"
