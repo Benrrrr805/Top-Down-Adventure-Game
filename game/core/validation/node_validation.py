@@ -117,14 +117,12 @@ class NodeValidation:
             raise ValueError(f"{node.name} should not have parent, since it is a top-level Node.")
         try:
             NodeValidation.validate_is_node(node.parent)
-        except AttributeError:
-            raise ValueError(f"{node.name} does not have a parent.")
         except ValueError:
             raise ValueError(f"{node.name} does not have a parent.")
         try:
             NodeValidation.validate_base_values(node.parent)
             NodeValidation.validate_not_self(node, node.parent)
-        except AttributeError:
+        except ValueError:
             raise ValueError(f"{node.name} does not have a valid parent.")
         return True
     
