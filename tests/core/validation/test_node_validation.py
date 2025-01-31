@@ -69,6 +69,17 @@ def test_validate_has_parent_failure_top_level():
     with pytest.raises(ValueError, match=r"should not have parent, since it is a top-level Node"):
         NodeValidation.validate_has_parent(node)
 
+def test_validate_has_parent_failure_invalid_parent():
+    # If parent is not a Node => should raise
+    node = Node(name="InvalidParent", top_level=False, parent="NotANode")
+    with pytest.raises(ValueError, match="InvalidParent does not have a parent"):
+        NodeValidation.validate_has_parent(node)
+
+    invalid_parent = Node(name="InvalidParent", top_level="NotBool")
+    node.parent = invalid_parent
+    with pytest.raises(ValueError, match="InvalidParent does not have a valid parent"):
+        NodeValidation.validate_has_parent(node)
+
 # ------------------------------------------------------------------------------
 # validate_not_self
 # ------------------------------------------------------------------------------

@@ -102,9 +102,29 @@ def test_init(vc_base: VisualComponent):
     assert not vc_base.need_to_update
     assert vc_base.text_position == (100 // 2, 50 // 2)
 
+def test_init_coordinates_with_parent(vc_base: VisualComponent):
+    """
+    Test that x and y coordinates are offset by the parent's coordinates if a parent is provided.
+    """
+    parent = VisualComponent(name="ParentVC", top_level=True, x_coordinate=100, y_coordinate=200)
+    vc = VisualComponent(name="ChildVC", top_level=False, parent=parent, x_coordinate=10, y_coordinate=20)
+    assert vc.x_coordinate == 110
+    assert vc.y_coordinate == 220
 
+def test_init_text_font():
+    """
+    Test that text_font is set to a Font object if it's a string.
+    """
+    vc = VisualComponent(name="TestVC", top_level=True, text_font="assets/fonts/ARIAL.TTF")
+    assert isinstance(vc.text_font, Font)
 
-
+def test_init_image_url_invalid_path():
+    """
+    Test that an invalid image_url raises a ValueError.
+    """
+    with pytest.raises(ValueError) as exc_info:
+        VisualComponent(name="TestVC", top_level=True, image_url="invalid_path.png")
+    assert "Background image does not exist" in str(exc_info.value)
 
 def test_in_rect(vc_base: VisualComponent):
     """
@@ -116,24 +136,22 @@ def test_in_rect(vc_base: VisualComponent):
     assert vc_base.in_rect((0, 0)) is False
 
 
-def test__draw_background(vc_base: VisualComponent):
+def test__draw_background():
     """
     Test internal method _draw_background covers the branch of having a background color,
     having a background image, or neither.
     """
-    vc_base.active = True
-    vc_base.image_url = "assets/test_image.png"
-
     # 1) background_image is not None
-    assert vc_base._draw_background() is True
+    vc = VisualComponent(name="TestVC", top_level=True, width=100, height=50, image_url="assets/test_image.png")
+    assert vc._draw_background() is True
 
     # 2) background_image is None
-    vc_base.background_image = None
-    assert vc_base._draw_background() is True
+    vc = VisualComponent(name="TestVC", top_level=True, width=100, height=50)
+    assert vc._draw_background() is True
 
-    # 3) background_image is None and background_color is None
-    vc_base.background_color = None
-    assert vc_base._draw_background() is True
+    # 3) background_image is None and background_color is not None
+    vc = VisualComponent(name="TestVC", top_level=True, width=100, height=50, background_color=BLACK)
+    assert vc._draw_background() is True
 
 def test__draw_debug_border(vc_base: VisualComponent):
     """
