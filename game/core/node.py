@@ -14,14 +14,14 @@ class Node:
         if isinstance(children, list):
             self.children = children
             for child in self.children:
-                child.add_parent(self)
+                child._add_parent(self)
         else:
             self.children: list[Node] = []
 
         # If a parent is provided, set it and add self to parent's children.
         if isinstance(parent, Node):
             self.parent = parent
-            parent.add_child(self)
+            parent._add_child(self)
         else:
             self.parent: Node = parent
 
@@ -40,28 +40,28 @@ class Node:
     # ------------------------------------------------------------------------
     #  Relationship Management
     # ------------------------------------------------------------------------
-    def add_child(self, child: 'Node') -> None:
+    def _add_child(self, child: 'Node') -> None:
         """
         Add a child to this node's children list (and only that).
         Does NOT set child.parent; that is now the sole job of `add_parent`.
         """
         self.children.append(child)
 
-    def remove_child(self, child: 'Node') -> None:
+    def _remove_child(self, child: 'Node') -> None:
         """
         Remove a child from this node's children list (and only that).
         Does NOT unset child.parent; that is now the sole job of `remove_parent`.
         """
         self.children.remove(child)
 
-    def add_parent(self, parent: 'Node') -> None:
+    def _add_parent(self, parent: 'Node') -> None:
         """
         Sets this node's `parent` to the given `parent` (and only that).
         Does NOT automatically add self to parent's children. That is now the job of `add_child`.
         """
         self.parent: 'Node' = parent
 
-    def remove_parent(self) -> None:
+    def _remove_parent(self) -> None:
         """
         Unsets this node's `parent`.
         Does NOT remove self from parent's children list. That is now the job of `remove_child`.
@@ -99,46 +99,46 @@ class Node:
         """
         Example helper that links a parent to a child or children.
         """
-        parent.add_child(child)
-        child.add_parent(parent)
+        parent._add_child(child)
+        child._add_parent(parent)
 
     def link_children(parent: 'Node', children: list['Node']) -> None:
         """
         Example helper that links a parent to a child or children.
         """
         for child in children:
-            parent.add_child(child)
-            child.add_parent(parent)
+            parent._add_child(child)
+            child._add_parent(parent)
 
     def unlink_child(parent, child: 'Node') -> None:
         """
         Example helper that unlinks a parent from a child or children.
         """
-        parent.remove_child(child)
-        child.remove_parent()
+        parent._remove_child(child)
+        child._remove_parent()
 
     def unlink_children(parent, children: list['Node']) -> None:
         """
         Example helper that unlinks a parent from a child or children.
         """
         for child in children:
-            parent.remove_child(child)
-            child.remove_parent()
+            parent._remove_child(child)
+            child._remove_parent()
 
     def link_parent(child: 'Node', parent: 'Node') -> None:
         """
         Example helper that links a child to a parent.
         """
-        child.add_parent(parent)
-        parent.add_child(child)
+        child._add_parent(parent)
+        parent._add_child(child)
 
     def unlink_parent(child: 'Node') -> None:
         """
         Example helper that unlinks a child from a parent.
         """
 
-        child.parent.remove_child(child)
-        child.remove_parent()
+        child.parent._remove_child(child)
+        child._remove_parent()
 
     # ------------------------------------------------------------------------
     #  Additional Relationship Queries
